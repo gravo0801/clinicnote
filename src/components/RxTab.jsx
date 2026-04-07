@@ -5,15 +5,17 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from './ui'
+import DiseaseNoteTab from './DiseaseNoteTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
-  const [rxList, setRxList] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [subTab, setSubTab]     = useState('drugs')
+  const [rxList, setRxList]     = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [search, setSearch]     = useState('')
   const [catFilter, setCatFilter] = useState('전체')
-  const [addRx, setAddRx] = useState(false)
-  const [detail, setDetail] = useState(null)
+  const [addRx, setAddRx]       = useState(false)
+  const [detail, setDetail]     = useState(null)
 
   const [rf, setRf] = useState({
     drugName: '', category: '', indication: '',
@@ -28,11 +30,8 @@ export default function RxTab() {
     })
   }, [])
 
-  const categories = useMemo(() =>
-    ['전체', ...new Set(rxList.map(r => r.category).filter(Boolean))],
-    [rxList]
-  )
-
+  const drugSuggestions = useMemo(() => rxList.map(r => r.drugName).filter(Boolean), [rxList])
+  const categories = useMemo(() => ['전체', ...new Set(rxList.map(r => r.category).filter(Boolean))], [rxList])
   const filtered = useMemo(() => rxList.filter(r => {
     const cOk = catFilter === '전체' || r.category === catFilter
     const q = search.toLowerCase()
@@ -46,16 +45,20 @@ export default function RxTab() {
     setRf({ drugName: '', category: '', indication: '', dosage: '', usage: '', duration: '', note: '' })
     setAddRx(false)
   }
-
-  const deleteRx = async (id) => {
-    await deleteDoc(doc(db, 'prescriptions', id))
-    setDetail(null)
-  }
+  const deleteRx = async (id) => { await deleteDoc(doc(db, 'prescriptions', id)); setDetail(null) }
 
   if (loading) return <Spinner />
 
-  // ── 공통 시트들 ─────────────────────────────────────────
-  const Sheets = (
+  const SubTabBar = ({ style = {} }) => (
+    <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#f0ede8', ...style }}>
+      {[['drugs', '💊 약물 카드'], ['notes', '📖 질환 노트']].map(([k, l]) => (
+        <button key={k} onClick={() => setSubTab(k)}
+          style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: subTab === k ? '#fff' : 'transparent', color: subTab === k ? (k === 'notes' ? '#7c3aed' : '#0F6E56') : '#9ca3af', fontSize: 13, fontWeight: subTab === k ? 700 : 400, cursor: 'pointer', boxShadow: subTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none', transition: 'all 0.15s' }}>{l}</button>
+      ))}
+    </div>
+  )
+
+  const DrugSheets = (
     <>
       {addRx && (
         <Sheet title="처방 추가" onClose={() => setAddRx(false)}>
@@ -71,29 +74,23 @@ export default function RxTab() {
       )}
       {detail && (
         <Sheet title="처방 상세" onClose={() => setDetail(null)}>
-          <div className="mb-5">
-            <div className="flex items-center gap-2.5 mb-1">
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
               <span style={{ fontSize: 20, fontWeight: 700 }}>{detail.drugName}</span>
-              {detail.category && (
-                <span className="text-xs px-2.5 py-1 rounded-lg"
-                  style={{ background: '#E1F5EE', color: '#085041', fontWeight: 600 }}>
-                  {detail.category}
-                </span>
-              )}
+              {detail.category && <span style={{ fontSize: 11, background: '#E1F5EE', color: '#085041', borderRadius: 6, padding: '3px 9px', fontWeight: 600 }}>{detail.category}</span>}
             </div>
-            {detail.indication && <div className="text-sm" style={{ color: '#6b7280' }}>{detail.indication}</div>}
+            {detail.indication && <div style={{ fontSize: 14, color: '#6b7280' }}>{detail.indication}</div>}
           </div>
-          {[['💊 용량', detail.dosage], ['⏰ 용법', detail.usage], ['📆 처방일수', detail.duration]]
-            .filter(([, v]) => v).map(([l, v]) => (
-              <div key={l} className="rounded-xl p-4 mb-2" style={{ background: '#f8f6f2' }}>
-                <div className="text-xs mb-1" style={{ color: '#9ca3af' }}>{l}</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a' }}>{v}</div>
-              </div>
+          {[['💊 용량', detail.dosage], ['⏰ 용법', detail.usage], ['📆 처방일수', detail.duration]].filter(([, v]) => v).map(([l, v]) => (
+            <div key={l} style={{ background: '#f8f6f2', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>{l}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a' }}>{v}</div>
+            </div>
           ))}
           {detail.note && (
-            <div className="rounded-xl p-4 mb-2" style={{ background: '#FAEEDA', border: '1px solid #FAC775' }}>
-              <div className="text-xs mb-1.5" style={{ color: '#633806' }}>📝 처방 팁</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#412402' }}>{detail.note}</div>
+            <div style={{ background: '#FAEEDA', borderRadius: 10, padding: '12px 14px', marginBottom: 8, border: '1px solid #FAC775' }}>
+              <div style={{ fontSize: 12, color: '#633806', marginBottom: 4 }}>📝 처방 팁</div>
+              <div style={{ fontSize: 14, color: '#412402', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{detail.note}</div>
             </div>
           )}
           <DangerButton onClick={() => deleteRx(detail.id)}>삭제</DangerButton>
@@ -102,141 +99,102 @@ export default function RxTab() {
     </>
   )
 
-  // ── 카드 컴포넌트 (공통) ─────────────────────────────────
   const RxCard = ({ rx }) => (
-    <div onClick={() => setDetail(rx)}
-      className="bg-white rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-sm"
-      style={{ border: '1px solid #f0ede8', borderLeft: '3px solid #0F6E56' }}>
-      <div className="flex justify-between items-start mb-1.5">
+    <div onClick={() => setDetail(rx)} style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', cursor: 'pointer', border: '1px solid #f0ede8', borderLeft: '3px solid #0F6E56', transition: 'box-shadow 0.15s' }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a' }}>{rx.drugName}</span>
-        {rx.category && (
-          <span className="text-xs px-2 py-0.5 rounded-md ml-2 shrink-0"
-            style={{ background: '#E1F5EE', color: '#085041', fontWeight: 600 }}>{rx.category}</span>
-        )}
+        {rx.category && <span style={{ fontSize: 11, background: '#E1F5EE', color: '#085041', borderRadius: 6, padding: '2px 8px', marginLeft: 8, fontWeight: 600, whiteSpace: 'nowrap' }}>{rx.category}</span>}
       </div>
-      <div className="text-sm mb-3" style={{ color: '#6b7280', lineHeight: 1.4 }}>{rx.indication}</div>
-      <div className="flex flex-wrap gap-1.5">
+      <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, lineHeight: 1.4 }}>{rx.indication}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
         {[['💊', rx.dosage], ['⏰', rx.usage], ['📆', rx.duration]].filter(([, v]) => v).map(([icon, v]) => (
-          <span key={icon} className="text-xs px-2 py-1 rounded-lg"
-            style={{ background: '#f5f3ef', color: '#6b7280' }}>
-            {icon} {v}
-          </span>
+          <span key={icon} style={{ fontSize: 12, background: '#f5f3ef', color: '#6b7280', borderRadius: 6, padding: '3px 8px' }}>{icon} {v}</span>
         ))}
       </div>
     </div>
   )
 
-  // ── 모바일 레이아웃 ──────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="pb-20">
-        <div className="px-4 pt-4 pb-3">
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#9ca3af' }}>🔍</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="약명, 적응증 검색..."
-              className="w-full rounded-xl py-2.5 text-sm outline-none"
-              style={{ paddingLeft: 36, paddingRight: 12, border: '1px solid #e5e7eb', fontFamily: 'inherit', fontSize: 14, background: '#fff' }} />
-          </div>
-        </div>
-        <div className="px-4 pb-3 overflow-x-auto">
-          <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
-            {categories.map(c => (
-              <button key={c} onClick={() => setCatFilter(c)}
-                className="px-3.5 py-1.5 rounded-full text-sm transition-all"
-                style={{ background: catFilter === c ? '#0F6E56' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', border: catFilter === c ? 'none' : '1px solid #e5e7eb', cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: catFilter === c ? 600 : 400 }}>
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="px-4 pb-3 flex justify-between items-center">
-          <span className="text-xs" style={{ color: '#9ca3af' }}>{filtered.length}개</span>
-          <button onClick={() => setAddRx(true)}
-            className="px-4 py-1.5 rounded-full text-sm font-semibold text-white"
-            style={{ background: '#0F6E56', border: 'none', cursor: 'pointer' }}>+ 처방 추가</button>
-        </div>
-        <div className="px-4 flex flex-col gap-2.5">
-          {filtered.length === 0
-            ? <div className="text-center py-12 text-sm" style={{ color: '#9ca3af' }}>💊 등록된 처방이 없습니다</div>
-            : filtered.map(rx => <RxCard key={rx.id} rx={rx} />)
-          }
-        </div>
-        {Sheets}
+      <div style={{ paddingBottom: 80 }}>
+        <div style={{ padding: '12px 16px 10px' }}><SubTabBar /></div>
+        {subTab === 'notes' ? <DiseaseNoteTab drugSuggestions={drugSuggestions} /> : (
+          <>
+            <div style={{ padding: '0 16px 10px' }}>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9ca3af' }}>🔍</span>
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="약명, 적응증 검색..." style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff' }} />
+              </div>
+            </div>
+            <div style={{ padding: '0 16px 10px', overflowX: 'auto' }}>
+              <div style={{ display: 'flex', gap: 6, minWidth: 'max-content' }}>
+                {categories.map(c => (
+                  <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '5px 12px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#0F6E56' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: catFilter === c ? 600 : 400 }}>{c}</button>
+                ))}
+              </div>
+            </div>
+            <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length}개</span>
+              <button onClick={() => setAddRx(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>+ 처방 추가</button>
+            </div>
+            <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {filtered.length === 0 ? <div style={{ textAlign: 'center', padding: '48px 0', color: '#9ca3af', fontSize: 13 }}>💊 등록된 처방이 없습니다</div>
+                : filtered.map(rx => <RxCard key={rx.id} rx={rx} />)}
+            </div>
+            {DrugSheets}
+          </>
+        )}
       </div>
     )
   }
 
-  // ── 데스크탑 레이아웃 ────────────────────────────────────
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-
-      {/* 좌측 — 카테고리 + 검색 */}
-      <div style={{
-        width: 220, background: '#fff', borderRight: '1px solid #ece9e3',
-        display: 'flex', flexDirection: 'column', height: '100vh',
-      }}>
-        <div style={{ padding: '20px 16px 14px', borderBottom: '1px solid #f0ede8' }}>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#9ca3af' }}>🔍</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..."
-              className="w-full rounded-lg py-2 text-sm outline-none"
-              style={{ paddingLeft: 34, paddingRight: 10, border: '1px solid #e5e7eb', fontFamily: 'inherit', fontSize: 13 }} />
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-          <div className="text-xs mb-2 px-2" style={{ color: '#9ca3af', fontWeight: 600, letterSpacing: '0.5px' }}>카테고리</div>
-          {categories.map(c => {
-            const count = c === '전체' ? rxList.length : rxList.filter(r => r.category === c).length
-            const active = catFilter === c
-            return (
-              <button key={c} onClick={() => setCatFilter(c)}
-                style={{
-                  width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '9px 12px', borderRadius: 9, border: 'none',
-                  background: active ? '#f0faf5' : 'transparent',
-                  color: active ? '#0F6E56' : '#374151',
-                  fontSize: 13, fontWeight: active ? 700 : 400,
-                  cursor: 'pointer', marginBottom: 2, textAlign: 'left',
-                }}>
-                <span>{c}</span>
-                <span style={{ fontSize: 11, color: active ? '#0F6E56' : '#9ca3af', background: active ? '#dcfce7' : '#f3f4f6', borderRadius: 10, padding: '1px 7px' }}>{count}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        <div style={{ padding: '14px 12px', borderTop: '1px solid #f0ede8' }}>
-          <button onClick={() => setAddRx(true)}
-            style={{ width: '100%', padding: '9px 0', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            + 처방 추가
-          </button>
-        </div>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', flexDirection: 'column' }}>
+      <div style={{ background: '#fff', borderBottom: '1px solid #ece9e3', padding: '12px 24px' }}>
+        <SubTabBar style={{ maxWidth: 320 }} />
       </div>
-
-      {/* 우측 — 카드 그리드 */}
-      <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef', padding: '28px 32px' }}>
-        <div className="flex justify-between items-center mb-5">
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
-              {catFilter === '전체' ? '전체 처방' : catFilter}
-            </h2>
-            <div className="text-sm mt-0.5" style={{ color: '#9ca3af' }}>{filtered.length}개</div>
+      {subTab === 'notes' ? <div style={{ flex: 1, overflow: 'hidden' }}><DiseaseNoteTab drugSuggestions={drugSuggestions} /></div> : (
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          <div style={{ width: 210, background: '#fff', borderRight: '1px solid #ece9e3', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px 14px', borderBottom: '1px solid #f0ede8' }}>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9ca3af' }}>🔍</span>
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..." style={{ width: '100%', padding: '8px 10px 8px 30px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+              </div>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
+              <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, letterSpacing: '0.5px', padding: '4px 8px 6px' }}>카테고리</div>
+              {categories.map(c => {
+                const count = c === '전체' ? rxList.length : rxList.filter(r => r.category === c).length
+                const active = catFilter === c
+                return (
+                  <button key={c} onClick={() => setCatFilter(c)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: 8, border: 'none', background: active ? '#f0faf5' : 'transparent', color: active ? '#0F6E56' : '#374151', fontSize: 13, fontWeight: active ? 700 : 400, cursor: 'pointer', marginBottom: 2 }}>
+                    <span>{c}</span>
+                    <span style={{ fontSize: 11, background: active ? '#dcfce7' : '#f3f4f6', color: active ? '#0F6E56' : '#9ca3af', borderRadius: 10, padding: '1px 7px' }}>{count}</span>
+                  </button>
+                )
+              })}
+            </div>
+            <div style={{ padding: '12px', borderTop: '1px solid #f0ede8' }}>
+              <button onClick={() => setAddRx(true)} style={{ width: '100%', padding: '9px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ 처방 추가</button>
+            </div>
           </div>
+          <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef', padding: '28px 32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{catFilter === '전체' ? '전체 처방' : catFilter}</h2>
+                <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>{filtered.length}개</div>
+              </div>
+            </div>
+            {filtered.length === 0
+              ? <div style={{ textAlign: 'center', paddingTop: 80, color: '#9ca3af' }}><div style={{ fontSize: 36, marginBottom: 10 }}>💊</div><div style={{ fontSize: 14 }}>등록된 처방이 없습니다</div></div>
+              : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>{filtered.map(rx => <RxCard key={rx.id} rx={rx} />)}</div>}
+          </div>
+          {DrugSheets}
         </div>
-
-        {filtered.length === 0
-          ? <div className="flex flex-col items-center justify-center py-24" style={{ color: '#9ca3af' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>💊</div>
-              <div style={{ fontSize: 14 }}>등록된 처방이 없습니다</div>
-            </div>
-          : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-              {filtered.map(rx => <RxCard key={rx.id} rx={rx} />)}
-            </div>
-        }
-      </div>
-
-      {Sheets}
+      )}
     </div>
   )
 }
