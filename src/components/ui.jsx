@@ -1,6 +1,44 @@
 // ─── 공통 UI 컴포넌트 ──────────────────────────────────────
+import { useState, useEffect } from 'react'
 
+export const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : true
+  )
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return isMobile
+}
+
+// 모바일: 바텀시트 / 데스크탑: 센터 모달
 export function Sheet({ title, onClose, children }) {
+  const isMobile = useIsMobile()
+
+  if (!isMobile) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center"
+        style={{ background: 'rgba(0,0,0,0.45)' }}
+        onClick={onClose}
+      >
+        <div
+          className="bg-white overflow-y-auto"
+          style={{ borderRadius: 20, padding: '28px 32px', width: '100%', maxWidth: 480, maxHeight: '85vh', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <span style={{ fontSize: 17, fontWeight: 700 }}>{title}</span>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>✕</button>
+          </div>
+          {children}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -13,7 +51,7 @@ export function Sheet({ title, onClose, children }) {
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-5">
-          <span style={{ fontSize: 16, fontWeight: 500 }}>{title}</span>
+          <span style={{ fontSize: 16, fontWeight: 700 }}>{title}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>✕</button>
         </div>
         {children}
@@ -23,7 +61,7 @@ export function Sheet({ title, onClose, children }) {
 }
 
 export function Field({ label, value, onChange, placeholder, type = 'text', multiline, children }) {
-  const cls = "w-full px-3 py-2.5 rounded-lg text-sm outline-none bg-white transition-colors"
+  const cls = 'w-full px-3 py-2.5 rounded-lg text-sm outline-none bg-white transition-colors'
   const style = { border: '1px solid #e5e7eb', fontSize: 14, fontFamily: 'inherit' }
   return (
     <div className="mb-3">
@@ -39,7 +77,6 @@ export function Field({ label, value, onChange, placeholder, type = 'text', mult
 }
 
 export function SegmentButtons({ options, value, onChange }) {
-  // options: [{ val, label }]
   return (
     <div className="flex gap-2">
       {options.map(({ val, label }) => (
@@ -59,7 +96,7 @@ export function SegmentButtons({ options, value, onChange }) {
 export function PrimaryButton({ onClick, disabled, children }) {
   return (
     <button onClick={onClick} disabled={disabled}
-      className="w-full py-3 rounded-lg text-sm font-medium mt-1 transition-opacity"
+      className="w-full py-3 rounded-lg text-sm font-semibold mt-1 transition-opacity"
       style={{ background: '#0F6E56', color: '#fff', border: 'none', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
       {children}
     </button>
