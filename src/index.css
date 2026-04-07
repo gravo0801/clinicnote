@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans KR', system-ui, sans-serif;
+  background: #f5f3ef;
+  color: #1a1a1a;
+  -webkit-font-smoothing: antialiased;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
