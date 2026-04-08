@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from './ui'
-import DiseaseNoteTab from './DiseaseNoteTab'
+import CaseStudyTab from './CaseStudyTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
@@ -51,7 +51,7 @@ export default function RxTab() {
 
   const SubTabBar = ({ style = {} }) => (
     <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#f0ede8', ...style }}>
-      {[['drugs', '💊 약물 카드'], ['notes', '📖 질환 노트']].map(([k, l]) => (
+      {[['drugs', '💊 약물 카드'], ['notes', '🏥 케이스 스터디']].map(([k, l]) => (
         <button key={k} onClick={() => setSubTab(k)}
           style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: subTab === k ? '#fff' : 'transparent', color: subTab === k ? (k === 'notes' ? '#7c3aed' : '#0F6E56') : '#9ca3af', fontSize: 13, fontWeight: subTab === k ? 700 : 400, cursor: 'pointer', boxShadow: subTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none', transition: 'all 0.15s' }}>{l}</button>
       ))}
@@ -155,7 +155,7 @@ export default function RxTab() {
       <div style={{ background: '#fff', borderBottom: '1px solid #ece9e3', padding: '12px 24px' }}>
         <SubTabBar style={{ maxWidth: 320 }} />
       </div>
-      {subTab === 'notes' ? <div style={{ flex: 1, overflow: 'hidden' }}><DiseaseNoteTab drugSuggestions={drugSuggestions} /></div> : (
+      {subTab === 'notes' ? <div style={{ flex: 1, overflow: 'hidden' }}><CaseStudyTab drugSuggestions={drugSuggestions} /></div> : (
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
           <div style={{ width: 210, background: '#fff', borderRight: '1px solid #ece9e3', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '16px 14px', borderBottom: '1px solid #f0ede8' }}>
