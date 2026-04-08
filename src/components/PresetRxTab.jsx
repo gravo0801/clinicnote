@@ -9,12 +9,10 @@ const CATEGORIES = ['전체','내과일반','상기도감염','소화기','근�
 const iStyle = { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' }
 const lblStyle = { display:'block', fontSize:11, color:'#6b7280', marginBottom:4, fontWeight:600 }
 
-// 약물 자동완성 (프리셋 폼용 — position:fixed 드롭다운)
+// 약물 자동완성 (프리셋 폼용)
 function DrugNameInput({ value, onChange, suggestions }) {
   const [open, setOpen] = useState(false)
-  const [dropPos, setDropPos] = useState(null)
   const wrapRef = useRef(null)
-  const inputRef = useRef(null)
   const hits = useMemo(() =>
     value.length >= 1 ? suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())).slice(0, 7) : []
   , [value, suggestions])
@@ -24,28 +22,21 @@ function DrugNameInput({ value, onChange, suggestions }) {
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const calcPos = () => {
-    if (inputRef.current) {
-      const r = inputRef.current.getBoundingClientRect()
-      setDropPos({ top: r.bottom + 3, left: r.left, width: Math.max(r.width, 240) })
-    }
-  }
-
   return (
     <div ref={wrapRef} style={{ position:'relative' }}>
-      <input ref={inputRef} value={value}
-        onChange={e => { onChange(e.target.value); calcPos(); setOpen(true) }}
-        onFocus={() => { if (value.length >= 1 && hits.length > 0) { calcPos(); setOpen(true) } }}
+      <input value={value}
+        onChange={e => { onChange(e.target.value); setOpen(e.target.value.length >= 1) }}
+        onFocus={() => { if (value.length >= 1) setOpen(true) }}
         placeholder="약물명 입력/검색..." style={{ ...iStyle, fontSize:12 }} />
-      {open && hits.length > 0 && dropPos && (
+      {open && hits.length > 0 && (
         <div style={{
-          position:'fixed', top:dropPos.top, left:dropPos.left, width:dropPos.width,
+          position:'absolute', top:'100%', left:0, minWidth:240, width:'max-content', maxWidth:340,
           zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:6,
           boxShadow:'0 6px 20px rgba(0,0,0,0.15)', maxHeight:220, overflowY:'auto',
         }}>
           {hits.map(n => (
             <div key={n} onMouseDown={e => { e.preventDefault(); onChange(n); setOpen(false) }}
-              style={{ padding:'8px 11px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a' }}
+              style={{ padding:'8px 11px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', whiteSpace:'nowrap' }}
               onMouseEnter={e => e.currentTarget.style.background='#f0faf5'} onMouseLeave={e => e.currentTarget.style.background='#fff'}>
               💊 {n}
             </div>
