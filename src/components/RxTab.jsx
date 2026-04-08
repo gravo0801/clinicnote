@@ -10,12 +10,15 @@ import PresetRxTab from './PresetRxTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
-  const [subTab, setSubTab]     = useState('notes')   // 'drugs' | 'notes' | 'preset'
+  const [subTab, setSubTab]     = useState('notes')
   const [rxList, setRxList]     = useState([])
+  const [myDrugs, setMyDrugs]   = useState([])  // 사용자 등록 약물
   const [loading, setLoading]   = useState(true)
   const [search, setSearch]     = useState('')
   const [catFilter, setCatFilter] = useState('전체')
   const [addRx, setAddRx]       = useState(false)
+  const [addMyDrug, setAddMyDrug] = useState(false)
+  const [newDrugName, setNewDrugName] = useState('')
   const [detail, setDetail]     = useState(null)
 
   const [rf, setRf] = useState({
@@ -31,7 +34,24 @@ export default function RxTab() {
     })
   }, [])
 
-  const drugSuggestions = useMemo(() => rxList.map(r => r.drugName).filter(Boolean), [rxList])
+  // 사용자 등록 약물 목록
+  useEffect(() => {
+    return onSnapshot(collection(db, 'myDrugs'), snap => {
+      setMyDrugs(snap.docs.map(d => d.data().name).filter(Boolean))
+    })
+  }, [])
+
+  const saveMyDrug = async () => {
+    if (!newDrugName.trim()) return
+    await addDoc(collection(db, 'myDrugs'), { name: newDrugName.trim(), createdAt: serverTimestamp() })
+    setNewDrugName('')
+    setAddMyDrug(false)
+  }
+
+  // 처방 노하우 약물 + 사용자 등록 약물 합산
+  const drugSuggestions = useMemo(() =>
+    [...new Set([...rxList.map(r => r.drugName).filter(Boolean), ...myDrugs])]
+  , [rxList, myDrugs])
 
   const categories = useMemo(() =>
     ['전체', ...new Set(rxList.map(r => r.category).filter(Boolean))],
@@ -89,6 +109,36 @@ export default function RxTab() {
           <Field label="처방일수" value={rf.duration} onChange={v => setRf(p => ({ ...p, duration: v }))} placeholder="예: 5–7일" />
           <Field label="처방 팁 / 메모" value={rf.note} onChange={v => setRf(p => ({ ...p, note: v }))} placeholder="주의사항, 증량 기준 등" multiline />
           <PrimaryButton onClick={saveRx}>저장</PrimaryButton>
+        </Sheet>
+      )}
+      {/* 약물 빠른 등록 */}
+      {addMyDrug && (
+        <Sheet title="약물 빠른 등록" onClose={() => { setAddMyDrug(false); setNewDrugName('') }}>
+          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 14, lineHeight: 1.6 }}>
+            처방창 자동완성에 추가할 약물명을 등록합니다.<br />
+            상세 정보가 필요하면 <b>처방 노하우 → 약물 카드</b>에서 추가하세요.
+          </p>
+          <Field label="약물명 *">
+            <input value={newDrugName} onChange={e => setNewDrugName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveMyDrug()}
+              placeholder="예: 세티리진정10mg(지르텍)"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              autoFocus />
+          </Field>
+          {/* 등록된 목록 */}
+          {myDrugs.length > 0 && (
+            <div style={{ marginTop: 16, marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 600, marginBottom: 8 }}>등록된 약물 ({myDrugs.length})</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {myDrugs.map(name => (
+                  <span key={name} style={{ fontSize: 12, background: '#f0faf5', color: '#0F6E56', border: '1px solid #d1fae5', borderRadius: 20, padding: '3px 10px' }}>
+                    💊 {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <PrimaryButton onClick={saveMyDrug}>추가</PrimaryButton>
         </Sheet>
       )}
       {detail && (
@@ -173,7 +223,10 @@ export default function RxTab() {
               </div>
               <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length}개</span>
-                <button onClick={() => setAddRx(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>+ 처방 추가</button>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => setAddMyDrug(true)} style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 20, padding: '5px 11px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>+ 약물 등록</button>
+                  <button onClick={() => setAddRx(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>+ 처방 추가</button>
+                </div>
               </div>
               <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {filtered.length === 0
@@ -228,7 +281,10 @@ export default function RxTab() {
                   )
                 })}
               </div>
-              <div style={{ padding: '12px', borderTop: '1px solid #f0ede8' }}>
+              <div style={{ padding: '12px', borderTop: '1px solid #f0ede8', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <button onClick={() => setAddMyDrug(true)} style={{ width: '100%', padding: '8px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  + 약물 빠른 등록
+                </button>
                 <button onClick={() => setAddRx(true)} style={{ width: '100%', padding: '9px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
                   + 처방 추가
                 </button>
