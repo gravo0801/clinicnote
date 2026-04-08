@@ -35,13 +35,11 @@ const S = {
   TD: { borderRight:'1px solid #eee', borderBottom:'1px solid #eee', padding:0, verticalAlign:'middle' },
 }
 
-// ── 약물 자동완성 (position:fixed 드롭다운 — overflow:hidden 탈출) ──
+// ── 약물 자동완성 ─────────────────────────────────────────
 function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) {
   const [open, setOpen] = useState(false)
   const [selectedFromList, setSelectedFromList] = useState(false)
-  const [dropPos, setDropPos] = useState(null)
   const wrapRef = useRef(null)
-  const inputRef = useRef(null)
 
   const allSuggestions = useMemo(() => [...new Set([...suggestions, ...COMMON_DRUGS])], [suggestions])
   const hits = useMemo(() =>
@@ -56,73 +54,57 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  // 드롭다운 위치 계산 (viewport 기준 fixed)
-  const calcPos = () => {
-    if (inputRef.current) {
-      const r = inputRef.current.getBoundingClientRect()
-      setDropPos({ top: r.bottom + 3, left: r.left, width: Math.max(r.width, 260) })
-    }
-  }
-
   const handleChange = v => {
-    onChange(v)
-    setSelectedFromList(false)
-    if (v.length >= 1) { calcPos(); setOpen(true) }
-    else setOpen(false)
+    onChange(v); setSelectedFromList(false); setOpen(v.length >= 1)
   }
-
   const select = name => { onChange(name); setSelectedFromList(true); setOpen(false) }
 
   return (
     <div ref={wrapRef} style={{ position:'relative', display:'flex', alignItems:'center', gap:4 }}>
-      <div style={{ flex:1 }}>
+      <div style={{ flex:1, position:'relative' }}>
         <input
-          ref={inputRef}
           value={value}
           onChange={e => handleChange(e.target.value)}
-          onFocus={() => { if (value.length >= 1 && hits.length > 0) { calcPos(); setOpen(true) } }}
+          onFocus={() => { if (value.length >= 1) setOpen(true) }}
           placeholder="약품명 입력/검색..."
           style={S.cell}
         />
+        {/* 드롭다운: z-index 높게, position absolute */}
+        {open && hits.length > 0 && (
+          <div style={{
+            position:'absolute', top:'100%', left:0, minWidth:260, width:'max-content', maxWidth:360,
+            zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
+            boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:260, overflowY:'auto',
+          }}>
+            {hits.map(n => (
+              <div key={n} onMouseDown={e => { e.preventDefault(); select(n) }}
+                style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', display:'flex', alignItems:'center', gap:8, whiteSpace:'nowrap' }}
+                onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
+                onMouseLeave={e => e.currentTarget.style.background='#fff'}>
+                <span>💊</span><span>{n}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      {/* 정보 링크: 드롭다운에서 선택한 경우에만 활성화 */}
       {showInfo && (
         selectedFromList && value
           ? <a href={drugInfoUrl(value)} target="_blank" rel="noopener noreferrer"
-              title={`"${value}" 식약처 의약품 정보 검색`}
+              title={`"${value}" 식약처 의약품 정보`}
               style={{ flexShrink:0, fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'3px 7px', textDecoration:'none', fontWeight:700, whiteSpace:'nowrap' }}>
               정보↗
             </a>
-          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 약물을 선택 후 활성화">정보↗</span>
-      )}
-      {/* fixed 위치 드롭다운 — overflow:hidden 부모에 영향 안 받음 */}
-      {open && hits.length > 0 && dropPos && (
-        <div style={{
-          position:'fixed', top:dropPos.top, left:dropPos.left, width:dropPos.width,
-          zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
-          boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:260, overflowY:'auto',
-        }}>
-          {hits.map(n => (
-            <div key={n} onMouseDown={e => { e.preventDefault(); select(n) }}
-              style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', display:'flex', alignItems:'center', gap:8 }}
-              onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
-              onMouseLeave={e => e.currentTarget.style.background='#fff'}>
-              <span>💊</span><span style={{ flex:1 }}>{n}</span>
-            </div>
-          ))}
-        </div>
+          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }}>정보↗</span>
       )}
     </div>
   )
 }
 
-// ── 상병코드 자동완성 셀 (position:fixed 드롭다운) ────────────
+// ── 상병코드 자동완성 셀 ──────────────────────────────────
 function DiseaseAutoInput({ value, onChange }) {
   const [text, setText] = useState(value?.code || '')
   const [open, setOpen] = useState(false)
-  const [dropPos, setDropPos] = useState(null)
   const wrapRef = useRef(null)
-  const inputRef = useRef(null)
   const results = useMemo(() => text.length >= 1 ? searchKCD(text) : [], [text])
 
   useEffect(() => {
@@ -135,35 +117,26 @@ function DiseaseAutoInput({ value, onChange }) {
     if (value?.code && value.code !== text) setText(value.code)
   }, [value?.code])
 
-  const calcPos = () => {
-    if (inputRef.current) {
-      const r = inputRef.current.getBoundingClientRect()
-      setDropPos({ top: r.bottom + 3, left: r.left, width: Math.max(r.width, 320) })
-    }
-  }
-
   const handleChange = e => {
     setText(e.target.value); onChange(null)
-    if (e.target.value.length >= 1) { calcPos(); setOpen(true) }
-    else setOpen(false)
+    setOpen(e.target.value.length >= 1)
   }
-
   const select = item => { setText(item.code); onChange(item); setOpen(false) }
 
   return (
     <div ref={wrapRef} style={{ position:'relative' }}>
-      <input ref={inputRef} value={text} onChange={handleChange}
-        onFocus={() => { if (text.length >= 1 && results.length > 0) { calcPos(); setOpen(true) } }}
+      <input value={text} onChange={handleChange}
+        onFocus={() => { if (text.length >= 1) setOpen(true) }}
         placeholder="코드/질환명..." style={S.cell} />
-      {open && results.length > 0 && dropPos && (
+      {open && results.length > 0 && (
         <div style={{
-          position:'fixed', top:dropPos.top, left:dropPos.left, width:dropPos.width,
+          position:'absolute', top:'100%', left:0, minWidth:300, width:'max-content', maxWidth:380,
           zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
           boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:240, overflowY:'auto',
         }}>
           {results.map(item => (
             <div key={item.code} onMouseDown={e => { e.preventDefault(); select(item) }}
-              style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', display:'flex', gap:10, alignItems:'center', borderBottom:'1px solid #f0f0f0' }}
+              style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', display:'flex', gap:10, alignItems:'center', borderBottom:'1px solid #f0f0f0', whiteSpace:'nowrap' }}
               onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
               onMouseLeave={e => e.currentTarget.style.background='#fff'}>
               <span style={{ fontWeight:700, color:'#0F6E56', minWidth:48, flexShrink:0 }}>{item.code}</span>
@@ -183,7 +156,7 @@ function DiseaseTable({ diseases, onChange }) {
   const remove = (i) => onChange(diseases.filter((_,idx) => idx !== i))
   const upd = (i,f,v) => onChange(diseases.map((d,idx) => idx===i ? {...d,[f]:v} : d))
   return (
-    <div style={{ border:'1px solid #d1d5db', borderRadius:8, overflow:'hidden', marginBottom:12 }}>
+    <div style={{ border:'1px solid #d1d5db', borderRadius:8, overflow:'visible', marginBottom:12 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 10px', background:'#e8f4f0', borderBottom:'1px solid #d1d5db' }}>
         <span style={{ fontSize:12, fontWeight:700, color:'#0F6E56' }}>상병 (질병)</span>
         <button onClick={add} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:5, padding:'3px 10px', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ 추가</button>
@@ -252,7 +225,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
   const allSuggestions = useMemo(() => [...new Set([...drugSuggestions, ...COMMON_DRUGS])], [drugSuggestions])
 
   return (
-    <div style={{ border:'1px solid #d1d5db', borderRadius:8, overflow:'hidden', marginBottom:12 }}>
+    <div style={{ border:'1px solid #d1d5db', borderRadius:8, overflow:'visible', marginBottom:12 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 10px', background:'#eef2ff', borderBottom:'1px solid #d1d5db' }}>
         <span style={{ fontSize:12, fontWeight:700, color:'#3730a3' }}>처방</span>
         <div style={{ display:'flex', gap:6 }}>
@@ -399,7 +372,7 @@ function Section({ num, title, children, defaultOpen=true, badge }) {
   const [open, setOpen] = useState(defaultOpen)
   const c = SCOL[num]||'#374151'; const bg = SBGMAP[c]||'#f8f8f8'
   return (
-    <div style={{ border:'1px solid #e5e7eb', borderRadius:12, marginBottom:10, overflow:'hidden' }}>
+    <div style={{ border:'1px solid #e5e7eb', borderRadius:12, marginBottom:10, overflow:'visible' }}>
       <button onClick={() => setOpen(p => !p)}
         style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:'11px 16px', background:open?bg:'#fff', border:'none', cursor:'pointer', textAlign:'left' }}>
         <div style={{ width:24, height:24, borderRadius:'50%', background:c, color:'#fff', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{num}</div>
@@ -424,7 +397,7 @@ function CaseView({ data, onEdit }) {
     </div>
   ) : null
   return (
-    <div style={{ padding:'20px 24px 40px', maxWidth:820 }}>
+    <div style={{ padding:'20px 24px 100px', maxWidth:820 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #f0ede8' }}>
         <div>
           <div style={{ fontSize:20, fontWeight:700, color:'#1a1a1a', marginBottom:6 }}>{data.title||'케이스 스터디'}</div>
@@ -584,7 +557,7 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
   const p=form.patient||{}; const w=form.workup||{}; const dx=form.diagnosis||{}; const k=form.knowledge||{}
 
   return (
-    <div style={{ padding:'20px 24px 40px', maxWidth:820 }}>
+    <div style={{ padding:'20px 24px 100px', maxWidth:820 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #f0ede8' }}>
         <div style={{ fontSize:16, fontWeight:700, color:'#1a1a1a' }}>✏️ {form.title||'케이스 편집'}</div>
         <div style={{ display:'flex', gap:8 }}>
