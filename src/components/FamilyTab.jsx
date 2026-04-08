@@ -6,8 +6,6 @@ import {
 import HealthCheckup from './HealthCheckup'
 import { db } from '../firebase'
 import { Sheet, SegmentButtons, DangerButton, Spinner, useIsMobile } from './ui'
-import RecordForm from './RecordForm'
-import AiReviewPanel from './AiReviewPanel'
 
 const getAge = y => new Date().getFullYear() - y
 
@@ -68,6 +66,10 @@ export default function FamilyTab() {
   const [delConfirm, setDelConfirm] = useState(false)
 
   const [mf, setMf] = useState({ name: '', relation: '', birthYear: '', gender: '남' })
+  const [rf, setRf] = useState({
+    date: new Date().toISOString().slice(0, 10),
+    diagnosis: '', treatment: '', nextVisit: '', status: 'ongoing', note: ''
+  })
 
   // ── Members ──────────────────────────────────────────────
   useEffect(() => {
@@ -109,13 +111,12 @@ export default function FamilyTab() {
     setAddMember(false)
   }
 
-  const saveRecord = async (form) => {
-    if (!selId) return
+  const saveRecord = async () => {
+    if (!selId || !rf.diagnosis.trim()) return
     await addDoc(collection(db, 'familyMembers', selId, 'records'), {
-      ...form,
-      diagnosis: form.diagnosis || form.chiefComplaint,
-      createdAt: serverTimestamp(),
+      ...rf, createdAt: serverTimestamp(),
     })
+    setRf({ date: new Date().toISOString().slice(0, 10), diagnosis: '', treatment: '', nextVisit: '', status: 'ongoing', note: '' })
     setAddRecord(false)
   }
 
@@ -169,7 +170,28 @@ export default function FamilyTab() {
 
       {addRecord && (
         <Sheet title="진료 기록 작성" onClose={() => setAddRecord(false)}>
-          <RecordForm onSave={saveRecord} onClose={() => setAddRecord(false)} rxSuggestions={rxNames} />
+          {[['진료일','date','date'],['진단명','diagnosis','text'],['치료/처방','treatment','text'],['다음 방문일','nextVisit','date']].map(([l,k,t]) => (
+            <div key={k} style={{ marginBottom: 10 }}>
+              <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>{l}</label>
+              {k === 'treatment'
+                ? <textarea value={rf[k]} onChange={e => setRf(p => ({...p,[k]:e.target.value}))} placeholder="약물명, 용량, 용법 기록"
+                    style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', minHeight:72 }} />
+                : <input type={t} value={rf[k]} onChange={e => setRf(p => ({...p,[k]:e.target.value}))}
+                    style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit' }} />
+              }
+            </div>
+          ))}
+          <div style={{ marginBottom:10 }}>
+            <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>상태</label>
+            <SegmentButtons options={[{val:'ongoing',label:'진행중'},{val:'resolved',label:'완료'},{val:'followup',label:'추적필요'}]}
+              value={rf.status} onChange={v => setRf(p => ({...p,status:v}))} />
+          </div>
+          <div style={{ marginBottom:12 }}>
+            <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>메모</label>
+            <textarea value={rf.note} onChange={e => setRf(p => ({...p,note:e.target.value}))} placeholder="추가 메모"
+              style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', minHeight:60 }} />
+          </div>
+          <button onClick={saveRecord} style={{ width:'100%', padding:'12px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:'pointer' }}>저장</button>
         </Sheet>
       )}
 
@@ -247,8 +269,7 @@ export default function FamilyTab() {
                   </div>
                 )}
 
-                {/* AI 검토 패널 */}
-                <AiReviewPanel record={detail} member={sel} />
+                {/* AI 검토 패널 — 케이스 스터디 탭에서 이용 가능 */}
 
                 <DangerButton onClick={() => deleteRecord(detail.id)}>기록 삭제</DangerButton>
               </>
