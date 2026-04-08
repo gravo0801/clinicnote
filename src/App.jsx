@@ -6,7 +6,7 @@ import { useIsMobile } from './components/ui'
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false)
-  const [tab, setTab] = useState('family')
+  const [tab, setTab] = useState('rx')
   const isMobile = useIsMobile()
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function App() {
             </button>
           </div>
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#f0ede8' }}>
-            {[['family', '👨‍👩‍👧 가족 건강'], ['rx', '💊 처방 노하우']].map(([k, l]) => (
+            {[['rx', '💊 처방 노하우'], ['family', '👨‍👩‍👧 가족 건강']].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)}
                 className="flex-1 py-2 rounded-lg text-sm transition-all"
                 style={{
@@ -61,8 +61,8 @@ export default function App() {
 
   // ── 데스크탑 레이아웃 ────────────────────────────────────
   const NAV_ITEMS = [
-    { key: 'family', icon: '👨‍👩‍👧', label: '가족 건강' },
     { key: 'rx',     icon: '💊', label: '처방 노하우' },
+    { key: 'family', icon: '👨‍👩‍👧', label: '가족 건강' },
   ]
 
   return (
