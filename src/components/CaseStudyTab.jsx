@@ -35,56 +35,55 @@ const S = {
   TD: { borderRight:'1px solid #eee', borderBottom:'1px solid #eee', padding:0, verticalAlign:'middle' },
 }
 
-// ── 약물 자동완성 (선택시에만 정보 링크 활성화) ──────────────
+// ── 약물 자동완성 (position:fixed 드롭다운 — overflow:hidden 탈출) ──
 function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) {
   const [open, setOpen] = useState(false)
   const [selectedFromList, setSelectedFromList] = useState(false)
-  const ref = useRef(null)
+  const [dropPos, setDropPos] = useState(null)
+  const wrapRef = useRef(null)
+  const inputRef = useRef(null)
 
-  // suggestions + COMMON_DRUGS 병합
   const allSuggestions = useMemo(() => [...new Set([...suggestions, ...COMMON_DRUGS])], [suggestions])
-  const hits = value.length >= 1 ? allSuggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())).slice(0, 10) : []
+  const hits = useMemo(() =>
+    value.length >= 1
+      ? allSuggestions.filter(s => s.toLowerCase().includes(value.toLowerCase())).slice(0, 10)
+      : []
+  , [value, allSuggestions])
 
   useEffect(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = e => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const handleChange = (v) => {
+  // 드롭다운 위치 계산 (viewport 기준 fixed)
+  const calcPos = () => {
+    if (inputRef.current) {
+      const r = inputRef.current.getBoundingClientRect()
+      setDropPos({ top: r.bottom + 3, left: r.left, width: Math.max(r.width, 260) })
+    }
+  }
+
+  const handleChange = v => {
     onChange(v)
     setSelectedFromList(false)
-    setOpen(v.length >= 1)
+    if (v.length >= 1) { calcPos(); setOpen(true) }
+    else setOpen(false)
   }
 
-  const select = (name) => {
-    onChange(name)
-    setSelectedFromList(true)
-    setOpen(false)
-  }
+  const select = name => { onChange(name); setSelectedFromList(true); setOpen(false) }
 
   return (
-    <div ref={ref} style={{ position:'relative', display:'flex', alignItems:'center', gap:4 }}>
-      <div style={{ flex:1, position:'relative' }}>
+    <div ref={wrapRef} style={{ position:'relative', display:'flex', alignItems:'center', gap:4 }}>
+      <div style={{ flex:1 }}>
         <input
+          ref={inputRef}
           value={value}
           onChange={e => handleChange(e.target.value)}
-          onFocus={() => { if (value.length >= 1 && hits.length > 0) setOpen(true) }}
+          onFocus={() => { if (value.length >= 1 && hits.length > 0) { calcPos(); setOpen(true) } }}
           placeholder="약품명 입력/검색..."
           style={S.cell}
         />
-        {open && hits.length > 0 && (
-          <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:500, background:'#fff', border:'1px solid #d1fae5', borderRadius:7, boxShadow:'0 8px 24px rgba(0,0,0,0.13)', overflow:'hidden', maxHeight:260, overflowY:'auto' }}>
-            {hits.map(n => (
-              <div key={n} onMouseDown={e => { e.preventDefault(); select(n) }}
-                style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', display:'flex', alignItems:'center', gap:8 }}
-                onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
-                onMouseLeave={e => e.currentTarget.style.background='#fff'}>
-                <span>💊</span> <span style={{ flex:1 }}>{n}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
       {/* 정보 링크: 드롭다운에서 선택한 경우에만 활성화 */}
       {showInfo && (
@@ -94,21 +93,40 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
               style={{ flexShrink:0, fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'3px 7px', textDecoration:'none', fontWeight:700, whiteSpace:'nowrap' }}>
               정보↗
             </a>
-          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 약물을 선택해야 활성화됩니다">정보↗</span>
+          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 약물을 선택 후 활성화">정보↗</span>
+      )}
+      {/* fixed 위치 드롭다운 — overflow:hidden 부모에 영향 안 받음 */}
+      {open && hits.length > 0 && dropPos && (
+        <div style={{
+          position:'fixed', top:dropPos.top, left:dropPos.left, width:dropPos.width,
+          zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
+          boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:260, overflowY:'auto',
+        }}>
+          {hits.map(n => (
+            <div key={n} onMouseDown={e => { e.preventDefault(); select(n) }}
+              style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', display:'flex', alignItems:'center', gap:8 }}
+              onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
+              onMouseLeave={e => e.currentTarget.style.background='#fff'}>
+              <span>💊</span><span style={{ flex:1 }}>{n}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )
 }
 
-// ── 상병코드 자동완성 셀 ────────────────────────────────────
+// ── 상병코드 자동완성 셀 (position:fixed 드롭다운) ────────────
 function DiseaseAutoInput({ value, onChange }) {
   const [text, setText] = useState(value?.code || '')
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [dropPos, setDropPos] = useState(null)
+  const wrapRef = useRef(null)
+  const inputRef = useRef(null)
   const results = useMemo(() => text.length >= 1 ? searchKCD(text) : [], [text])
 
   useEffect(() => {
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = e => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
@@ -117,18 +135,32 @@ function DiseaseAutoInput({ value, onChange }) {
     if (value?.code && value.code !== text) setText(value.code)
   }, [value?.code])
 
-  const handleChange = (e) => {
-    setText(e.target.value); onChange(null); if (e.target.value.length >= 1) setOpen(true); else setOpen(false)
+  const calcPos = () => {
+    if (inputRef.current) {
+      const r = inputRef.current.getBoundingClientRect()
+      setDropPos({ top: r.bottom + 3, left: r.left, width: Math.max(r.width, 320) })
+    }
   }
 
-  const select = (item) => { setText(item.code); onChange(item); setOpen(false) }
+  const handleChange = e => {
+    setText(e.target.value); onChange(null)
+    if (e.target.value.length >= 1) { calcPos(); setOpen(true) }
+    else setOpen(false)
+  }
+
+  const select = item => { setText(item.code); onChange(item); setOpen(false) }
 
   return (
-    <div ref={ref} style={{ position:'relative' }}>
-      <input value={text} onChange={handleChange} onFocus={() => { if (text.length >= 1 && results.length > 0) setOpen(true) }}
+    <div ref={wrapRef} style={{ position:'relative' }}>
+      <input ref={inputRef} value={text} onChange={handleChange}
+        onFocus={() => { if (text.length >= 1 && results.length > 0) { calcPos(); setOpen(true) } }}
         placeholder="코드/질환명..." style={S.cell} />
-      {open && results.length > 0 && (
-        <div style={{ position:'absolute', top:'100%', left:0, zIndex:500, width:340, background:'#fff', border:'1px solid #d1fae5', borderRadius:7, boxShadow:'0 8px 24px rgba(0,0,0,0.13)', overflow:'hidden', maxHeight:240, overflowY:'auto' }}>
+      {open && results.length > 0 && dropPos && (
+        <div style={{
+          position:'fixed', top:dropPos.top, left:dropPos.left, width:dropPos.width,
+          zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
+          boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:240, overflowY:'auto',
+        }}>
           {results.map(item => (
             <div key={item.code} onMouseDown={e => { e.preventDefault(); select(item) }}
               style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', display:'flex', gap:10, alignItems:'center', borderBottom:'1px solid #f0f0f0' }}
