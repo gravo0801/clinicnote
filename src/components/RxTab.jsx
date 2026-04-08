@@ -10,7 +10,7 @@ import PresetRxTab from './PresetRxTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
-  const [subTab, setSubTab]     = useState('drugs')   // 'drugs' | 'notes' | 'preset'
+  const [subTab, setSubTab]     = useState('notes')   // 'drugs' | 'notes' | 'preset'
   const [rxList, setRxList]     = useState([])
   const [loading, setLoading]   = useState(true)
   const [search, setSearch]     = useState('')
@@ -62,7 +62,7 @@ export default function RxTab() {
   // ── 서브탭 바 ────────────────────────────────────────────
   const SubTabBar = ({ style = {} }) => (
     <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#f0ede8', ...style }}>
-      {[['drugs', '💊 약물 카드'], ['notes', '🏥 케이스 스터디'], ['preset', '📋 약속처방']].map(([k, l]) => (
+      {[['notes', '🏥 케이스 스터디'], ['drugs', '💊 약물 카드'], ['preset', '📋 약속처방']].map(([k, l]) => (
         <button key={k} onClick={() => setSubTab(k)}
           style={{
             flex: 1, padding: '7px 0', borderRadius: 7, border: 'none',
