@@ -386,16 +386,45 @@ function Section({ num, title, children, defaultOpen=true, badge }) {
 }
 
 // ── 케이스 보기 (view mode) ────────────────────────────────
-function CaseView({ data, onEdit }) {
+function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
+  const [reviewLoading, setReviewLoading] = useState(false)
+  const [reviewData, setReviewData] = useState(data.aiReview || null)
+
   const p = data.patient||{}; const w = data.workup||{}
   const dx = data.diagnosis||{}; const k = data.knowledge||{}
   const drugs = dx.drugs||[]; const diseases = dx.diseases||[]
+
   const Row = ({ label, value }) => value ? (
     <div style={{ display:'flex', gap:10, padding:'5px 0', borderBottom:'1px solid #f5f5f5' }}>
       <span style={{ fontSize:12, color:'#9ca3af', flexShrink:0, minWidth:90 }}>{label}</span>
       <span style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.6, flex:1, whiteSpace:'pre-wrap' }}>{value}</span>
     </div>
   ) : null
+
+  const callReview = async () => {
+    setReviewLoading(true)
+    try {
+      const res = await fetch('/api/review', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          patientAge: p.age, patientGender: p.gender,
+          chiefComplaint: p.chiefComplaint,
+          diagnosis: dx.impression,
+          kcdCode: diseases[0]?.kcd?.code,
+          kcdName: diseases[0]?.kcd?.name,
+          drugs: drugs.map(d => ({ name: d.name, dosage: d.dosage, usage: `${d.freq||3}회 ${d.usage||'식후'}`, duration: d.duration })),
+          progressNote: w.history,
+        }),
+      })
+      const result = await res.json()
+      if (result.error) throw new Error(result.error)
+      setReviewData(result)
+      // Firebase에 저장
+      if (onUpdateReview) onUpdateReview(result)
+    } catch (e) { alert('AI 검토 오류: ' + e.message) }
+    finally { setReviewLoading(false) }
+  }
+
   return (
     <div style={{ padding:'20px 24px 100px', maxWidth:820 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #f0ede8' }}>
@@ -407,7 +436,16 @@ function CaseView({ data, onEdit }) {
             {diseases[0]?.kcd && <span style={{ fontSize:12, background:'#e6f4ef', color:'#0F6E56', borderRadius:20, padding:'2px 10px', fontWeight:700 }}>{diseases[0].kcd.code} {diseases[0].kcd.name}</span>}
           </div>
         </div>
-        <button onClick={onEdit} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:13, fontWeight:700, cursor:'pointer', flexShrink:0 }}>✏️ 수정</button>
+        <div style={{ display:'flex', gap:8, flexShrink:0 }}>
+          <button onClick={onDelete}
+            style={{ background:'none', border:'1px solid #fca5a5', borderRadius:8, color:'#ef4444', padding:'7px 13px', fontSize:12, cursor:'pointer', fontWeight:600 }}>
+            🗑 삭제
+          </button>
+          <button onClick={onEdit}
+            style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+            ✏️ 수정
+          </button>
+        </div>
       </div>
       {(p.age||p.chiefComplaint||p.hpi) && (
         <Section num={1} title="환자 정보 및 증상" defaultOpen={true}>
@@ -473,12 +511,24 @@ function CaseView({ data, onEdit }) {
             </div>
           )}
           {dx.nonDrug && <Row label="처치/계획" value={dx.nonDrug} />}
-          {data.aiReview && (
-            <div style={{ marginTop:12, borderTop:'1px solid #f0ede8', paddingTop:12 }}>
-              <div style={{ fontSize:12, fontWeight:700, color:'#991b1b', marginBottom:6 }}>🏥 심평원 검토 결과</div>
-              <AiResult data={data.aiReview} type="review" />
+          {/* 심평원 검토 버튼 + 결과 */}
+          <div style={{ marginTop:14, background:'#fef2f2', borderRadius:10, padding:'13px', border:'1px solid #fecaca' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: reviewData ? 10 : 0 }}>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:'#991b1b' }}>🏥 심평원 급여기준 검토</div>
+                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드·처방 기준으로 AI가 검토합니다</div>
+              </div>
+              <button onClick={callReview} disabled={reviewLoading}
+                style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:7, border:'none', background: reviewLoading ? '#d1d5db' : '#dc2626', color:'#fff', fontSize:12, fontWeight:700, cursor: reviewLoading ? 'not-allowed' : 'pointer', flexShrink:0 }}>
+                {reviewLoading
+                  ? <><span style={{ width:12, height:12, border:'2px solid rgba(255,255,255,0.4)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin 0.8s linear infinite', display:'inline-block' }} />검토 중...</>
+                  : <>{reviewData ? '🔄 재검토' : '🔍 AI 검토'}</>
+                }
+                <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+              </button>
             </div>
-          )}
+            {reviewData && <AiResult data={reviewData} type="review" />}
+          </div>
         </Section>
       )}
       {(k.text||k.aiContent||(k.images||[]).length>0) && (
@@ -768,7 +818,14 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
           }
         </div>
         {newModalJsx}
-        {selCase&&!editMode && <Sheet title="케이스 보기" onClose={() => setSelId(null)}><CaseView data={selCase} onEdit={() => setEditMode(true)} /></Sheet>}
+        {selCase&&!editMode && <Sheet title="케이스 보기" onClose={() => setSelId(null)}>
+          <CaseView data={selCase} onEdit={() => setEditMode(true)}
+            onDelete={() => deleteCase(selCase.id)}
+            onUpdateReview={async (result) => {
+              await updateDoc(doc(db,'caseStudies',selCase.id), { aiReview: result, updatedAt: serverTimestamp() })
+              setCases(p => p.map(c => c.id===selCase.id ? {...c, aiReview: result} : c))
+            }} />
+        </Sheet>}
         {selCase&&editMode && <Sheet title="케이스 편집" onClose={() => setEditMode(false)}><CaseEdit data={selCase} drugSuggestions={drugSuggestions} presets={presets} onSave={handleSaved} onCancel={() => setEditMode(false)} /></Sheet>}
       </div>
     )
@@ -801,7 +858,12 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
             </div>
           : editMode
             ? <CaseEdit key={selCase.id+'_edit'} data={selCase} drugSuggestions={drugSuggestions} presets={presets} onSave={handleSaved} onCancel={() => setEditMode(false)} />
-            : <CaseView key={selCase.id+'_view'} data={selCase} onEdit={() => setEditMode(true)} />
+            : <CaseView key={selCase.id+'_view'} data={selCase} onEdit={() => setEditMode(true)}
+                onDelete={() => deleteCase(selCase.id)}
+                onUpdateReview={async (result) => {
+                  await updateDoc(doc(db,'caseStudies',selCase.id), { aiReview: result, updatedAt: serverTimestamp() })
+                  setCases(p => p.map(c => c.id===selCase.id ? {...c, aiReview: result} : c))
+                }} />
         }
       </div>
       {newModalJsx}
