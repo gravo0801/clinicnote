@@ -580,21 +580,43 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
 
   if (loading) return <Spinner />
 
-  const NewModal = () => (
+  const newModalJsx = showNew ? (
     <Sheet title="새 케이스 생성" onClose={() => setShowNew(false)}>
-      <div style={{ marginBottom: 12 }}><label style={F.label}>케이스 제목 (선택)</label><input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="예: 급성 편도염 증례 1" style={F.std} /></div>
-      <div style={{ marginBottom: 20 }}><label style={F.label}>주호소 *</label><input value={newCC} onChange={e => setNewCC(e.target.value)} placeholder="예: 발열, 인후통 3일째" style={F.std} onKeyDown={e => e.key === 'Enter' && createCase()} /></div>
-      <button onClick={createCase} disabled={!newCC.trim() || creating} style={{ width: '100%', padding: '12px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: !newCC.trim() ? 'not-allowed' : 'pointer', opacity: !newCC.trim() ? 0.5 : 1 }}>
+      <div style={{ marginBottom: 12 }}>
+        <label style={F.label}>케이스 제목 (선택)</label>
+        <input
+          value={newTitle}
+          onChange={e => setNewTitle(e.target.value)}
+          placeholder="예: 급성 편도염 증례 1"
+          style={F.std}
+          autoFocus
+        />
+      </div>
+      <div style={{ marginBottom: 20 }}>
+        <label style={F.label}>주호소 *</label>
+        <input
+          value={newCC}
+          onChange={e => setNewCC(e.target.value)}
+          placeholder="예: 발열, 인후통 3일째"
+          style={F.std}
+          onKeyDown={e => e.key === 'Enter' && createCase()}
+        />
+      </div>
+      <button
+        onClick={createCase}
+        disabled={!newCC.trim() || creating}
+        style={{ width: '100%', padding: '12px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: !newCC.trim() ? 'not-allowed' : 'pointer', opacity: !newCC.trim() ? 0.5 : 1 }}
+      >
         {creating ? '생성 중...' : '케이스 생성 →'}
       </button>
     </Sheet>
-  )
+  ) : null
 
-  const ListItem = ({ c }) => {
+  const renderListItem = (c) => {
     const active = selId === c.id
     const mainKcd = c.diagnosis?.diseases?.[0]?.kcd
     return (
-      <div onClick={() => setSelId(c.id)} style={{ padding: '11px 12px', borderRadius: 10, cursor: 'pointer', marginBottom: 4, background: active ? '#f0faf5' : 'transparent', border: active ? '1px solid #a7f3d0' : '1px solid transparent' }}>
+      <div key={c.id} onClick={() => setSelId(c.id)} style={{ padding: '11px 12px', borderRadius: 10, cursor: 'pointer', marginBottom: 4, background: active ? '#f0faf5' : 'transparent', border: active ? '1px solid #a7f3d0' : '1px solid transparent' }}>
         <div style={{ fontSize: 13, fontWeight: active ? 700 : 500, color: active ? '#0F6E56' : '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{c.title || c.patient?.chiefComplaint || '새 케이스'}</div>
         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
           {c.patient?.chiefComplaint && <span style={{ fontSize: 11, color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{c.patient.chiefComplaint}</span>}
@@ -620,10 +642,10 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
         <div style={{ padding: '0 16px' }}>
           {filtered.length === 0
             ? <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af' }}><div style={{ fontSize: 36, marginBottom: 10 }}>🏥</div><div style={{ fontSize: 14, fontWeight: 500, marginBottom: 10 }}>케이스가 없습니다</div><button onClick={() => setShowNew(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>첫 케이스 추가하기</button></div>
-            : filtered.map(c => <ListItem key={c.id} c={c} />)
+            : filtered.map(c => renderListItem(c))
           }
         </div>
-        {showNew && <NewModal />}
+        {newModalJsx}
         {selCase && <Sheet title="케이스 편집" onClose={() => setSelId(null)}><CaseDetail caseDoc={selCase} drugSuggestions={drugSuggestions} onUpdate={updateCase} onDelete={() => deleteCase(selCase.id)} /></Sheet>}
       </div>
     )
@@ -637,7 +659,7 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
           {filtered.length === 0 ? <div style={{ textAlign: 'center', padding: '40px 0', color: '#9ca3af', fontSize: 13 }}><div style={{ fontSize: 28, marginBottom: 8 }}>🏥</div>케이스가 없습니다</div>
-            : filtered.map(c => <ListItem key={c.id} c={c} />)}
+            : filtered.map(c => renderListItem(c))}
         </div>
         <div style={{ padding: '12px', borderTop: '1px solid #f0ede8' }}>
           <button onClick={() => setShowNew(true)} style={{ width: '100%', padding: '10px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✏️ 새 케이스 추가</button>
@@ -654,7 +676,7 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
           : <CaseDetail key={selCase.id} caseDoc={selCase} drugSuggestions={drugSuggestions} onUpdate={updateCase} onDelete={() => deleteCase(selCase.id)} />
         }
       </div>
-      {showNew && <NewModal />}
+      {newModalJsx}
     </div>
   )
 }
