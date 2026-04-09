@@ -22,12 +22,15 @@ const compressImage = (file) => new Promise((resolve) => {
   }; reader.readAsDataURL(file)
 })
 
-// 식약처 의약품안전나라 — 품목명 직접 검색 결과 페이지
-// itemName 파라미터로 정확한 품목명 검색 결과로 직접 이동
+// 식약처 의약품안전나라 검색 — 핵심 성분명/약품명으로 직접 검색
 const drugInfoUrl = (name) => {
-  // 괄호 안 성분명/브랜드명 제거 후 핵심 약품명만 추출
-  const clean = name.replace(/\(.*?\)/g, '').trim()
-  return `https://nedrug.mfds.go.kr/pbp/CCBBB01/getItemList?itemName=${encodeURIComponent(clean)}&ingrName=&releaseYn=&cancelYn=N`
+  // 용량(숫자+단위), 괄호 내용 제거 → 핵심 약품명만 추출
+  const clean = name
+    .replace(/\(.*?\)/g, '')          // 괄호 내용 제거: (코대원), (화이자) 등
+    .replace(/\d+(\.\d+)?(mg|mcg|g|ml|IU|%)/gi, '') // 용량 제거
+    .replace(/\s+/g, ' ')
+    .trim()
+  return `https://nedrug.mfds.go.kr/searchDrug?searchYn=true&search_str=${encodeURIComponent(clean)}`
 }
 
 const S = {
