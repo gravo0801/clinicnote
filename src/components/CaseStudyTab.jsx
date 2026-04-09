@@ -22,9 +22,9 @@ const compressImage = (file) => new Promise((resolve) => {
   }; reader.readAsDataURL(file)
 })
 
-// health.kr 의약품 정보 직접 검색 URL
+// 식약처 의약품안전나라 — 직접 검색 결과 페이지로 연결
 const drugInfoUrl = (name) =>
-  `https://health.kr/searchDrug/result.asp?drug_nm=${encodeURIComponent(name)}`
+  `https://nedrug.mfds.go.kr/searchDrug?searchYn=true&search_str=${encodeURIComponent(name)}`
 
 const S = {
   input: { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' },
@@ -90,11 +90,11 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
       {showInfo && (
         selectedFromList && value
           ? <a href={drugInfoUrl(value)} target="_blank" rel="noopener noreferrer"
-              title={`"${value}" 식약처 의약품 정보`}
+              title={`"${value}" — 식약처 의약품안전나라 검색`}
               style={{ flexShrink:0, fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'3px 7px', textDecoration:'none', fontWeight:700, whiteSpace:'nowrap' }}>
-              정보↗
+              식약처↗
             </a>
-          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }}>정보↗</span>
+          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 선택 후 활성화">식약처↗</span>
       )}
     </div>
   )
@@ -513,7 +513,8 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
                   <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                     <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{d.name}</span>
                     <a href={drugInfoUrl(d.name)} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 6px', textDecoration:'none', fontWeight:600 }}>정보↗</a>
+                      title={`"${d.name}" — 식약처 의약품안전나라`}
+                      style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 6px', textDecoration:'none', fontWeight:600 }}>식약처↗</a>
                   </div>
                   <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
                     {[d.dosage,`${d.freq||3}회/일`,d.duration&&d.duration+'일',d.usage].filter(Boolean).map((v,j) => (
