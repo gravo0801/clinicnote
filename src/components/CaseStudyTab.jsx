@@ -22,9 +22,9 @@ const compressImage = (file) => new Promise((resolve) => {
   }; reader.readAsDataURL(file)
 })
 
-// 식약처 의약품안전나라 검색 URL (직접 검색 결과)
+// health.kr 의약품 정보 직접 검색 URL
 const drugInfoUrl = (name) =>
-  `https://nedrug.mfds.go.kr/searchDrug?searchYn=true&search_str=${encodeURIComponent(name)}`
+  `https://health.kr/searchDrug/result.asp?drug_nm=${encodeURIComponent(name)}`
 
 const S = {
   input: { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' },
@@ -401,28 +401,43 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
     </div>
   ) : null
 
+  const [reviewError, setReviewError] = useState(null)
+
   const callReview = async () => {
     setReviewLoading(true)
+    setReviewError(null)
     try {
+      const payload = {
+        patientAge: p.age, patientGender: p.gender,
+        chiefComplaint: p.chiefComplaint,
+        diagnosis: dx.impression,
+        kcdCode: diseases[0]?.kcd?.code,
+        kcdName: diseases[0]?.kcd?.name,
+        drugs: (drugs || []).filter(d => d.name).map(d => ({
+          name: d.name, dosage: d.dosage || '-',
+          usage: `${d.freq||3}회/일 ${d.usage||'식후'}`,
+          duration: d.duration || '-'
+        })),
+        progressNote: w.history || '',
+      }
       const res = await fetch('/api/review', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          patientAge: p.age, patientGender: p.gender,
-          chiefComplaint: p.chiefComplaint,
-          diagnosis: dx.impression,
-          kcdCode: diseases[0]?.kcd?.code,
-          kcdName: diseases[0]?.kcd?.name,
-          drugs: drugs.map(d => ({ name: d.name, dosage: d.dosage, usage: `${d.freq||3}회 ${d.usage||'식후'}`, duration: d.duration })),
-          progressNote: w.history,
-        }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
+      if (!res.ok) {
+        const errText = await res.text()
+        throw new Error(`서버 오류 (${res.status}): ${errText.slice(0, 200)}`)
+      }
       const result = await res.json()
       if (result.error) throw new Error(result.error)
       setReviewData(result)
-      // Firebase에 저장
       if (onUpdateReview) onUpdateReview(result)
-    } catch (e) { alert('AI 검토 오류: ' + e.message) }
-    finally { setReviewLoading(false) }
+    } catch (e) {
+      setReviewError(e.message)
+    } finally {
+      setReviewLoading(false)
+    }
   }
 
   return (
@@ -513,7 +528,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
           {dx.nonDrug && <Row label="처치/계획" value={dx.nonDrug} />}
           {/* 심평원 검토 버튼 + 결과 */}
           <div style={{ marginTop:14, background:'#fef2f2', borderRadius:10, padding:'13px', border:'1px solid #fecaca' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: reviewData ? 10 : 0 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: (reviewData || reviewError) ? 10 : 0 }}>
               <div>
                 <div style={{ fontSize:13, fontWeight:700, color:'#991b1b' }}>🏥 심평원 급여기준 검토</div>
                 <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드·처방 기준으로 AI가 검토합니다</div>
@@ -527,6 +542,16 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
                 <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
               </button>
             </div>
+            {reviewError && (
+              <div style={{ background:'#fee2e2', borderRadius:7, padding:'10px 12px', marginBottom:8, fontSize:12, color:'#991b1b', lineHeight:1.5 }}>
+                <strong>오류:</strong> {reviewError}
+                {reviewError.includes('API key') && (
+                  <div style={{ marginTop:6, fontSize:11, color:'#7f1d1d' }}>
+                    → Vercel 환경변수에 <code style={{ background:'#fecaca', padding:'1px 4px', borderRadius:3 }}>ANTHROPIC_API_KEY</code>가 설정되어 있는지 확인하세요.
+                  </div>
+                )}
+              </div>
+            )}
             {reviewData && <AiResult data={reviewData} type="review" />}
           </div>
         </Section>
@@ -576,17 +601,21 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
           patientAge: form.patient?.age, patientGender: form.patient?.gender,
           chiefComplaint: form.patient?.chiefComplaint, diagnosis: dx.impression,
           kcdCode: dx.diseases?.[0]?.kcd?.code, kcdName: dx.diseases?.[0]?.kcd?.name,
-          drugs: (dx.drugs||[]).map(d => ({ name:d.name, dosage:d.dosage, usage:`${d.freq||3}회 ${d.usage||'식후'}`, duration:d.duration })),
-          progressNote: form.workup?.history,
+          drugs: (dx.drugs||[]).filter(d=>d.name).map(d => ({ name:d.name, dosage:d.dosage||'-', usage:`${d.freq||3}회/일 ${d.usage||'식후'}`, duration:d.duration||'-' })),
+          progressNote: form.workup?.history||'',
         } : { type, caseData: form })
       })
+      if (!res.ok) {
+        const errText = await res.text()
+        throw new Error(`서버 오류 (${res.status}): ${errText.slice(0,200)}`)
+      }
       const result = await res.json()
       if (result.error) throw new Error(result.error)
       if (type==='review') setForm(f => ({...f, aiReview:result}))
       else if (type==='knowledge') setForm(f => ({...f, knowledge:{...f.knowledge, aiContent:result}}))
       else if (type==='papers') setForm(f => ({...f, literature:{aiContent:result}}))
       else if (type==='revenue') setForm(f => ({...f, revenue:{aiContent:result}}))
-    } catch(e) { alert('AI 오류: ' + e.message) }
+    } catch(e) { alert('AI 오류:\n' + e.message) }
     finally { setAiLoad(p => ({...p,[type]:false})) }
   }
 
