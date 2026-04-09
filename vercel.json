@@ -1,0 +1,6 @@
+{
+  "functions": {
+    "api/review.js": { "maxDuration": 30 },
+    "api/ai.js":     { "maxDuration": 30 }
+  }
+}
