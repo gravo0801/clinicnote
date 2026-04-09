@@ -22,9 +22,13 @@ const compressImage = (file) => new Promise((resolve) => {
   }; reader.readAsDataURL(file)
 })
 
-// 식약처 의약품안전나라 — 직접 검색 결과 페이지로 연결
-const drugInfoUrl = (name) =>
-  `https://nedrug.mfds.go.kr/searchDrug?searchYn=true&search_str=${encodeURIComponent(name)}`
+// 식약처 의약품안전나라 — 품목명 직접 검색 결과 페이지
+// itemName 파라미터로 정확한 품목명 검색 결과로 직접 이동
+const drugInfoUrl = (name) => {
+  // 괄호 안 성분명/브랜드명 제거 후 핵심 약품명만 추출
+  const clean = name.replace(/\(.*?\)/g, '').trim()
+  return `https://nedrug.mfds.go.kr/pbp/CCBBB01/getItemList?itemName=${encodeURIComponent(clean)}&ingrName=&releaseYn=&cancelYn=N`
+}
 
 const S = {
   input: { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' },
@@ -313,20 +317,57 @@ function AiResult({ data, type }) {
     const ST = { ok:{bg:'#EAF3DE',color:'#27500A',icon:'✅'}, warning:{bg:'#FAEEDA',color:'#633806',icon:'⚠️'}, error:{bg:'#FCEBEB',color:'#791F1F',icon:'❌'} }
     return (
       <div style={{ marginTop:10 }}>
+        {/* 종합 결과 */}
         <div style={{ background:OC[data.overall]||'#0F6E56', borderRadius:9, padding:'10px 14px', marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>{data.overall}</span>
           <span style={{ fontSize:12, color:'rgba(255,255,255,0.9)', maxWidth:'65%', textAlign:'right' }}>{data.summary}</span>
         </div>
+
+        {/* 항목별 검토 */}
         {data.items?.map((item,i) => { const s=ST[item.status]||ST.ok; return (
           <div key={i} style={{ background:s.bg, borderRadius:7, padding:'8px 12px', marginBottom:5 }}>
             <div style={{ fontSize:11, fontWeight:700, color:s.color, marginBottom:3 }}>{s.icon} {item.category}</div>
             <div style={{ fontSize:12, color:'#1a1a1a', lineHeight:1.5 }}>{item.comment}</div>
           </div>
         )})}
+
+        {/* 제안사항 */}
         {data.suggestions?.length > 0 && (
-          <div style={{ background:'#f0faf5', borderRadius:7, padding:'9px 12px' }}>
-            <div style={{ fontSize:11, fontWeight:700, color:'#0F6E56', marginBottom:5 }}>💡 제안</div>
+          <div style={{ background:'#f0faf5', borderRadius:7, padding:'9px 12px', marginBottom:8 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:'#0F6E56', marginBottom:5 }}>💡 개선 제안</div>
             {data.suggestions.map((s,i) => <div key={i} style={{ fontSize:12, color:'#1a1a1a', paddingLeft:10, position:'relative', marginBottom:2 }}><span style={{ position:'absolute', left:0, color:'#0F6E56' }}>·</span>{s}</div>)}
+          </div>
+        )}
+
+        {/* 모범 처방 레지멘 */}
+        {data.recommendedRegimen?.length > 0 && (
+          <div style={{ background:'#f5f3ff', borderRadius:10, padding:'12px 14px', border:'1px solid #ddd6fe', marginTop:6 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:'#6d28d9', marginBottom:4 }}>🏆 모범 처방 레지멘 (AI 권장)</div>
+            {data.regimenSummary && (
+              <div style={{ fontSize:12, color:'#4c1d95', lineHeight:1.6, marginBottom:10, paddingBottom:8, borderBottom:'1px solid #ede9fe' }}>
+                {data.regimenSummary}
+              </div>
+            )}
+            <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+              {data.recommendedRegimen.map((r,i) => (
+                <div key={i} style={{ background:'#fff', borderRadius:8, padding:'10px 12px', border:'1px solid #ede9fe', borderLeft:'3px solid #7c3aed' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:5 }}>
+                    <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{r.drugName}</span>
+                    <span style={{ fontSize:11, borderRadius:5, padding:'2px 7px', background:r.covered!==false?'#EAF3DE':'#fee2e2', color:r.covered!==false?'#27500A':'#991b1b', fontWeight:600, flexShrink:0, marginLeft:6 }}>
+                      {r.covered!==false?'급여':'비급여'}
+                    </span>
+                  </div>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:r.reason?5:0 }}>
+                    {[r.dosage, r.freq, r.duration&&r.duration, r.usage].filter(Boolean).map((v,j) => (
+                      <span key={j} style={{ fontSize:11, background:'#f5f3ff', border:'1px solid #ede9fe', borderRadius:5, padding:'2px 7px', color:'#6d28d9' }}>{v}</span>
+                    ))}
+                  </div>
+                  {r.reason && (
+                    <div style={{ fontSize:11, color:'#6b7280', lineHeight:1.5, marginTop:3 }}>📌 {r.reason}</div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
