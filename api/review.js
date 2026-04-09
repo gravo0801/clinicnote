@@ -82,10 +82,31 @@ export default async function handler(req, res) {
 ${drugList}
 
 다음 JSON 형식으로만 응답하세요:
-{"overall":"적절","summary":"요약","items":[{"category":"진단-처방 일치성","status":"ok","comment":"내용"},{"category":"심평원 급여기준","status":"ok","comment":"내용"},{"category":"용량·용법","status":"ok","comment":"내용"},{"category":"처방일수","status":"ok","comment":"내용"},{"category":"약물 상호작용","status":"ok","comment":"내용"}],"suggestions":["제안1"]}
-
-overall 값: "적절" 또는 "주의필요" 또는 "검토필요"
-status 값: "ok" 또는 "warning" 또는 "error"`
+{
+  "overall": "적절" 또는 "주의필요" 또는 "검토필요",
+  "summary": "한 문장 요약 (50자 이내)",
+  "items": [
+    {"category": "진단-처방 일치성", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"},
+    {"category": "심평원 급여기준", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"},
+    {"category": "용량·용법 적절성", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"},
+    {"category": "처방일수 적절성", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"},
+    {"category": "약물 상호작용", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"},
+    {"category": "급여 청구 유의사항", "status": "ok" 또는 "warning" 또는 "error", "comment": "내용"}
+  ],
+  "suggestions": ["제안사항1", "제안사항2"],
+  "recommendedRegimen": [
+    {
+      "drugName": "약품명 (성분명 포함)",
+      "dosage": "용량 (예: 1T, 500mg)",
+      "freq": "횟수 (예: 3회/일)",
+      "duration": "처방일수 (예: 5일)",
+      "usage": "복용시점 (예: 식후)",
+      "covered": true 또는 false,
+      "reason": "이 약물을 추천하는 이유 (급여기준 부합 여부 포함)"
+    }
+  ],
+  "regimenSummary": "모범 처방 레지멘에 대한 전체 설명 (2-3문장)"
+}`
 
   try {
     const data = await callAnthropic(apiKey, prompt)
