@@ -1,5 +1,48 @@
-// Vercel serverless function ???ы룊??AI 寃??export default async function handler(req, res) {
-  // CORS ?덉슜
+import https from 'https'
+
+function callAnthropic(apiKey, prompt) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const options = {
+      hostname: 'api.anthropic.com',
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+    }
+
+    const req = https.request(options, (res) => {
+      let data = ''
+      res.on('data', chunk => { data += chunk })
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Anthropic API 오류 (${res.statusCode}): ${data.slice(0, 300)}`))
+          return
+        }
+        try {
+          resolve(JSON.parse(data))
+        } catch (e) {
+          reject(new Error(`응답 파싱 오류: ${e.message}`))
+        }
+      })
+    })
+
+    req.on('error', (e) => reject(new Error(`네트워크 오류: ${e.message}`)))
+    req.write(body)
+    req.end()
+  })
+}
+
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -9,7 +52,9 @@
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured. Vercel ?섍꼍蹂?섏뿉 ANTHROPIC_API_KEY瑜?異붽??섏꽭??' })
+    return res.status(500).json({
+      error: 'API key not configured. Vercel 환경변수에 ANTHROPIC_API_KEY를 추가하세요.'
+    })
   }
 
   const {
@@ -18,85 +63,56 @@
     drugs, progressNote
   } = req.body || {}
 
-  const drugList = (drugs || [])
-    .filter(d => d.name)
-    .map((d, i) => `  ${i + 1}. ${d.name} ???⑸웾: ${d.dosage || '-'}, ?⑸쾿: ${d.usage || '-'}, ?쇱닔: ${d.duration || '-'}`)
-    .join('\n')
+  const drugList = (Array.isArray(drugs) ? drugs : [])
+    .filter(d => d && d.name)
+    .map((d, i) => `  ${i + 1}. ${d.name} — 용량: ${d.dosage || '-'}, 용법: ${d.usage || '-'}, 일수: ${d.duration || '-'}`)
+    .join('\n') || '  처방 없음'
 
-  const prompt = `?뱀떊? ??쒕?援?嫄닿컯蹂댄뿕?ъ궗?됯????ы룊?? 湲됱뿬湲곗? 諛??꾩긽?쏀븰???뺥넻???섑븰 ?꾨Ц媛?낅땲??
-?꾨옒 吏꾨즺 ?뺣낫瑜?寃?좏븯怨?援ъ“?붾맂 JSON?쇰줈留??묐떟?섏꽭?? JSON ???ㅻⅨ ?띿뒪?몃뒗 ?덈? 異쒕젰?섏? 留덉꽭??
+  const prompt = `당신은 대한민국 건강보험심사평가원(심평원) 급여기준 및 임상약학에 정통한 의학 전문가입니다.
+아래 진료 정보를 검토하고 반드시 JSON 형식으로만 응답하세요. 마크다운 코드블록 없이 순수 JSON만 출력하세요.
 
-?먯쭊猷??뺣낫??- ?섏옄: ${patientGender || '遺덈챸'}, ${patientAge || '遺덈챸'}??- 二쇳샇?? ${chiefComplaint || '誘멸린??}
-- 吏꾨떒紐? ${diagnosis || '誘멸린??}
-- ?곷퀝肄붾뱶: ${kcdCode || '誘멸린??} (${kcdName || ''})
-- Progress Note: ${progressNote || '誘멸린??}
+진료 정보:
+- 환자: ${patientGender || '불명'}, ${patientAge || '불명'}세
+- 주호소: ${chiefComplaint || '미기재'}
+- 진단명: ${diagnosis || '미기재'}
+- 상병코드: ${kcdCode || '미기재'} (${kcdName || ''})
+- Progress Note: ${progressNote || '미기재'}
 
-?먯쿂諛??쎈Ъ??${drugList || '  泥섎갑 ?놁쓬'}
+처방 약물:
+${drugList}
 
-?ㅼ쓬 JSON ?뺤떇?쇰줈 ?뺥솗???묐떟?섏꽭??
-{
-  "overall": "?곸젅" ?먮뒗 "二쇱쓽?꾩슂" ?먮뒗 "寃?좏븘??,
-  "summary": "??臾몄옣 ?붿빟 (50???대궡)",
-  "items": [
-    {
-      "category": "移댄뀒怨좊━紐?,
-      "status": "ok" ?먮뒗 "warning" ?먮뒗 "error",
-      "comment": "?곸꽭 ?댁슜"
-    }
-  ],
-  "suggestions": ["?쒖븞?ы빆1", "?쒖븞?ы빆2"]
-}
+다음 JSON 형식으로만 응답하세요:
+{"overall":"적절","summary":"요약","items":[{"category":"진단-처방 일치성","status":"ok","comment":"내용"},{"category":"심평원 급여기준","status":"ok","comment":"내용"},{"category":"용량·용법","status":"ok","comment":"내용"},{"category":"처방일수","status":"ok","comment":"내용"},{"category":"약물 상호작용","status":"ok","comment":"내용"}],"suggestions":["제안1"]}
 
-寃????ぉ:
-1. 吏꾨떒-泥섎갑 ?쇱튂??(?곷퀝肄붾뱶? 泥섎갑?쎈Ъ??遺?⑺븯?붿?)
-2. ?ы룊??湲됱뿬湲곗? (媛??쎈Ъ???대떦 ?곷퀝肄붾뱶 湲곗? 湲됱뿬 ?몄젙 ?щ?)
-3. ?⑸웾쨌?⑸쾿 ?곸젅??(?깆씤 ?쒖? ?⑸웾 湲곗? 怨쇰떎/怨쇱냼 ?щ?)
-4. 泥섎갑?쇱닔 ?곸젅??(吏덊솚 ?뱀꽦???곸젙 泥섎갑?쇱닔)
-5. ?쎈Ъ ?곹샇?묒슜 (二쇱슂 DDI 媛?μ꽦)
-6. 湲됱뿬 泥?뎄 ???좎쓽?ы빆`
+overall 값: "적절" 또는 "주의필요" 또는 "검토필요"
+status 값: "ok" 또는 "warning" 또는 "error"`
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
-
-    if (!response.ok) {
-      const errBody = await response.text()
-      console.error('Anthropic API error:', response.status, errBody)
-      return res.status(500).json({ error: `AI API ?ㅻ쪟 (${response.status}): ${errBody.slice(0, 200)}` })
-    }
-
-    const data = await response.json()
+    const data = await callAnthropic(apiKey, prompt)
     const text = data.content?.[0]?.text || ''
 
     if (!text) {
-      return res.status(500).json({ error: 'AI ?묐떟??鍮꾩뼱 ?덉뒿?덈떎.' })
+      return res.status(500).json({ error: 'AI 응답이 비어 있습니다.' })
     }
 
-    // JSON ?뚯떛 ??```json ... ``` 留덊겕?ㅼ슫 ?쒓굅
-    const clean = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
-    
-    let parsed
-    try {
-      parsed = JSON.parse(clean)
-    } catch (parseErr) {
-      console.error('JSON parse error:', parseErr, 'raw text:', text)
-      return res.status(500).json({ error: `?묐떟 ?뚯떛 ?ㅻ쪟: ${parseErr.message}. ?먮Ц: ${text.slice(0, 300)}` })
+    // JSON 추출 — 마크다운 제거 후 파싱
+    const clean = text
+      .replace(/^```json\s*/m, '')
+      .replace(/^```\s*/m, '')
+      .replace(/```\s*$/m, '')
+      .trim()
+
+    // JSON 블록만 추출
+    const jsonMatch = clean.match(/\{[\s\S]*\}/)
+    if (!jsonMatch) {
+      return res.status(500).json({ error: `JSON을 찾을 수 없습니다. 원문: ${text.slice(0, 200)}` })
     }
 
+    const parsed = JSON.parse(jsonMatch[0])
     return res.status(200).json(parsed)
+
   } catch (err) {
-    console.error('Review handler error:', err)
-    return res.status(500).json({ error: `泥섎━ 以??ㅻ쪟: ${err.message}` })
+    console.error('review handler error:', err.message)
+    return res.status(500).json({ error: err.message })
   }
 }
