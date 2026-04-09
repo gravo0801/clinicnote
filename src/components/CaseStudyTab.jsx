@@ -46,6 +46,7 @@ const S = {
 function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) {
   const [open, setOpen] = useState(false)
   const [selectedFromList, setSelectedFromList] = useState(false)
+  const [showDrugModal, setShowDrugModal] = useState(false)
   const wrapRef = useRef(null)
 
   const allSuggestions = useMemo(() => [...new Set([...suggestions, ...COMMON_DRUGS])], [suggestions])
@@ -95,13 +96,19 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
         )}
       </div>
       {showInfo && (
-        selectedFromList && value
-          ? <a href={drugInfoUrl(value)} target="_blank" rel="noopener noreferrer"
-              title={`"${value}" — 식약처 의약품안전나라 검색`}
-              style={{ flexShrink:0, fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'3px 7px', textDecoration:'none', fontWeight:700, whiteSpace:'nowrap' }}>
-              식약처↗
-            </a>
-          : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 선택 후 활성화">식약처↗</span>
+        <>
+          {selectedFromList && value
+            ? <button onClick={() => setShowDrugModal(true)}
+                title={`"${value}" 약물 정보 조회`}
+                style={{ flexShrink:0, fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'3px 7px', fontWeight:700, whiteSpace:'nowrap', cursor:'pointer' }}>
+                정보조회
+              </button>
+            : <span style={{ flexShrink:0, fontSize:11, color:'#d1d5db', background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 7px', fontWeight:600, whiteSpace:'nowrap', cursor:'not-allowed' }} title="목록에서 선택 후 활성화">정보조회</span>
+          }
+          {showDrugModal && value && (
+            <DrugInfoModal drugName={value} onClose={() => setShowDrugModal(false)} />
+          )}
+        </>
       )}
     </div>
   )
@@ -312,7 +319,94 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
   )
 }
 
-// ── AI 결과 블록 ───────────────────────────────────────────
+// ── 약물 정보 인라인 모달 ─────────────────────────────────
+function DrugInfoModal({ drugName, onClose }) {
+  const [info, setInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const fetch_ = async () => {
+      try {
+        const res = await fetch('/api/druginfo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ drugName }),
+        })
+        if (!cancelled) {
+          if (!res.ok) throw new Error(`서버 오류 (${res.status})`)
+          const data = await res.json()
+          if (data.error) throw new Error(data.error)
+          setInfo(data)
+        }
+      } catch (e) {
+        if (!cancelled) setError(e.message)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    fetch_()
+    return () => { cancelled = true }
+  }, [drugName])
+
+  const rows = info ? [
+    ['분류', info.category],
+    ['적응증', info.indication],
+    ['성인 용량', info.dosage],
+    ['소아 용량', info.pediatricDosage],
+    ['부작용', info.sideEffects],
+    ['금기', info.contraindication],
+    ['약물 상호작용', info.interaction],
+    ['심평원 급여기준', info.insuranceCoverage],
+    ['임부 안전성', info.pregnancyCategory],
+    ['처방 주의사항', info.precaution],
+  ].filter(([, v]) => v) : []
+
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:9000, background:'rgba(0,0,0,0.5)', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+      onClick={onClose}>
+      <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:540, maxHeight:'88vh', overflow:'hidden', display:'flex', flexDirection:'column', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}
+        onClick={e => e.stopPropagation()}>
+        {/* 헤더 */}
+        <div style={{ padding:'16px 20px', borderBottom:'1px solid #f0ede8', display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexShrink:0 }}>
+          <div>
+            <div style={{ fontSize:17, fontWeight:700, color:'#1a1a1a', marginBottom:3 }}>{drugName}</div>
+            {info && <div style={{ fontSize:12, color:'#6b7280' }}>{info.engName} · {info.category}</div>}
+          </div>
+          <button onClick={onClose} style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'#9ca3af', lineHeight:1, flexShrink:0, marginLeft:10 }}>✕</button>
+        </div>
+        {/* 본문 */}
+        <div style={{ overflowY:'auto', padding:'16px 20px 24px' }}>
+          {loading && (
+            <div style={{ textAlign:'center', padding:'40px 0' }}>
+              <div style={{ width:28, height:28, border:'3px solid #e5e7eb', borderTopColor:'#0F6E56', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+              <div style={{ fontSize:13, color:'#6b7280' }}>약물 정보를 불러오는 중...</div>
+              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+            </div>
+          )}
+          {error && (
+            <div style={{ background:'#fee2e2', borderRadius:8, padding:'12px 14px', fontSize:13, color:'#991b1b' }}>
+              ⚠️ {error}
+            </div>
+          )}
+          {info && rows.map(([label, value]) => (
+            <div key={label} style={{ marginBottom:12, paddingBottom:12, borderBottom:'1px solid #f5f5f5' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.4px' }}>{label}</div>
+              <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.7 }}>{value}</div>
+            </div>
+          ))}
+          {/* 면책 고지 */}
+          {info && (
+            <div style={{ fontSize:11, color:'#9ca3af', background:'#f8f6f2', borderRadius:7, padding:'8px 10px', marginTop:8, lineHeight:1.6 }}>
+              ⚠️ 본 정보는 AI 생성 참고 자료이며 실제 처방은 최신 허가사항을 확인하세요.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 function AiResult({ data, type }) {
   if (!data) return null
   if (type === 'review') {
@@ -425,6 +519,29 @@ function Section({ num, title, children, defaultOpen=true, badge }) {
         <span style={{ fontSize:11, color:'#9ca3af', display:'inline-block', transition:'transform 0.2s', transform:open?'rotate(180deg)':'none' }}>▼</span>
       </button>
       {open && <div style={{ padding:'16px', background:'#fff', borderTop:'1px solid #f0ede8' }}>{children}</div>}
+    </div>
+  )
+}
+
+// ── 약물 보기 행 (정보조회 모달 포함) ─────────────────────
+function DrugViewRow({ drug: d }) {
+  const [showModal, setShowModal] = useState(false)
+  return (
+    <div style={{ background:'#f8f6f2', borderRadius:8, padding:'9px 12px', marginBottom:7, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{d.name}</span>
+        <button onClick={() => setShowModal(true)}
+          style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', fontWeight:600, cursor:'pointer' }}>
+          정보조회
+        </button>
+      </div>
+      <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+        {[d.dosage,`${d.freq||3}회/일`,d.duration&&d.duration+'일',d.usage].filter(Boolean).map((v,j) => (
+          <span key={j} style={{ fontSize:11, background:'#fff', border:'1px solid #e5e7eb', borderRadius:5, padding:'2px 7px', color:'#374151' }}>{v}</span>
+        ))}
+        <span style={{ fontSize:11, borderRadius:5, padding:'2px 7px', background:d.covered!==false?'#EAF3DE':'#fee2e2', color:d.covered!==false?'#27500A':'#991b1b', fontWeight:600 }}>{d.covered!==false?'급여':'비급여'}</span>
+      </div>
+      {showModal && <DrugInfoModal drugName={d.name} onClose={() => setShowModal(false)} />}
     </div>
   )
 }
@@ -553,20 +670,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
             <div style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, color:'#9ca3af', fontWeight:600, marginBottom:6 }}>처방 약물</div>
               {drugs.filter(d=>d.name).map((d,i) => (
-                <div key={i} style={{ background:'#f8f6f2', borderRadius:8, padding:'9px 12px', marginBottom:7, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{d.name}</span>
-                    <a href={drugInfoUrl(d.name)} target="_blank" rel="noopener noreferrer"
-                      title={`"${d.name}" — 식약처 의약품안전나라`}
-                      style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 6px', textDecoration:'none', fontWeight:600 }}>식약처↗</a>
-                  </div>
-                  <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-                    {[d.dosage,`${d.freq||3}회/일`,d.duration&&d.duration+'일',d.usage].filter(Boolean).map((v,j) => (
-                      <span key={j} style={{ fontSize:11, background:'#fff', border:'1px solid #e5e7eb', borderRadius:5, padding:'2px 7px', color:'#374151' }}>{v}</span>
-                    ))}
-                    <span style={{ fontSize:11, borderRadius:5, padding:'2px 7px', background:d.covered!==false?'#EAF3DE':'#fee2e2', color:d.covered!==false?'#27500A':'#991b1b', fontWeight:600 }}>{d.covered!==false?'급여':'비급여'}</span>
-                  </div>
-                </div>
+                <DrugViewRow key={i} drug={d} />
               ))}
             </div>
           )}
