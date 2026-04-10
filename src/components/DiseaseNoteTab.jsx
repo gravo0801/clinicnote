@@ -1,10 +1,12 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   collection, onSnapshot, addDoc, deleteDoc, updateDoc,
   doc, serverTimestamp, query, orderBy
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Sheet, Spinner, useIsMobile } from './ui'
+
+const NOTES_PER_PAGE = 8
 
 const compressImage = (file) => new Promise((resolve) => {
   const reader = new FileReader()
@@ -24,6 +26,14 @@ const compressImage = (file) => new Promise((resolve) => {
   }
   reader.readAsDataURL(file)
 })
+
+function readFileAsBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = (e) => resolve(e.target.result)
+    reader.readAsDataURL(file)
+  })
+}
 
 function toEmbedUrl(url) {
   if (!url) return null
@@ -61,11 +71,62 @@ const LINK_META = {
 
 const S = {
   row: { display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: '#f8f6f2', borderRadius: 8, border: '1px solid #f0ede8', marginBottom: 8 },
-  badge: (color, bg) => ({ fontSize: 10, color: color, background: bg, borderRadius: 4, padding: '1px 6px', fontWeight: 700, flexShrink: 0 }),
-  btn: (active) => ({ fontSize: 11, color: active ? '#0F6E56' : '#6b7280', background: active ? '#f0faf5' : '#fff', border: '1px solid #e5e7eb', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 }),
+  badge: function(color, bg) { return { fontSize: 10, color: color, background: bg, borderRadius: 4, padding: '1px 6px', fontWeight: 700, flexShrink: 0 } },
+  btn: function(active) { return { fontSize: 11, color: active ? '#0F6E56' : '#6b7280', background: active ? '#f0faf5' : '#fff', border: '1px solid #e5e7eb', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 } },
   linkBtn: { fontSize: 11, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, padding: '2px 8px', textDecoration: 'none', fontWeight: 600 },
   input: { width: '100%', padding: '9px 11px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff', color: '#1a1a1a' },
   label: { display: 'block', fontSize: 11, color: '#6b7280', marginBottom: 4, fontWeight: 600 },
+}
+
+function FileAttachPreview({ file }) {
+  const [show, setShow] = useState(false)
+  const isImage = file.type === 'image' || (file.mime && file.mime.startsWith('image/'))
+  const isPdf = file.name && file.name.toLowerCase().endsWith('.pdf')
+  const isPptx = file.name && (file.name.toLowerCase().endsWith('.pptx') || file.name.toLowerCase().endsWith('.ppt'))
+  const isDoc = file.name && (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc'))
+  const canPreview = isImage || isPdf || isPptx || isDoc
+
+  const getEmbedSrc = () => {
+    if (!file.data) return null
+    if (isImage) return file.data
+    if (isPdf) return file.data
+    return 'https://docs.google.com/viewer?url=' + encodeURIComponent(file.url || '') + '&embedded=true'
+  }
+
+  const icon = isImage ? '[IMG]' : isPdf ? '[PDF]' : isPptx ? '[PPT]' : isDoc ? '[DOC]' : '[FILE]'
+  const color = isImage ? '#0891b2' : isPdf ? '#dc2626' : isPptx ? '#d97706' : isDoc ? '#2563eb' : '#6b7280'
+  const bg = isImage ? '#e0f2fe' : isPdf ? '#fee2e2' : isPptx ? '#fef3c7' : isDoc ? '#eff6ff' : '#f3f4f6'
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={Object.assign({}, S.row, { cursor: canPreview ? 'pointer' : 'default' })} onClick={() => canPreview && setShow(p => !p)}>
+        <span style={S.badge(color, bg)}>{icon}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+        {file.size && <span style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0 }}>{(file.size / 1024 / 1024).toFixed(1) + 'MB'}</span>}
+        {canPreview && (
+          <button style={S.btn(show)} onClick={e => { e.stopPropagation(); setShow(p => !p) }}>
+            {show ? '접기' : '미리보기'}
+          </button>
+        )}
+      </div>
+      {show && canPreview && file.data && (
+        <div style={{ border: '1px solid #e5e7eb', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
+          {isImage && <img src={file.data} alt={file.name} style={{ width: '100%', maxHeight: 500, objectFit: 'contain', display: 'block', background: '#f0f0f0' }} />}
+          {isPdf && (
+            <iframe src={file.data} style={{ width: '100%', height: 600, border: 'none', display: 'block' }} title={file.name} />
+          )}
+          {(isPptx || isDoc) && (
+            <div style={{ padding: 24, textAlign: 'center', color: '#6b7280', fontSize: 13 }}>
+              <div style={{ marginBottom: 10 }}>PPTX/DOC 파일은 로컬에서 직접 열기를 권장합니다.</div>
+              <a href={file.data} download={file.name} style={{ background: '#0F6E56', color: '#fff', padding: '8px 20px', borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 13 }}>
+                파일 다운로드
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function LinkPreview({ link }) {
@@ -84,20 +145,14 @@ function LinkPreview({ link }) {
         </div>
         <span style={S.badge(meta.color, meta.bg)}>{meta.label}</span>
         <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
-          {canEmbed && (
-            <button onClick={() => setShow(p => !p)} style={S.btn(show)}>
-              {show ? '접기' : '미리보기'}
-            </button>
-          )}
+          {canEmbed && <button onClick={() => setShow(p => !p)} style={S.btn(show)}>{show ? '접기' : '미리보기'}</button>}
           <a href={link.url} target="_blank" rel="noopener noreferrer" style={S.linkBtn}>열기</a>
         </div>
       </div>
       {show && canEmbed && (
         <div style={{ border: '1px solid #e5e7eb', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
           <iframe src={embedUrl} style={{ width: '100%', height: t === 'gslides' ? 480 : 520, border: 'none', display: 'block' }} title={link.title || 'preview'} allowFullScreen />
-          <div style={{ padding: '5px 10px', background: '#fffbeb', fontSize: 10, color: '#92400e' }}>
-            Google 계정 로그인 또는 파일 공유 설정이 필요할 수 있습니다.
-          </div>
+          <div style={{ padding: '5px 10px', background: '#fffbeb', fontSize: 10, color: '#92400e' }}>Google 계정 로그인 또는 파일 공유 설정이 필요할 수 있습니다.</div>
         </div>
       )}
     </div>
@@ -113,13 +168,12 @@ function ImagePreview({ img, onRemove }) {
           style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8, border: '1px solid #e5e7eb', cursor: 'pointer', display: 'block' }} />
         {onRemove && (
           <button onClick={onRemove}
-            style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#ef4444', color: '#fff', border: 'none', fontSize: 11, cursor: 'pointer', fontWeight: 700, lineHeight: 1 }}>x</button>
+            style={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%', background: '#ef4444', color: '#fff', border: 'none', fontSize: 11, cursor: 'pointer', fontWeight: 700 }}>x</button>
         )}
         <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 2, maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.name}</div>
       </div>
       {big && (
-        <div onClick={() => setBig(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
+        <div onClick={() => setBig(false)} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
           <img src={img.data} alt={img.name} style={{ maxWidth: '92vw', maxHeight: '88vh', objectFit: 'contain', borderRadius: 8 }} />
         </div>
       )}
@@ -150,26 +204,101 @@ function LinkInput({ links, onChange }) {
           추가
         </button>
       </div>
-      {url && (
-        <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 11, color: meta.color, fontWeight: 700 }}>{meta.label} 감지됨</span>
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="표시 이름 (선택)"
-            style={{ ...S.input, flex: 1, fontSize: 11 }} />
-        </div>
-      )}
-      <div style={{ fontSize: 11, color: '#9ca3af', lineHeight: 1.7 }}>
-        지원: Google Drive / Slides / Docs / Sheets / PDF URL
-      </div>
+      {url && <div style={{ marginBottom: 8 }}><span style={{ fontSize: 11, color: meta.color, fontWeight: 700 }}>{meta.label} 감지됨</span></div>}
+      <div style={{ fontSize: 11, color: '#9ca3af' }}>지원: Google Drive / Slides / Docs / Sheets / PDF URL</div>
       {links.length > 0 && (
         <div style={{ marginTop: 10 }}>
           {links.map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 10px', background: '#f8f6f2', borderRadius: 7, marginBottom: 5, border: '1px solid #f0ede8' }}>
               <span style={{ fontSize: 11, color: LINK_META[getLinkType(l.url)]?.color || '#6b7280', fontWeight: 700 }}>{LINK_META[getLinkType(l.url)]?.icon || '?'}</span>
               <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title || l.url}</span>
-              <button onClick={() => onChange(links.filter((_, idx) => idx !== i))}
-                style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14, lineHeight: 1, flexShrink: 0 }}>x</button>
+              <button onClick={() => onChange(links.filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14, lineHeight: 1 }}>x</button>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AiSearch({ title, content, category }) {
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const search = async () => {
+    setLoading(true); setError(null); setResult(null)
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'disease_note',
+          caseData: {
+            patient: {},
+            diagnosis: { impression: title },
+            noteContent: content,
+            category: category
+          }
+        })
+      })
+      if (!res.ok) throw new Error('서버 오류 ' + res.status)
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setResult(data)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{ background: '#f0faf5', borderRadius: 10, padding: '13px', border: '1px solid #a7f3d0', marginTop: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: result || error ? 12 : 0 }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F6E56' }}>AI 질환 검색</div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>상병코드 및 치료 regimen 검색</div>
+        </div>
+        <button onClick={search} disabled={loading}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 7, border: 'none', background: loading ? '#d1d5db' : '#0F6E56', color: '#fff', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+          {loading ? '검색 중...' : 'AI 검색'}
+        </button>
+      </div>
+      {error && <div style={{ background: '#fee2e2', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: '#991b1b' }}>{error}</div>}
+      {result && (
+        <div>
+          {result.kcdCodes && result.kcdCodes.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#0F6E56', marginBottom: 6 }}>관련 상병코드 (KCD)</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                {result.kcdCodes.map((k, i) => (
+                  <span key={i} style={{ fontSize: 12, background: '#e6f4ef', color: '#0F6E56', borderRadius: 6, padding: '3px 9px', fontWeight: 700 }}>
+                    {k.code} {k.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {result.regimen && result.regimen.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#3730a3', marginBottom: 6 }}>표준 치료 Regimen</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {result.regimen.map((r, i) => (
+                  <div key={i} style={{ background: '#fff', borderRadius: 8, padding: '9px 12px', border: '1px solid #e0e7ff', borderLeft: '3px solid #4f46e5' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 3 }}>{r.drug}</div>
+                    <div style={{ fontSize: 12, color: '#374151' }}>{r.dose} / {r.duration}</div>
+                    {r.note && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{r.note}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {result.summary && (
+            <div style={{ background: '#fff', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#374151', lineHeight: 1.7, border: '1px solid #e5e7eb' }}>
+              {result.summary}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -182,9 +311,11 @@ function NoteForm({ initial, onSave }) {
   const [tags, setTagsStr] = useState((initial?.tags || []).join(', '))
   const [content, setContent] = useState(initial?.content || '')
   const [images, setImages] = useState(initial?.images || [])
+  const [attachedFiles, setAttachedFiles] = useState(initial?.attachedFiles || [])
   const [links, setLinks] = useState(initial?.links || [])
   const [saving, setSaving] = useState(false)
   const [imgLoading, setImgLoading] = useState(false)
+  const [fileLoading, setFileLoading] = useState(false)
 
   const handleImages = async (e) => {
     setImgLoading(true)
@@ -194,14 +325,31 @@ function NoteForm({ initial, onSave }) {
     e.target.value = ''
   }
 
+  const handleFiles = async (e) => {
+    setFileLoading(true)
+    const files = Array.from(e.target.files).slice(0, 5)
+    const results = []
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(file.name + ' 파일이 10MB를 초과합니다.')
+        continue
+      }
+      const data = await readFileAsBase64(file)
+      results.push({ name: file.name, data: data, mime: file.type, size: file.size, type: file.type.startsWith('image/') ? 'image' : 'file' })
+    }
+    setAttachedFiles(p => [...p, ...results])
+    setFileLoading(false)
+    e.target.value = ''
+  }
+
   const handleSave = async () => {
     if (!title.trim()) return
     setSaving(true)
-    await onSave({ title: title.trim(), category, tags: tags.split(',').map(t => t.trim()).filter(Boolean), content, images, links })
+    await onSave({ title: title.trim(), category, tags: tags.split(',').map(t => t.trim()).filter(Boolean), content, images, attachedFiles, links })
     setSaving(false)
   }
 
-  const disabled = !title.trim() || saving || imgLoading
+  const disabled = !title.trim() || saving || imgLoading || fileLoading
 
   return (
     <div style={{ paddingBottom: 20 }}>
@@ -228,9 +376,9 @@ function NoteForm({ initial, onSave }) {
         <label style={S.label}>내용 (자유롭게 붙여넣기)</label>
         <textarea value={content} onChange={e => setContent(e.target.value)}
           placeholder="교재, 가이드라인, 논문 요약, 처방 팁 등을 자유롭게 작성하세요..."
-          style={{ ...S.input, resize: 'vertical', minHeight: 160, lineHeight: 1.8 }} />
+          style={{ ...S.input, resize: 'vertical', minHeight: 240, lineHeight: 1.8 }} />
       </div>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 14 }}>
         <label style={S.label}>이미지 첨부 (최대 10장)</label>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: '#f0faf5', color: '#0F6E56', border: '1px dashed #6ee7b7', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
           {imgLoading ? '처리중...' : '이미지 선택'}
@@ -238,19 +386,37 @@ function NoteForm({ initial, onSave }) {
         </label>
         {images.length > 0 && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-            {images.map((img, i) => (
-              <ImagePreview key={i} img={img} onRemove={() => setImages(p => p.filter((_, idx) => idx !== i))} />
+            {images.map((img, i) => <ImagePreview key={i} img={img} onRemove={() => setImages(p => p.filter((_, idx) => idx !== i))} />)}
+          </div>
+        )}
+      </div>
+      <div style={{ marginBottom: 14 }}>
+        <label style={S.label}>파일 첨부 (PDF, PPTX, DOCX 등 각 10MB 이하)</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: '#eff6ff', color: '#2563eb', border: '1px dashed #bfdbfe', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+          {fileLoading ? '업로드중...' : 'PDF/PPTX/DOCX 선택'}
+          <input type="file" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx" onChange={handleFiles} style={{ display: 'none' }} />
+        </label>
+        <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 8 }}>PDF는 앱 내 미리보기 가능</span>
+        {attachedFiles.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            {attachedFiles.map((f, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: '#f8f6f2', borderRadius: 7, marginBottom: 5, border: '1px solid #f0ede8' }}>
+                <span style={{ fontSize: 11, color: '#2563eb', fontWeight: 700 }}>{f.name.split('.').pop().toUpperCase()}</span>
+                <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                {f.size && <span style={{ fontSize: 10, color: '#9ca3af' }}>{(f.size / 1024 / 1024).toFixed(1) + 'MB'}</span>}
+                <button onClick={() => setAttachedFiles(p => p.filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14 }}>x</button>
+              </div>
             ))}
           </div>
         )}
       </div>
       <div style={{ marginBottom: 16, background: '#f8f6f2', borderRadius: 10, padding: '12px 14px', border: '1px solid #f0ede8' }}>
-        <label style={{ ...S.label, marginBottom: 8, fontSize: 12, color: '#374151' }}>파일 링크 첨부 (PDF / PPTX / Google Drive / Slides)</label>
+        <label style={{ ...S.label, marginBottom: 8, fontSize: 12, color: '#374151' }}>링크 첨부 (Google Drive / Slides / Docs / PDF URL)</label>
         <LinkInput links={links} onChange={setLinks} />
       </div>
       <button onClick={handleSave} disabled={disabled}
         style={{ width: '100%', padding: '12px', background: disabled ? '#d1d5db' : '#0F6E56', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer' }}>
-        {saving ? '저장 중...' : imgLoading ? '이미지 처리 중...' : (initial ? '수정 완료' : '노트 저장')}
+        {saving ? '저장 중...' : fileLoading ? '파일 처리 중...' : (initial ? '수정 완료' : '노트 저장')}
       </button>
     </div>
   )
@@ -260,6 +426,7 @@ function NoteCard({ note, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   const dateStr = note.createdAt?.toDate ? note.createdAt.toDate().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }) : ''
   const imgCount = (note.images || []).length
+  const fileCount = (note.attachedFiles || []).length
   const linkCount = (note.links || []).length
   const hasText = !!(note.content?.trim())
 
@@ -273,6 +440,7 @@ function NoteCard({ note, onEdit, onDelete }) {
             <span style={{ fontSize: 11, color: '#9ca3af' }}>{dateStr}</span>
             {note.category && <span style={{ fontSize: 10, color: '#0F6E56', background: '#f0faf5', border: '1px solid #d1fae5', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>{note.category}</span>}
             {imgCount > 0 && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>{'사진 ' + imgCount}</span>}
+            {fileCount > 0 && <span style={{ fontSize: 10, color: '#2563eb', background: '#eff6ff', borderRadius: 4, padding: '1px 6px' }}>{'파일 ' + fileCount}</span>}
             {linkCount > 0 && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>{'링크 ' + linkCount}</span>}
             {hasText && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>텍스트</span>}
             {(note.tags || []).map(t => <span key={t} style={{ fontSize: 10, color: '#0F6E56', background: '#f0faf5', border: '1px solid #d1fae5', borderRadius: 10, padding: '1px 6px' }}>{t}</span>)}
@@ -289,35 +457,63 @@ function NoteCard({ note, onEdit, onDelete }) {
           {hasText && <div style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.85, whiteSpace: 'pre-wrap', marginBottom: 14, background: '#fafaf9', borderRadius: 8, padding: '12px 14px', border: '1px solid #f0ede8' }}>{note.content}</div>}
           {imgCount > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 8 }}>{'이미지 (' + imgCount + ')'}</div>
+              <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 8 }}>{'사진 (' + imgCount + ')'}</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {note.images.map((img, i) => <ImagePreview key={i} img={img} />)}
               </div>
             </div>
           )}
+          {fileCount > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 8 }}>{'첨부 파일 (' + fileCount + ')'}</div>
+              {note.attachedFiles.map((f, i) => <FileAttachPreview key={i} file={f} />)}
+            </div>
+          )}
           {linkCount > 0 && (
-            <div>
+            <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 8 }}>{'첨부 링크 (' + linkCount + ')'}</div>
               {note.links.map((l, i) => <LinkPreview key={i} link={l} />)}
             </div>
           )}
+          <AiSearch title={note.title} content={note.content} category={note.category} />
         </div>
       )}
     </div>
   )
 }
 
-function DateGroup({ date, notes, onEdit, onDelete }) {
-  const [open, setOpen] = useState(true)
+function Pagination({ total, page, perPage, onChange }) {
+  const totalPages = Math.ceil(total / perPage)
+  if (totalPages <= 1) return null
+  const pages = []
+  const start = Math.max(1, page - 2)
+  const end = Math.min(totalPages, page + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
   return (
-    <div style={{ marginBottom: 16 }}>
-      <button onClick={() => setOpen(p => !p)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', marginBottom: 8, width: '100%', textAlign: 'left' }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: '#9ca3af' }}>{date}</span>
-        <span style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-        <span style={{ fontSize: 11, color: '#9ca3af', background: '#f3f4f6', borderRadius: 10, padding: '1px 7px' }}>{notes.length + '개'}</span>
-        <span style={{ fontSize: 10, color: '#9ca3af', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>v</span>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, paddingTop: 20, paddingBottom: 12 }}>
+      <button onClick={() => onChange(1)} disabled={page === 1}
+        style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === 1 ? '#d1d5db' : '#374151', cursor: page === 1 ? 'not-allowed' : 'pointer', fontSize: 12 }}>
+        처음
       </button>
-      {open && notes.map(n => <NoteCard key={n.id} note={n} onEdit={onEdit} onDelete={onDelete} />)}
+      <button onClick={() => onChange(page - 1)} disabled={page === 1}
+        style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === 1 ? '#d1d5db' : '#374151', cursor: page === 1 ? 'not-allowed' : 'pointer', fontSize: 12 }}>
+        이전
+      </button>
+      {pages.map(p => (
+        <button key={p} onClick={() => onChange(p)}
+          style={{ padding: '6px 11px', borderRadius: 7, border: page === p ? 'none' : '1px solid #e5e7eb', background: page === p ? '#0F6E56' : '#fff', color: page === p ? '#fff' : '#374151', cursor: 'pointer', fontSize: 13, fontWeight: page === p ? 700 : 400 }}>
+          {p}
+        </button>
+      ))}
+      <button onClick={() => onChange(page + 1)} disabled={page === totalPages}
+        style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === totalPages ? '#d1d5db' : '#374151', cursor: page === totalPages ? 'not-allowed' : 'pointer', fontSize: 12 }}>
+        다음
+      </button>
+      <button onClick={() => onChange(totalPages)} disabled={page === totalPages}
+        style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === totalPages ? '#d1d5db' : '#374151', cursor: page === totalPages ? 'not-allowed' : 'pointer', fontSize: 12 }}>
+        마지막
+      </button>
+      <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 4 }}>{page + ' / ' + totalPages + ' 페이지'}</span>
     </div>
   )
 }
@@ -329,7 +525,7 @@ function EmptyState({ onAdd, search }) {
         {search ? ('"' + search + '" 검색 결과 없음') : '질환 노트가 없습니다'}
       </div>
       <div style={{ fontSize: 13, marginBottom: 20, lineHeight: 1.7 }}>
-        {search ? '다른 키워드로 검색해보세요.' : '교재, 가이드라인 요약, 이미지, Google Drive 파일 링크를 첨부하세요.'}
+        {search ? '다른 키워드로 검색해보세요.' : '교재, 가이드라인 요약, 이미지, 파일을 첨부하세요.'}
       </div>
       {!search && <button onClick={onAdd} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>첫 노트 작성하기</button>}
     </div>
@@ -344,6 +540,7 @@ export default function DiseaseNoteTab() {
   const [catFilter, setCatFilter] = useState('전체')
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     const q = query(collection(db, 'diseaseNotes2'), orderBy('createdAt', 'desc'))
@@ -352,6 +549,8 @@ export default function DiseaseNoteTab() {
       setLoading(false)
     })
   }, [])
+
+  useEffect(() => { setPage(1) }, [search, catFilter])
 
   const saveNote = async (payload) => {
     if (editTarget) {
@@ -374,21 +573,22 @@ export default function DiseaseNoteTab() {
     return catOk && sOk
   }), [notes, catFilter, search])
 
-  const grouped = useMemo(() => {
-    const g = {}
-    filtered.forEach(n => {
-      const d = n.createdAt?.toDate ? n.createdAt.toDate() : new Date()
-      const key = d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' })
-      if (!g[key]) g[key] = []
-      g[key].push(n)
-    })
-    return g
-  }, [filtered])
+  const paginated = useMemo(() => {
+    const start = (page - 1) * NOTES_PER_PAGE
+    return filtered.slice(start, start + NOTES_PER_PAGE)
+  }, [filtered, page])
 
-  const formJsx = (showForm || editTarget) ? (
-    <Sheet title={editTarget ? '노트 수정' : '새 질환 노트'} onClose={() => { setShowForm(false); setEditTarget(null) }}>
-      <NoteForm initial={editTarget} onSave={saveNote} />
-    </Sheet>
+  const formSheet = (showForm || editTarget) ? (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '20px 16px' }}>
+      <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 700, padding: '24px 28px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', marginTop: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid #f0ede8' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a' }}>{editTarget ? '노트 수정' : '새 질환 노트'}</div>
+          <button onClick={() => { setShowForm(false); setEditTarget(null) }}
+            style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>x</button>
+        </div>
+        <NoteForm initial={editTarget} onSave={saveNote} />
+      </div>
+    </div>
   ) : null
 
   if (loading) return <Spinner />
@@ -417,8 +617,9 @@ export default function DiseaseNoteTab() {
           <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length + '개 노트'}</span>
           <button onClick={() => setShowForm(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
         </div>
-        {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : Object.entries(grouped).map(([date, group]) => <DateGroup key={date} date={date} notes={group} onEdit={n => setEditTarget(n)} onDelete={deleteNote} />)}
-        {formJsx}
+        {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n => setEditTarget(n)} onDelete={deleteNote} />)}
+        <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
+        {formSheet}
       </div>
     )
   }
@@ -443,17 +644,18 @@ export default function DiseaseNoteTab() {
           <button onClick={() => setShowForm(true)} style={{ width: '100%', padding: '10px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 질환 노트</button>
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef', padding: '24px 28px 60px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef', padding: '24px 28px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{catFilter === '전체' ? '전체 노트' : (catFilter + ' 노트')}</h2>
-            <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{filtered.length + '개 - ' + Object.keys(grouped).length + '일'}</div>
+            <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{filtered.length + '개'}</div>
           </div>
           <button onClick={() => setShowForm(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
         </div>
-        {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : Object.entries(grouped).map(([date, group]) => <DateGroup key={date} date={date} notes={group} onEdit={n => setEditTarget(n)} onDelete={deleteNote} />)}
+        {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n2 => setEditTarget(n2)} onDelete={deleteNote} />)}
+        <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
       </div>
-      {formJsx}
+      {formSheet}
     </div>
   )
 }
