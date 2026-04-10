@@ -75,6 +75,24 @@ export default async function handler(req, res) {
 5개 이내.`
   }
 
+  // disease_note: 상병코드 + 치료 regimen 검색
+  if (type === 'disease_note') {
+    const noteTitle = caseData?.diagnosis?.impression || ''
+    const noteContent = caseData?.noteContent || ''
+    const cat = caseData?.category || ''
+    const diseasePrompt = 'You are a Korean clinical expert. Based on the disease title and content below, provide KCD codes and standard treatment regimen in JSON only. No markdown. JSON format: {"kcdCodes":[{"code":"J039","name":"급성 편도염"}],"regimen":[{"drug":"아목시실린캡슐500mg","dose":"1T 3회/일","duration":"5일","note":"1차 선택약"}],"summary":"간단한 치료 원칙 설명 (2-3문장)"}. Disease: ' + noteTitle + '. Category: ' + cat + '. Content summary: ' + noteContent.slice(0, 300)
+    try {
+      const data = await callAnthropic(apiKey, diseasePrompt)
+      const text = data.content?.[0]?.text || ''
+      const clean = text.replace(/```json/g, '').replace(/```/g, '').trim()
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
+      if (s === -1) return res.status(500).json({ error: 'JSON 없음' })
+      return res.status(200).json(JSON.parse(clean.slice(s, e + 1)))
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   const prompt = prompts[type]
   if (!prompt) return res.status(400).json({ error: 'Invalid type' })
 
