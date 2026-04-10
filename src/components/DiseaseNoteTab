@@ -49,14 +49,14 @@ function getLinkType(url) {
 }
 
 const LINK_META = {
-  gdrive:     { icon: '[Drive]',  label: 'Google Drive',  color: '#0891b2', embed: true },
-  gslides:    { icon: '[Slides]', label: 'Google Slides', color: '#d97706', embed: true },
-  gdocs:      { icon: '[Docs]',   label: 'Google Docs',   color: '#2563eb', embed: true },
-  gsheets:    { icon: '[Sheets]', label: 'Google Sheets', color: '#059669', embed: true },
-  notebooklm: { icon: '[NLM]',    label: 'NotebookLM',    color: '#7c3aed', embed: false },
-  pdf:        { icon: '[PDF]',    label: 'PDF',           color: '#dc2626', embed: true },
-  pptx:       { icon: '[PPTX]',   label: 'PPTX',          color: '#d97706', embed: true },
-  link:       { icon: '[Link]',   label: 'Link',          color: '#6b7280', embed: true },
+  gdrive:     { icon: '[Drive]',  label: 'Google Drive',  color: '#0891b2', bg: '#e0f2fe', embed: true },
+  gslides:    { icon: '[Slides]', label: 'Google Slides', color: '#d97706', bg: '#fef3c7', embed: true },
+  gdocs:      { icon: '[Docs]',   label: 'Google Docs',   color: '#2563eb', bg: '#eff6ff', embed: true },
+  gsheets:    { icon: '[Sheets]', label: 'Google Sheets', color: '#059669', bg: '#ecfdf5', embed: true },
+  notebooklm: { icon: '[NLM]',    label: 'NotebookLM',    color: '#7c3aed', bg: '#f5f3ff', embed: false },
+  pdf:        { icon: '[PDF]',    label: 'PDF',           color: '#dc2626', bg: '#fee2e2', embed: true },
+  pptx:       { icon: '[PPTX]',   label: 'PPTX',          color: '#d97706', bg: '#fef3c7', embed: true },
+  link:       { icon: '[Link]',   label: 'Link',          color: '#6b7280', bg: '#f3f4f6', embed: true },
 }
 
 function LinkPreview({ link }) {
@@ -68,12 +68,12 @@ function LinkPreview({ link }) {
   return (
     <div style={{ marginBottom: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: '#f8f6f2', borderRadius: 8, border: '1px solid #f0ede8' }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: meta.color, background: meta.color + '18', borderRadius: 4, padding: '1px 7px', flexShrink: 0 }}>{meta.icon}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: meta.color, background: meta.bg, borderRadius: 4, padding: '1px 7px', flexShrink: 0 }}>{meta.icon}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.title || link.url}</div>
           <div style={{ fontSize: 10, color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.url}</div>
         </div>
-        <span style={{ fontSize: 10, color: meta.color, background: meta.color + '18', borderRadius: 4, padding: '1px 6px', fontWeight: 700, flexShrink: 0 }}>{meta.label}</span>
+        <span style={{ fontSize: 10, color: meta.color, background: meta.bg, borderRadius: 4, padding: '1px 6px', fontWeight: 700, flexShrink: 0 }}>{meta.label}</span>
         <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
           {canEmbed && (
             <button onClick={() => setShow(p => !p)}
