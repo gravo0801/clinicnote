@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Login from './components/Login'
 import FamilyTab from './components/FamilyTab'
 import RxTab from './components/RxTab'
+import DiseaseNoteTab from './components/DiseaseNoteTab'
 import { useIsMobile } from './components/ui'
 
 export default function App() {
@@ -39,7 +40,7 @@ export default function App() {
             </button>
           </div>
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#f0ede8' }}>
-            {[['rx', '💊 처방 노하우'], ['family', '👨‍👩‍👧 가족 건강']].map(([k, l]) => (
+            {[['rx', '💊 처방'], ['notes', '📚 노트'], ['family', '👨‍👩‍👧 가족']].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)}
                 className="flex-1 py-2 rounded-lg text-sm transition-all"
                 style={{
@@ -54,7 +55,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        {tab === 'family' ? <FamilyTab /> : <RxTab />}
+        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : <RxTab />}
       </div>
     )
   }
@@ -62,6 +63,7 @@ export default function App() {
   // ── 데스크탑 레이아웃 ────────────────────────────────────
   const NAV_ITEMS = [
     { key: 'rx',     icon: '💊', label: '처방 노하우' },
+    { key: 'notes',  icon: '📚', label: '질환 노트' },
     { key: 'family', icon: '👨‍👩‍👧', label: '가족 건강' },
   ]
 
@@ -123,7 +125,7 @@ export default function App() {
 
       {/* ── 메인 콘텐츠 ── */}
       <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-        {tab === 'family' ? <FamilyTab /> : <RxTab />}
+        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : <RxTab />}
       </div>
     </div>
   )
