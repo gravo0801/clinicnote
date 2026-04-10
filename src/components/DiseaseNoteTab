@@ -6,7 +6,7 @@ import {
 import { db } from '../firebase'
 import { Sheet, Spinner, useIsMobile } from './ui'
 
-// ── 이미지 압축 (Base64, 최대 800px) ─────────────────────
+// -- 이미지 압축 (Base64, 최대 800px) ---------------------
 const compressImage = (file) => new Promise((resolve) => {
   const reader = new FileReader()
   reader.onload = (e) => {
@@ -26,7 +26,7 @@ const compressImage = (file) => new Promise((resolve) => {
   reader.readAsDataURL(file)
 })
 
-// ── Google Drive 링크 → 임베드 URL 변환 ──────────────────
+// -- Google Drive 링크 - 임베드 URL 변환 ------------------
 function toEmbedUrl(url) {
   if (!url) return null
   // Google Drive 파일 공유 링크
@@ -74,7 +74,7 @@ const LINK_META = {
   link:      { icon:'🔗', label:'링크', color:'#6b7280', embed:true },
 }
 
-// ── 링크 미리보기 ─────────────────────────────────────────
+// -- 링크 미리보기 -----------------------------------------
 function LinkPreview({ link }) {
   const [show, setShow] = useState(false)
   const t = getLinkType(link.url)
@@ -121,7 +121,7 @@ function LinkPreview({ link }) {
   )
 }
 
-// ── 이미지 미리보기 ───────────────────────────────────────
+// -- 이미지 미리보기 ---------------------------------------
 function ImagePreview({ img, onRemove }) {
   const [big, setBig] = useState(false)
   return (
@@ -147,7 +147,7 @@ function ImagePreview({ img, onRemove }) {
 
 const CATEGORIES = ['전체','내과','호흡기','소화기','순환기','내분비','근골격','신경','감염','소아','피부','이비인후','안과','비뇨기','정신','기타']
 
-// ── 링크 입력 폼 ──────────────────────────────────────────
+// -- 링크 입력 폼 ------------------------------------------
 function LinkInput({ links, onChange }) {
   const [url, setUrl]   = useState('')
   const [title, setTitle] = useState('')
@@ -203,7 +203,7 @@ function LinkInput({ links, onChange }) {
   )
 }
 
-// ── 노트 폼 ───────────────────────────────────────────────
+// -- 노트 폼 -----------------------------------------------
 function NoteForm({ initial, onSave, onClose }) {
   const [title, setTitle]   = useState(initial?.title || '')
   const [category, setCat]  = useState(initial?.category || '내과')
@@ -297,7 +297,7 @@ function NoteForm({ initial, onSave, onClose }) {
   )
 }
 
-// ── 노트 카드 ─────────────────────────────────────────────
+// -- 노트 카드 ---------------------------------------------
 function NoteCard({ note, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   const dateStr = note.createdAt?.toDate
@@ -328,7 +328,7 @@ function NoteCard({ note, onEdit, onDelete }) {
             style={{ fontSize:11, color:'#6b7280', background:'none', border:'1px solid #e5e7eb', borderRadius:5, padding:'3px 8px', cursor:'pointer' }}>수정</button>
           <button onClick={e => { e.stopPropagation(); onDelete(note.id) }}
             style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:5, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
-          <span style={{ fontSize:10, color:'#9ca3af', transform:open?'rotate(180deg)':'none', display:'inline-block', transition:'transform 0.2s' }}>▼</span>
+          <span style={{ fontSize:10, color:'#9ca3af', transform:open?'rotate(180deg)':'none', display:'inline-block', transition:'transform 0.2s' }}></span>
         </div>
       </div>
       {open && (
@@ -358,7 +358,7 @@ function NoteCard({ note, onEdit, onDelete }) {
   )
 }
 
-// ── 날짜 그룹 ─────────────────────────────────────────────
+// -- 날짜 그룹 ---------------------------------------------
 function DateGroup({ date, notes, onEdit, onDelete }) {
   const [open, setOpen] = useState(true)
   return (
@@ -368,14 +368,14 @@ function DateGroup({ date, notes, onEdit, onDelete }) {
         <span style={{ fontSize:11, fontWeight:700, color:'#9ca3af', letterSpacing:'0.4px' }}>{date}</span>
         <span style={{ flex:1, height:1, background:'#e5e7eb' }} />
         <span style={{ fontSize:11, color:'#9ca3af', background:'#f3f4f6', borderRadius:10, padding:'1px 7px' }}>{notes.length}개</span>
-        <span style={{ fontSize:10, color:'#9ca3af', display:'inline-block', transform:open?'rotate(180deg)':'none', transition:'transform 0.2s' }}>▼</span>
+        <span style={{ fontSize:10, color:'#9ca3af', display:'inline-block', transform:open?'rotate(180deg)':'none', transition:'transform 0.2s' }}></span>
       </button>
       {open && notes.map(n => <NoteCard key={n.id} note={n} onEdit={onEdit} onDelete={onDelete} />)}
     </div>
   )
 }
 
-// ── 메인 컴포넌트 ──────────────────────────────────────────
+// -- 메인 컴포넌트 ------------------------------------------
 export default function DiseaseNoteTab() {
   const isMobile = useIsMobile()
   const [notes, setNotes]         = useState([])
