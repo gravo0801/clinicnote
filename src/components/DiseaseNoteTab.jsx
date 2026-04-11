@@ -242,7 +242,10 @@ function AiSearch({ title, content, category }) {
           }
         })
       })
-      if (!res.ok) throw new Error('서버 오류 ' + res.status)
+      if (!res.ok) {
+        const txt = await res.text()
+        throw new Error('서버 오류 ' + res.status + ': ' + txt.slice(0, 100))
+      }
       const data = await res.json()
       if (data.error) throw new Error(data.error)
       setResult(data)
@@ -253,50 +256,116 @@ function AiSearch({ title, content, category }) {
     }
   }
 
+  const roleColors = {
+    '주처방': { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+    '항생제': { bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+    '해열': { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
+    '소염': { bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
+    '거담': { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+    '위장': { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0' },
+    '기본': { bg: '#f5f3ff', color: '#5b21b6', border: '#ddd6fe' },
+  }
+
+  const getRoleStyle = (role) => {
+    if (!role) return roleColors['기본']
+    for (const key of Object.keys(roleColors)) {
+      if (role.includes(key)) return roleColors[key]
+    }
+    return roleColors['기본']
+  }
+
   return (
-    <div style={{ background: '#f0faf5', borderRadius: 10, padding: '13px', border: '1px solid #a7f3d0', marginTop: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: result || error ? 12 : 0 }}>
+    <div style={{ background: '#f0faf5', borderRadius: 10, padding: '14px', border: '1px solid #a7f3d0', marginTop: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: result || error ? 14 : 0 }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F6E56' }}>AI 질환 검색</div>
-          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>상병코드 및 치료 regimen 검색</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F6E56' }}>AI 완성 처방 세트</div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>상병코드 + 주처방 + 대증치료 + 위장보호 포함 완성 처방</div>
         </div>
         <button onClick={search} disabled={loading}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 7, border: 'none', background: loading ? '#d1d5db' : '#0F6E56', color: '#fff', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
-          {loading ? '검색 중...' : 'AI 검색'}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 7, border: 'none', background: loading ? '#d1d5db' : '#0F6E56', color: '#fff', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+          {loading ? '생성 중...' : 'AI 처방 생성'}
         </button>
       </div>
-      {error && <div style={{ background: '#fee2e2', borderRadius: 7, padding: '8px 12px', fontSize: 12, color: '#991b1b' }}>{error}</div>}
+
+      {error && (
+        <div style={{ background: '#fee2e2', borderRadius: 7, padding: '9px 12px', fontSize: 12, color: '#991b1b', marginBottom: 10 }}>
+          오류: {error}
+        </div>
+      )}
+
       {result && (
         <div>
           {result.kcdCodes && result.kcdCodes.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#0F6E56', marginBottom: 6 }}>관련 상병코드 (KCD)</div>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#0F6E56', marginBottom: 6 }}>KCD 상병코드</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                 {result.kcdCodes.map((k, i) => (
-                  <span key={i} style={{ fontSize: 12, background: '#e6f4ef', color: '#0F6E56', borderRadius: 6, padding: '3px 9px', fontWeight: 700 }}>
-                    {k.code} {k.name}
+                  <span key={i} style={{ fontSize: 12, background: '#e6f4ef', color: '#0F6E56', borderRadius: 6, padding: '3px 10px', fontWeight: 700, border: '1px solid #a7f3d0' }}>
+                    {k.code}  {k.name}
                   </span>
                 ))}
               </div>
             </div>
           )}
+
           {result.regimen && result.regimen.length > 0 && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#3730a3', marginBottom: 6 }}>표준 치료 Regimen</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {result.regimen.map((r, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: 8, padding: '9px 12px', border: '1px solid #e0e7ff', borderLeft: '3px solid #4f46e5' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 3 }}>{r.drug}</div>
-                    <div style={{ fontSize: 12, color: '#374151' }}>{r.dose} / {r.duration}</div>
-                    {r.note && <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{r.note}</div>}
-                  </div>
-                ))}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a' }}>
+                  {result.prescriptionTitle || '완성 처방 세트'}
+                </div>
+                <span style={{ fontSize: 10, background: '#0F6E56', color: '#fff', borderRadius: 10, padding: '1px 8px', fontWeight: 700 }}>
+                  {'전체 ' + result.regimen.length + '종 함께 처방'}
+                </span>
+              </div>
+              <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
+                <div style={{ background: '#f8f6f2', padding: '7px 12px', fontSize: 11, color: '#6b7280', borderBottom: '1px solid #e5e7eb' }}>
+                  아래 약물 전체가 하나의 완성된 처방 세트입니다. 상황에 따라 일부 조정 가능.
+                </div>
+                {result.regimen.map((r, i) => {
+                  const rs = getRoleStyle(r.role)
+                  return (
+                    <div key={i} style={{ padding: '10px 14px', borderBottom: i < result.regimen.length - 1 ? '1px solid #f0ede8' : 'none', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{ width: 3, flexShrink: 0, alignSelf: 'stretch', background: rs.border, borderRadius: 2, marginTop: 2 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{r.drug}</span>
+                          {r.role && (
+                            <span style={{ fontSize: 10, background: rs.bg, color: rs.color, borderRadius: 4, padding: '1px 7px', fontWeight: 700, flexShrink: 0 }}>
+                              {r.role}
+                            </span>
+                          )}
+                          <span style={{ fontSize: 11, color: r.covered !== false ? '#0F6E56' : '#dc2626', background: r.covered !== false ? '#f0faf5' : '#fee2e2', borderRadius: 4, padding: '1px 6px', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>
+                            {r.covered !== false ? '급여' : '비급여'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: r.reason ? 4 : 0 }}>
+                          {[r.dosage, r.freq, r.duration, r.usage].filter(Boolean).map((v, j) => (
+                            <span key={j} style={{ fontSize: 11, background: '#f3f4f6', color: '#374151', borderRadius: 5, padding: '2px 8px' }}>{v}</span>
+                          ))}
+                        </div>
+                        {r.reason && <div style={{ fontSize: 11, color: '#6b7280', lineHeight: 1.5 }}>{r.reason}</div>}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}
+
           {result.summary && (
-            <div style={{ background: '#fff', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#374151', lineHeight: 1.7, border: '1px solid #e5e7eb' }}>
-              {result.summary}
+            <div style={{ background: '#eff6ff', borderRadius: 8, padding: '10px 13px', fontSize: 12, color: '#1d4ed8', lineHeight: 1.75, marginBottom: 8, border: '1px solid #bfdbfe' }}>
+              <span style={{ fontWeight: 700 }}>처방 원칙: </span>{result.summary}
+            </div>
+          )}
+          {result.caution && (
+            <div style={{ background: '#fef3c7', borderRadius: 8, padding: '9px 13px', fontSize: 12, color: '#92400e', lineHeight: 1.6, marginBottom: 8, border: '1px solid #fde68a' }}>
+              <span style={{ fontWeight: 700 }}>주의/대체: </span>{result.caution}
+            </div>
+          )}
+          {result.followUp && (
+            <div style={{ background: '#f5f3ff', borderRadius: 8, padding: '9px 13px', fontSize: 12, color: '#5b21b6', lineHeight: 1.6, border: '1px solid #ddd6fe' }}>
+              <span style={{ fontWeight: 700 }}>추적 계획: </span>{result.followUp}
             </div>
           )}
         </div>
@@ -376,7 +445,7 @@ function NoteForm({ initial, onSave }) {
         <label style={S.label}>내용 (자유롭게 붙여넣기)</label>
         <textarea value={content} onChange={e => setContent(e.target.value)}
           placeholder="교재, 가이드라인, 논문 요약, 처방 팁 등을 자유롭게 작성하세요..."
-          style={{ ...S.input, resize: 'vertical', minHeight: 240, lineHeight: 1.8 }} />
+          style={{ ...S.input, resize: 'vertical', minHeight: 300, lineHeight: 1.8 }} />
       </div>
       <div style={{ marginBottom: 14 }}>
         <label style={S.label}>이미지 첨부 (최대 10장)</label>
@@ -579,8 +648,8 @@ export default function DiseaseNoteTab() {
   }, [filtered, page])
 
   const formSheet = (showForm || editTarget) ? (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '20px 16px' }}>
-      <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 700, padding: '24px 28px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', marginTop: 20, marginBottom: 20 }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '16px 12px' }}>
+      <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 960, padding: '32px 40px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', marginTop: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid #f0ede8' }}>
           <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a' }}>{editTarget ? '노트 수정' : '새 질환 노트'}</div>
           <button onClick={() => { setShowForm(false); setEditTarget(null) }}
