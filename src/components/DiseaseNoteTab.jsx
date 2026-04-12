@@ -29,23 +29,41 @@ const compressImage = (file) => new Promise((resolve) => {
   reader.readAsDataURL(file)
 })
 
+const MAX_CLOUDINARY_MB = 10
+
+function getResourceType(file) {
+  const ext = file.name.split('.').pop().toLowerCase()
+  if (['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) return 'image'
+  if (['mp4','mov','avi','webm','mkv'].includes(ext)) return 'video'
+  return 'raw'
+}
+
 async function uploadToCloudinary(file, onProgress) {
+  if (file.size > MAX_CLOUDINARY_MB * 1024 * 1024) {
+    throw new Error(file.name + ' 파일이 ' + MAX_CLOUDINARY_MB + 'MB를 초과합니다. Google Drive 링크 첨부를 이용해 주세요.')
+  }
+  const resourceType = getResourceType(file)
   const fd = new FormData()
   fd.append('file', file)
   fd.append('upload_preset', UPLOAD_PRESET)
   fd.append('folder', 'clinicnote')
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload')
+    xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/' + resourceType + '/upload')
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100))
     }
     xhr.onload = () => {
       if (xhr.status === 200) {
         const res = JSON.parse(xhr.responseText)
-        resolve({ url: res.secure_url, name: file.name, mime: file.type, size: file.size, publicId: res.public_id })
+        resolve({ url: res.secure_url, name: file.name, mime: file.type, size: file.size, publicId: res.public_id, resourceType })
       } else {
-        reject(new Error('업로드 실패: ' + xhr.status))
+        let msg = '업로드 실패 (' + xhr.status + ')'
+        try {
+          const err = JSON.parse(xhr.responseText)
+          if (err.error && err.error.message) msg = err.error.message
+        } catch (_) {}
+        reject(new Error(msg))
       }
     }
     xhr.onerror = () => reject(new Error('네트워크 오류'))
@@ -406,7 +424,8 @@ function NoteForm({ initial, onSave }) {
         )}
       </div>
       <div style={{ marginBottom: 14, background: '#eff6ff', borderRadius: 10, padding: '12px 14px', border: '1px solid #bfdbfe' }}>
-        <label style={{ ...S.label, color: '#1d4ed8', fontSize: 12 }}>PDF / PPTX / DOCX 파일 업로드 (Cloudinary, 용량 제한 없음)</label>
+        <label style={{ ...S.label, color: '#1d4ed8', fontSize: 12 }}>PDF / PPTX / DOCX 파일 업로드 (파일당 최대 10MB)</label>
+        <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 8 }}>10MB 초과 파일(NotebookLM PPT 등)은 아래 Google Drive 링크 첨부를 이용하세요.</div>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: '#2563eb', color: '#fff', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
           파일 선택 (PDF/PPTX/DOCX)
           <input type="file" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx" onChange={handleCloudUpload} style={{ display: 'none' }} />
