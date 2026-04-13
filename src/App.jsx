@@ -1,118 +1,132 @@
 import { useState, useEffect } from 'react'
-import MapView from './components/MapView'
-import SpotList from './components/SpotList'
-import SpotPanel from './components/SpotPanel'
-import NearbyPanel from './components/NearbyPanel'
-import { subscribeSpots, addSpot, updateSpot, deleteSpot } from './firebase'
+import Login from './components/Login'
+import FamilyTab from './components/FamilyTab'
+import RxTab from './components/RxTab'
+import DiseaseNoteTab from './components/DiseaseNoteTab'
+import { useIsMobile } from './components/ui'
 
 export default function App() {
-  const [spots, setSpots] = useState([])
-  const [selectedSpot, setSelectedSpot] = useState(null)
-  const [panelMode, setPanelMode] = useState(null)
-  const [newCoords, setNewCoords] = useState(null)
-  const [centerOn, setCenterOn] = useState(null)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [tab, setTab] = useState('rx')
+  const isMobile = useIsMobile()
 
   useEffect(() => {
-    return subscribeSpots(setSpots)
+    if (sessionStorage.getItem('cn_auth') === '1') setLoggedIn(true)
   }, [])
 
-  const handleMapClick = (lat, lng) => {
-    setNewCoords({ lat, lng })
-    setSelectedSpot(null)
-    setPanelMode('new')
+  const logout = () => {
+    sessionStorage.removeItem('cn_auth')
+    setLoggedIn(false)
   }
 
-  const handleSpotSelect = (spot) => {
-    setSelectedSpot(spot)
-    setPanelMode('edit')
-    setCenterOn({ lat: spot.lat, lng: spot.lng })
+  if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />
+
+  // ── 모바일 레이아웃 ──────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: '#f5f3ef' }}>
+        <div className="bg-white sticky top-0 z-40 px-4 pt-4 pb-3"
+          style={{ borderBottom: '1px solid #ece9e3' }}>
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
+                style={{ background: '#0F6E56' }}>🩺</div>
+              <span style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a' }}>ClinicNote</span>
+            </div>
+            <button onClick={logout}
+              className="px-3 py-1.5 rounded-lg text-xs"
+              style={{ border: '1px solid #e5e7eb', background: 'none', color: '#9ca3af', cursor: 'pointer' }}>
+              로그아웃
+            </button>
+          </div>
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#f0ede8' }}>
+            {[['rx', '💊 처방'], ['notes', '📚 노트'], ['family', '👨‍👩‍👧 가족']].map(([k, l]) => (
+              <button key={k} onClick={() => setTab(k)}
+                className="flex-1 py-2 rounded-lg text-sm transition-all"
+                style={{
+                  border: 'none', cursor: 'pointer',
+                  background: tab === k ? '#fff' : 'transparent',
+                  color: tab === k ? '#0F6E56' : '#9ca3af',
+                  fontWeight: tab === k ? 700 : 400,
+                  boxShadow: tab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
+                }}>
+                {l}
+              </button>
+            ))}
+          </div>
+        </div>
+        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : <RxTab />}
+      </div>
+    )
   }
 
-  const handleNearbyOpen = (spot) => {
-    setSelectedSpot(spot)
-    setPanelMode('nearby')
-    setCenterOn({ lat: spot.lat, lng: spot.lng })
-  }
-
-  const handleSaveNew = async (data) => {
-    await addSpot({ ...data, lat: newCoords.lat, lng: newCoords.lng })
-    setPanelMode(null)
-    setNewCoords(null)
-  }
-
-  const handleUpdate = async (id, data) => {
-    await updateSpot(id, data)
-    setPanelMode(null)
-    setSelectedSpot(null)
-  }
-
-  const handleDelete = async (id) => {
-    await deleteSpot(id)
-    setPanelMode(null)
-    setSelectedSpot(null)
-  }
-
-  const handleClose = () => {
-    setPanelMode(null)
-    setSelectedSpot(null)
-    setNewCoords(null)
-  }
+  // ── 데스크탑 레이아웃 ────────────────────────────────────
+  const NAV_ITEMS = [
+    { key: 'rx',     icon: '💊', label: '처방 노하우' },
+    { key: 'notes',  icon: '📚', label: '질환 노트' },
+    { key: 'family', icon: '👨‍👩‍👧', label: '가족 건강' },
+  ]
 
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <div className="logo">
-            <span className="logo-icon">🏥</span>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f3ef' }}>
+
+      {/* ── 사이드바 ── */}
+      <div style={{
+        width: 220, background: '#fff', borderRight: '1px solid #ece9e3',
+        display: 'flex', flexDirection: 'column',
+        position: 'sticky', top: 0, height: '100vh', flexShrink: 0,
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '28px 20px 24px', borderBottom: '1px solid #f0ede8' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 38, height: 38, background: '#0F6E56', borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🩺</div>
             <div>
-              <h1 className="logo-title">개원 입지 분석</h1>
-              <p className="logo-sub">지도를 클릭해 후보지를 추가하세요</p>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a' }}>ClinicNote</div>
+              <div style={{ fontSize: 11, color: '#9ca3af', marginTop: 1 }}>가족 건강 관리</div>
             </div>
           </div>
         </div>
-        <SpotList
-          spots={spots}
-          selectedId={selectedSpot?.id}
-          onSelect={handleSpotSelect}
-          onNearby={handleNearbyOpen}
-        />
-      </aside>
 
-      <main className="map-area">
-        <MapView
-          spots={spots}
-          centerOn={centerOn}
-          selectedSpot={selectedSpot}
-          newSpotCoords={newCoords}
-          onMapClick={handleMapClick}
-          onSpotClick={handleSpotSelect}
-        />
-        {spots.length === 0 && (
-          <div className="map-hint">
-            <span>📍 지도를 클릭해 첫 후보지를 추가하세요</span>
-          </div>
-        )}
-      </main>
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '16px 12px' }}>
+          {NAV_ITEMS.map(({ key, icon, label }) => {
+            const active = tab === key
+            return (
+              <button key={key} onClick={() => setTab(key)}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '11px 14px', borderRadius: 10, border: 'none',
+                  background: active ? '#f0faf5' : 'transparent',
+                  color: active ? '#0F6E56' : '#6b7280',
+                  fontSize: 14, fontWeight: active ? 700 : 400,
+                  cursor: 'pointer', marginBottom: 4, textAlign: 'left',
+                  transition: 'all 0.15s',
+                }}>
+                <span style={{ fontSize: 16 }}>{icon}</span>
+                {label}
+                {active && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#0F6E56' }} />}
+              </button>
+            )
+          })}
+        </nav>
 
-      {(panelMode === 'new' || panelMode === 'edit') && (
-        <SpotPanel
-          mode={panelMode}
-          spot={selectedSpot}
-          coords={newCoords}
-          onSave={handleSaveNew}
-          onUpdate={handleUpdate}
-          onDelete={handleDelete}
-          onClose={handleClose}
-          onNearby={() => selectedSpot && handleNearbyOpen(selectedSpot)}
-        />
-      )}
+        {/* Logout */}
+        <div style={{ padding: '16px 12px', borderTop: '1px solid #f0ede8' }}>
+          <button onClick={logout}
+            style={{
+              width: '100%', padding: '9px 14px', borderRadius: 10,
+              border: '1px solid #e5e7eb', background: 'none',
+              color: '#9ca3af', fontSize: 13, cursor: 'pointer', textAlign: 'left',
+            }}>
+            🚪 로그아웃
+          </button>
+        </div>
+      </div>
 
-      {panelMode === 'nearby' && selectedSpot && (
-        <NearbyPanel
-          spot={selectedSpot}
-          onClose={handleClose}
-        />
-      )}
+      {/* ── 메인 콘텐츠 ── */}
+      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : <RxTab />}
+      </div>
     </div>
   )
 }
