@@ -125,6 +125,10 @@ const S = {
 
 function CloudinaryFilePreview({ file }) {
   const [show, setShow] = useState(false)
+  const [blobUrl, setBlobUrl] = useState(null)
+  const [loadingPdf, setLoadingPdf] = useState(false)
+  const [pdfError, setPdfError] = useState(null)
+
   const isPdf = file.mime === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')
   const isPptx = !!(file.name?.toLowerCase().match(/\.(pptx?)$/))
   const isDoc = !!(file.name?.toLowerCase().match(/\.(docx?)$/))
@@ -134,11 +138,28 @@ function CloudinaryFilePreview({ file }) {
   const color = isImage ? '#0891b2' : isPdf ? '#dc2626' : isPptx ? '#d97706' : isDoc ? '#2563eb' : '#6b7280'
   const bg = isImage ? '#e0f2fe' : isPdf ? '#fee2e2' : isPptx ? '#fef3c7' : isDoc ? '#eff6ff' : '#f3f4f6'
   const canPreview = isImage || isPdf || isPptx || isDoc || isXls
-  // PDF: embed directly, PPTX/DOCX: Google Docs Viewer
-  const getPreviewUrl = () => {
-    if (isPdf) return file.url
-    return 'https://docs.google.com/viewer?url=' + encodeURIComponent(file.url) + '&embedded=true'
+
+  const handlePreview = async () => {
+    if (show) { setShow(false); return }
+    setShow(true)
+    if (isPdf && !blobUrl && !loadingPdf) {
+      setLoadingPdf(true)
+      setPdfError(null)
+      try {
+        const res = await fetch(file.url)
+        if (!res.ok) throw new Error('fetch failed')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        setBlobUrl(url)
+      } catch (e) {
+        setPdfError('PDF 로드 실패. 다운로드 버튼을 이용해 주세요.')
+      } finally {
+        setLoadingPdf(false)
+      }
+    }
   }
+
+  const googleViewerUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(file.url) + '&embedded=true'
 
   return (
     <div style={{ marginBottom: 8 }}>
@@ -146,22 +167,36 @@ function CloudinaryFilePreview({ file }) {
         <span style={S.badge(color, bg)}>{icon}</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
         {file.size && <span style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0 }}>{(file.size / 1024 / 1024).toFixed(1) + 'MB'}</span>}
-        {canPreview && <button style={S.btn(show)} onClick={() => setShow(p => !p)}>{show ? '접기' : '미리보기'}</button>}
+        {canPreview && <button style={S.btn(show)} onClick={handlePreview}>{show ? '접기' : '미리보기'}</button>}
         <a href={file.url} target="_blank" rel="noopener noreferrer" style={S.linkBtn}>다운로드</a>
       </div>
-      {show && canPreview && (
+      {show && (
         <div style={{ border: '1px solid #e5e7eb', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden', background: '#fff' }}>
           {isImage && (
             <img src={file.url} alt={file.name} style={{ width: '100%', maxHeight: 500, objectFit: 'contain', display: 'block', background: '#f0f0f0' }} />
           )}
           {isPdf && (
-            <embed src={file.url} type="application/pdf" style={{ width: '100%', height: 640, display: 'block' }} />
+            <>
+              {loadingPdf && (
+                <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: '#6b7280' }}>PDF 불러오는 중...</div>
+              )}
+              {pdfError && (
+                <div style={{ padding: '16px', fontSize: 13, color: '#991b1b', background: '#fee2e2' }}>
+                  {pdfError}
+                  <br />
+                  <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: 700 }}>새 탭에서 열기</a>
+                </div>
+              )}
+              {blobUrl && !loadingPdf && (
+                <iframe src={blobUrl} style={{ width: '100%', height: 640, border: 'none', display: 'block' }} title={file.name} />
+              )}
+            </>
           )}
           {(isPptx || isDoc || isXls) && (
             <>
-              <iframe src={getPreviewUrl()} style={{ width: '100%', height: 580, border: 'none', display: 'block' }} title={file.name} allowFullScreen />
+              <iframe src={googleViewerUrl} style={{ width: '100%', height: 580, border: 'none', display: 'block' }} title={file.name} allowFullScreen />
               <div style={{ padding: '6px 12px', background: '#fffbeb', fontSize: 11, color: '#92400e', borderTop: '1px solid #fde68a' }}>
-                Google Docs 뷰어 사용 중 - 로딩에 10~20초 소요될 수 있습니다. 안 보이면 다운로드 후 열어보세요.
+                Google Docs 뷰어 - 로딩에 10~20초 소요 가능. 안 보이면 다운로드 후 열어보세요.
               </div>
             </>
           )}
