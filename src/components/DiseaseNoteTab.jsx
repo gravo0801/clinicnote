@@ -80,8 +80,12 @@ function toEmbedUrl(url, mime) {
   if (url.includes('docs.google.com/presentation')) return url.replace(/\/edit.*$/, '/embed?start=false&loop=false')
   if (url.includes('docs.google.com/document')) return url.replace(/\/edit.*$/, '/preview')
   if (url.includes('docs.google.com/spreadsheets')) return url.replace(/\/edit.*$/, '/preview')
+  // Cloudinary URLs: always use Google Docs Viewer (direct iframe blocked by CORS/browser)
+  if (url.includes('cloudinary.com')) {
+    return 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true'
+  }
   if (mime === 'application/pdf' || url.match(/\.pdf(\?.*)?$/i)) return url
-  if (url.includes('cloudinary.com') || url.match(/\.(pptx?|docx?|xlsx?)(\?.*)?$/i)) {
+  if (url.match(/\.(pptx?|docx?|xlsx?)(\?.*)?$/i)) {
     return 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true'
   }
   return url
