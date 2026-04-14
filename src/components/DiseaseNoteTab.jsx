@@ -126,14 +126,19 @@ const S = {
 function CloudinaryFilePreview({ file }) {
   const [show, setShow] = useState(false)
   const isPdf = file.mime === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')
-  const isPptx = file.name?.toLowerCase().match(/\.(pptx?)$/)
-  const isDoc = file.name?.toLowerCase().match(/\.(docx?)$/)
-  const isImage = file.mime?.startsWith('image/') || file.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/)
-  const embedUrl = toEmbedUrl(file.url, file.mime)
-  const icon = isImage ? '[IMG]' : isPdf ? '[PDF]' : isPptx ? '[PPT]' : isDoc ? '[DOC]' : '[FILE]'
+  const isPptx = !!(file.name?.toLowerCase().match(/\.(pptx?)$/))
+  const isDoc = !!(file.name?.toLowerCase().match(/\.(docx?)$/))
+  const isXls = !!(file.name?.toLowerCase().match(/\.(xlsx?)$/))
+  const isImage = !!(file.mime?.startsWith('image/') || file.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/))
+  const icon = isImage ? '[IMG]' : isPdf ? '[PDF]' : isPptx ? '[PPT]' : isDoc ? '[DOC]' : isXls ? '[XLS]' : '[FILE]'
   const color = isImage ? '#0891b2' : isPdf ? '#dc2626' : isPptx ? '#d97706' : isDoc ? '#2563eb' : '#6b7280'
   const bg = isImage ? '#e0f2fe' : isPdf ? '#fee2e2' : isPptx ? '#fef3c7' : isDoc ? '#eff6ff' : '#f3f4f6'
-  const canPreview = !!(embedUrl && (isImage || isPdf || isPptx || isDoc))
+  const canPreview = isImage || isPdf || isPptx || isDoc || isXls
+  // PDF: embed directly, PPTX/DOCX: Google Docs Viewer
+  const getPreviewUrl = () => {
+    if (isPdf) return file.url
+    return 'https://docs.google.com/viewer?url=' + encodeURIComponent(file.url) + '&embedded=true'
+  }
 
   return (
     <div style={{ marginBottom: 8 }}>
@@ -145,15 +150,20 @@ function CloudinaryFilePreview({ file }) {
         <a href={file.url} target="_blank" rel="noopener noreferrer" style={S.linkBtn}>다운로드</a>
       </div>
       {show && canPreview && (
-        <div style={{ border: '1px solid #e5e7eb', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden' }}>
-          {isImage && <img src={embedUrl} alt={file.name} style={{ width: '100%', maxHeight: 500, objectFit: 'contain', display: 'block', background: '#f0f0f0' }} />}
-          {(isPdf || isPptx || isDoc) && (
-            <iframe src={embedUrl} style={{ width: '100%', height: 580, border: 'none', display: 'block' }} title={file.name} allowFullScreen />
+        <div style={{ border: '1px solid #e5e7eb', borderTop: 'none', borderRadius: '0 0 8px 8px', overflow: 'hidden', background: '#fff' }}>
+          {isImage && (
+            <img src={file.url} alt={file.name} style={{ width: '100%', maxHeight: 500, objectFit: 'contain', display: 'block', background: '#f0f0f0' }} />
           )}
-          {(isPptx || isDoc) && (
-            <div style={{ padding: '5px 10px', background: '#fffbeb', fontSize: 10, color: '#92400e' }}>
-              Google Docs 뷰어로 표시됩니다. 로딩이 느리면 다운로드 후 열어보세요.
-            </div>
+          {isPdf && (
+            <embed src={file.url} type="application/pdf" style={{ width: '100%', height: 640, display: 'block' }} />
+          )}
+          {(isPptx || isDoc || isXls) && (
+            <>
+              <iframe src={getPreviewUrl()} style={{ width: '100%', height: 580, border: 'none', display: 'block' }} title={file.name} allowFullScreen />
+              <div style={{ padding: '6px 12px', background: '#fffbeb', fontSize: 11, color: '#92400e', borderTop: '1px solid #fde68a' }}>
+                Google Docs 뷰어 사용 중 - 로딩에 10~20초 소요될 수 있습니다. 안 보이면 다운로드 후 열어보세요.
+              </div>
+            </>
           )}
         </div>
       )}
