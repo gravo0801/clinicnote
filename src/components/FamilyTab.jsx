@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
-  collection, onSnapshot, addDoc, deleteDoc, doc,
-  serverTimestamp, query, orderBy
+  collection, onSnapshot, addDoc, deleteDoc, updateDoc,
+  doc, serverTimestamp, query, orderBy
 } from 'firebase/firestore'
 import HealthCheckup from './HealthCheckup'
 import { db } from '../firebase'
 import { Sheet, SegmentButtons, DangerButton, Spinner, useIsMobile } from './ui'
 
+const CLOUD_NAME = 'dfcvmvlen'
+const UPLOAD_PRESET = 'clinicnote_uploads'
+
 const getAge = y => new Date().getFullYear() - y
 
 const STATUS = {
-  ongoing:  { label: '진행중',   bg: '#FAEEDA', color: '#633806' },
-  resolved: { label: '완료',     bg: '#EAF3DE', color: '#27500A' },
-  followup: { label: '추적필요', bg: '#FCEBEB', color: '#791F1F' },
+  ongoing:  { label: '진행중',   bg: '#FAEEDA', color: '#633806', dot: '#d97706' },
+  resolved: { label: '완료',     bg: '#EAF3DE', color: '#27500A', dot: '#22c55e' },
+  followup: { label: '추적필요', bg: '#FCEBEB', color: '#791F1F', dot: '#ef4444' },
 }
 
 const followUpStatus = (nextVisit, status) => {
@@ -23,55 +26,330 @@ const followUpStatus = (nextVisit, status) => {
   return null
 }
 
+const compressImage = (file) => new Promise((resolve) => {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const max = 900
+      let { width, height } = img
+      if (width > max) { height = Math.round(height * max / width); width = max }
+      if (height > max) { width = Math.round(width * max / height); height = max }
+      canvas.width = width; canvas.height = height
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height)
+      resolve({ data: canvas.toDataURL('image/jpeg', 0.72), name: file.name, type: 'image' })
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+})
+
+async function uploadToCloudinary(file, onProgress) {
+  const ext = file.name.split('.').pop().toLowerCase()
+  const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext)
+  const resourceType = isImg ? 'image' : 'raw'
+  if (file.size > 10 * 1024 * 1024) throw new Error(file.name + ' 파일이 10MB를 초과합니다.')
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('upload_preset', UPLOAD_PRESET)
+  fd.append('folder', 'clinicnote_family')
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/' + resourceType + '/upload')
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100)) }
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const res = JSON.parse(xhr.responseText)
+        resolve({ url: res.secure_url, name: file.name, mime: file.type, size: file.size })
+      } else {
+        let msg = '업로드 실패 (' + xhr.status + ')'
+        try { const err = JSON.parse(xhr.responseText); if (err.error?.message) msg = err.error.message } catch (_) {}
+        reject(new Error(msg))
+      }
+    }
+    xhr.onerror = () => reject(new Error('네트워크 오류'))
+    xhr.send(fd)
+  })
+}
+
 function MemberInitial({ name, size = 40 }) {
   const initial = name?.charAt(0) || '?'
   const colors = ['#0F6E56','#2563eb','#7c3aed','#db2777','#d97706','#059669']
   const bg = colors[name?.charCodeAt(0) % colors.length] || '#0F6E56'
   return (
-    <div style={{
-      width: size, height: size, borderRadius: size / 2,
-      background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: '#fff', fontSize: size * 0.4, fontWeight: 700, flexShrink: 0,
-    }}>{initial}</div>
+    <div style={{ width: size, height: size, borderRadius: size / 2, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: size * 0.4, fontWeight: 700, flexShrink: 0 }}>
+      {initial}
+    </div>
   )
 }
 
-// 구버전(treatment string) + 신버전(drugs array) 모두 표시
-function RecordSummary({ r }) {
-  const hasDrugs = r.drugs && r.drugs.length > 0 && r.drugs[0].name
-  if (hasDrugs) {
-    return (
-      <div className="text-xs truncate" style={{ color: '#6b7280' }}>
-        💊 {r.drugs.filter(d=>d.name).map(d=>d.name).join(', ')}
-      </div>
-    )
+//  이슈 입력 폼 (트래킹 중심) 
+function IssueForm({ initial, onSave, onClose }) {
+  const [title, setTitle] = useState(initial?.title || '')
+  const [date, setDate] = useState(initial?.date || new Date().toISOString().slice(0,10))
+  const [nextVisit, setNextVisit] = useState(initial?.nextVisit || '')
+  const [status, setStatus] = useState(initial?.status || 'ongoing')
+  const [note, setNote] = useState(initial?.note || '')
+  const [images, setImages] = useState(initial?.images || [])
+  const [cloudFiles, setCloudFiles] = useState(initial?.cloudFiles || [])
+  const [saving, setSaving] = useState(false)
+  const [imgLoading, setImgLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState({})
+
+  const handleImages = async (e) => {
+    setImgLoading(true)
+    const compressed = await Promise.all(Array.from(e.target.files).slice(0,6).map(compressImage))
+    setImages(p => [...p, ...compressed].slice(0,10))
+    setImgLoading(false)
+    e.target.value = ''
   }
+
+  const handleFiles = async (e) => {
+    const files = Array.from(e.target.files)
+    e.target.value = ''
+    for (const file of files) {
+      const key = file.name + Date.now()
+      setUploadProgress(p => ({ ...p, [key]: 0 }))
+      try {
+        const result = await uploadToCloudinary(file, (pct) => setUploadProgress(p => ({ ...p, [key]: pct })))
+        setCloudFiles(p => [...p, result])
+      } catch (err) { alert(err.message) }
+      finally { setUploadProgress(p => { const n = {...p}; delete n[key]; return n }) }
+    }
+  }
+
+  const uploading = Object.entries(uploadProgress)
+  const disabled = !title.trim() || saving || imgLoading || uploading.length > 0
+
+  const iStyle = { width: '100%', padding: '9px 11px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff' }
+  const lStyle = { display: 'block', fontSize: 11, color: '#6b7280', marginBottom: 4, fontWeight: 600 }
+
   return (
-    <div className="text-xs truncate" style={{ color: '#6b7280' }}>{r.treatment || '-'}</div>
+    <div style={{ paddingBottom: 16 }}>
+      <div style={{ marginBottom: 12 }}>
+        <label style={lStyle}>이상 내용 / 이슈 제목 *</label>
+        <input value={title} onChange={e => setTitle(e.target.value)} autoFocus
+          placeholder="예: 혈압 상승, 공복혈당 이상, 건강검진 이상소견"
+          style={iStyle} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+        <div>
+          <label style={lStyle}>발견/기록일</label>
+          <input type="date" value={date} onChange={e => setDate(e.target.value)} style={iStyle} />
+        </div>
+        <div>
+          <label style={lStyle}>다음 추적 예정일</label>
+          <input type="date" value={nextVisit} onChange={e => setNextVisit(e.target.value)} style={iStyle} />
+        </div>
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <label style={lStyle}>상태</label>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Object.entries(STATUS).map(([k, v]) => (
+            <button key={k} onClick={() => setStatus(k)}
+              style={{ flex: 1, padding: '7px 4px', borderRadius: 8, border: status === k ? 'none' : '1px solid #e5e7eb', background: status === k ? v.bg : '#fff', color: status === k ? v.color : '#6b7280', fontSize: 12, fontWeight: status === k ? 700 : 400, cursor: 'pointer' }}>
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <label style={lStyle}>메모 / 세부 내용</label>
+        <textarea value={note} onChange={e => setNote(e.target.value)}
+          placeholder="수치, 증상, 의사 소견, 생활습관 변화 등 자유롭게 기록..."
+          style={{ ...iStyle, resize: 'vertical', minHeight: 100, lineHeight: 1.7 }} />
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <label style={lStyle}>사진 첨부</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#f0faf5', color: '#0F6E56', border: '1px dashed #6ee7b7', borderRadius: 7, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+          {imgLoading ? '처리중...' : '사진 선택'}
+          <input type="file" multiple accept="image/*" onChange={handleImages} style={{ display: 'none' }} />
+        </label>
+        {images.length > 0 && (
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8 }}>
+            {images.map((img, i) => (
+              <div key={i} style={{ position: 'relative' }}>
+                <img src={img.data} alt={img.name} style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 7, border: '1px solid #e5e7eb' }} />
+                <button onClick={() => setImages(p => p.filter((_,idx) => idx !== i))}
+                  style={{ position: 'absolute', top: -5, right: -5, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', color: '#fff', border: 'none', fontSize: 10, cursor: 'pointer', fontWeight: 700 }}>x</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ marginBottom: 16, background: '#eff6ff', borderRadius: 9, padding: '10px 12px', border: '1px solid #bfdbfe' }}>
+        <label style={{ ...lStyle, color: '#1d4ed8', fontSize: 12 }}>검진 결과지 / 파일 업로드 (PDF, 이미지 등 최대 10MB)</label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#2563eb', color: '#fff', borderRadius: 7, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+          파일 선택
+          <input type="file" multiple accept=".pdf,.doc,.docx,image/*" onChange={handleFiles} style={{ display: 'none' }} />
+        </label>
+        {uploading.length > 0 && uploading.map(([key, pct]) => (
+          <div key={key} style={{ marginTop: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#1d4ed8', marginBottom: 3 }}>
+              <span>업로드 중...</span><span>{pct + '%'}</span>
+            </div>
+            <div style={{ background: '#bfdbfe', borderRadius: 4, height: 4 }}>
+              <div style={{ background: '#2563eb', borderRadius: 4, height: 4, width: pct + '%', transition: 'width 0.3s' }} />
+            </div>
+          </div>
+        ))}
+        {cloudFiles.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            {cloudFiles.map((f, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 8px', background: '#fff', borderRadius: 6, marginBottom: 4, border: '1px solid #bfdbfe' }}>
+                <span style={{ fontSize: 10, color: '#2563eb', fontWeight: 700 }}>{(f.name||'').split('.').pop().toUpperCase()}</span>
+                <span style={{ fontSize: 11, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                <button onClick={() => setCloudFiles(p => p.filter((_,idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 13 }}>x</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <button onClick={async () => { setSaving(true); await onSave({ title: title.trim(), date, nextVisit, status, note, images, cloudFiles }); setSaving(false) }}
+        disabled={disabled}
+        style={{ width: '100%', padding: '12px', background: disabled ? '#d1d5db' : '#0F6E56', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer' }}>
+        {saving ? '저장 중...' : uploading.length > 0 ? '업로드 중...' : (initial ? '수정 완료' : '기록 저장')}
+      </button>
+    </div>
+  )
+}
+
+//  이슈 카드 (타임라인 스타일) 
+function IssueCard({ r, onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const [imgBig, setImgBig] = useState(null)
+  const sm = STATUS[r.status] || STATUS.ongoing
+  const fu = followUpStatus(r.nextVisit, r.status)
+  const imgCount = (r.images || []).length
+  const fileCount = (r.cloudFiles || []).length
+  const daysSince = Math.floor((new Date() - new Date(r.date)) / 86400000)
+
+  return (
+    <div style={{ display: 'flex', gap: 0, marginBottom: 4 }}>
+      {/* 타임라인 바 */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 32, flexShrink: 0 }}>
+        <div style={{ width: 12, height: 12, borderRadius: '50%', background: sm.dot, border: '2px solid #fff', boxShadow: '0 0 0 2px ' + sm.dot + '44', marginTop: 16, flexShrink: 0 }} />
+        <div style={{ width: 2, flex: 1, background: '#e5e7eb', marginTop: 4 }} />
+      </div>
+      {/* 카드 */}
+      <div style={{ flex: 1, marginBottom: 12 }}>
+        <div onClick={() => setOpen(p => !p)}
+          style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', cursor: 'pointer', border: fu === 'overdue' ? '1px solid #fca5a5' : fu === 'soon' ? '1px solid #fcd34d' : '1px solid #f0ede8', boxShadow: open ? '0 2px 8px rgba(0,0,0,0.06)' : 'none' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{r.title}</div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: '#9ca3af' }}>{r.date}</span>
+                {daysSince > 0 && <span style={{ fontSize: 10, color: '#9ca3af' }}>({daysSince}일 전)</span>}
+                {imgCount > 0 && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>{'사진 ' + imgCount}</span>}
+                {fileCount > 0 && <span style={{ fontSize: 10, color: '#2563eb', background: '#eff6ff', borderRadius: 4, padding: '1px 6px' }}>{'파일 ' + fileCount}</span>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+              <span style={{ fontSize: 10, background: sm.bg, color: sm.color, borderRadius: 6, padding: '2px 8px', fontWeight: 700 }}>{sm.label}</span>
+              {r.nextVisit && (
+                <span style={{ fontSize: 10, color: fu === 'overdue' ? '#dc2626' : fu === 'soon' ? '#d97706' : '#9ca3af' }}>
+                  {fu === 'overdue' ? '추적 지남 ' : '추적 예정 '}{r.nextVisit}{fu === 'overdue' ? ' !' : fu === 'soon' ? ' ~' : ''}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {open && (
+          <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '12px 14px', borderTop: '1px solid #f0ede8', border: '1px solid #f0ede8', borderTopWidth: 0 }}>
+            {r.note && (
+              <div style={{ fontSize: 13, color: '#374151', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: imgCount > 0 || fileCount > 0 ? 12 : 0, background: '#fafaf9', borderRadius: 7, padding: '10px 12px', border: '1px solid #f0ede8' }}>
+                {r.note}
+              </div>
+            )}
+            {imgCount > 0 && (
+              <div style={{ marginBottom: fileCount > 0 ? 10 : 0 }}>
+                <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 6 }}>{'첨부 사진 (' + imgCount + ')'}</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {r.images.map((img, i) => (
+                    <img key={i} src={img.data} alt={img.name} onClick={() => setImgBig(img.data)}
+                      style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 7, border: '1px solid #e5e7eb', cursor: 'zoom-in' }} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {fileCount > 0 && (
+              <div style={{ marginTop: imgCount > 0 ? 10 : 0 }}>
+                <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 6 }}>{'첨부 파일 (' + fileCount + ')'}</div>
+                {r.cloudFiles.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 10px', background: '#f8f6f2', borderRadius: 7, marginBottom: 5, border: '1px solid #f0ede8' }}>
+                    <span style={{ fontSize: 10, color: '#2563eb', fontWeight: 700 }}>{(f.name||'').split('.').pop().toUpperCase()}</span>
+                    <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                    {f.size && <span style={{ fontSize: 10, color: '#9ca3af' }}>{(f.size/1024/1024).toFixed(1) + 'MB'}</span>}
+                    <a href={f.url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, padding: '2px 7px', textDecoration: 'none', fontWeight: 600, flexShrink: 0 }}>열기</a>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 6, marginTop: 12, paddingTop: 10, borderTop: '1px solid #f0ede8' }}>
+              <button onClick={() => onEdit(r)}
+                style={{ fontSize: 11, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 600 }}>수정</button>
+              <button onClick={() => onDelete(r.id)}
+                style={{ fontSize: 11, color: '#ef4444', background: 'none', border: '1px solid #fca5a5', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 600 }}>삭제</button>
+            </div>
+          </div>
+        )}
+        {imgBig && (
+          <div onClick={() => setImgBig(null)} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}>
+            <img src={imgBig} alt="" style={{ maxWidth: '92vw', maxHeight: '88vh', objectFit: 'contain', borderRadius: 8 }} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+//  상태별 요약 배지 
+function StatusSummary({ recs, small }) {
+  const counts = { followup: recs.filter(r => r.status === 'followup').length, ongoing: recs.filter(r => r.status === 'ongoing').length, resolved: recs.filter(r => r.status === 'resolved').length }
+  const alertCount = recs.filter(r => followUpStatus(r.nextVisit, r.status) === 'overdue').length
+  if (small) return (
+    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+      {counts.followup > 0 && <span style={{ fontSize: 10, background: '#FCEBEB', color: '#791F1F', borderRadius: 6, padding: '1px 7px', fontWeight: 700 }}>{'추적 ' + counts.followup}</span>}
+      {counts.ongoing > 0 && <span style={{ fontSize: 10, background: '#FAEEDA', color: '#633806', borderRadius: 6, padding: '1px 7px', fontWeight: 700 }}>{'진행 ' + counts.ongoing}</span>}
+      {alertCount > 0 && <span style={{ fontSize: 10, background: '#fee2e2', color: '#dc2626', borderRadius: 6, padding: '1px 7px', fontWeight: 700 }}>{'지남 ' + alertCount}</span>}
+    </div>
+  )
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      {Object.entries(STATUS).map(([k, v]) => (
+        <div key={k} style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{counts[k]}</div>
+          <div style={{ fontSize: 11, opacity: 0.8 }}>{v.label}</div>
+        </div>
+      ))}
+      {alertCount > 0 && (
+        <div style={{ background: 'rgba(239,68,68,0.3)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>{alertCount}</div>
+          <div style={{ fontSize: 11, opacity: 0.8 }}>기간 초과</div>
+        </div>
+      )}
+    </div>
   )
 }
 
 export default function FamilyTab() {
   const isMobile = useIsMobile()
-  const [members, setMembers]   = useState([])
-  const [records, setRecords]   = useState({})
-  const [rxNames, setRxNames]   = useState([])  // 처방 약물명 자동완성용
-  const [selId, setSelId]       = useState(null)
-  const [loading, setLoading]   = useState(true)
-
-  const [memberTab, setMemberTab]  = useState('records') // 'records' | 'checkup'
-  const [addMember,  setAddMember]  = useState(false)
-  const [addRecord,  setAddRecord]  = useState(false)
-  const [detail,     setDetail]     = useState(null)
+  const [members, setMembers] = useState([])
+  const [records, setRecords] = useState({})
+  const [selId, setSelId] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [memberTab, setMemberTab] = useState('tracking')
+  const [addMember, setAddMember] = useState(false)
+  const [addRecord, setAddRecord] = useState(false)
+  const [editRecord, setEditRecord] = useState(null)
   const [delConfirm, setDelConfirm] = useState(false)
-
+  const [filterStatus, setFilterStatus] = useState('all')
   const [mf, setMf] = useState({ name: '', relation: '', birthYear: '', gender: '남' })
-  const [rf, setRf] = useState({
-    date: new Date().toISOString().slice(0, 10),
-    diagnosis: '', treatment: '', nextVisit: '', status: 'ongoing', note: ''
-  })
 
-  // ── Members ──────────────────────────────────────────────
   useEffect(() => {
     const q = query(collection(db, 'familyMembers'), orderBy('createdAt', 'asc'))
     return onSnapshot(q, snap => {
@@ -82,7 +360,6 @@ export default function FamilyTab() {
     })
   }, [])
 
-  // ── Records ──────────────────────────────────────────────
   useEffect(() => {
     if (members.length === 0) return
     const unsubs = members.map(m => {
@@ -94,348 +371,168 @@ export default function FamilyTab() {
     return () => unsubs.forEach(u => u())
   }, [members.length])
 
-  // ── 처방 약물명 목록 (자동완성 소스) ─────────────────────
-  useEffect(() => {
-    return onSnapshot(collection(db, 'prescriptions'), snap => {
-      setRxNames(snap.docs.map(d => d.data().drugName).filter(Boolean))
-    })
-  }, [])
-
   const saveMember = async () => {
     if (!mf.name.trim()) return
-    const ref = await addDoc(collection(db, 'familyMembers'), {
-      ...mf, birthYear: parseInt(mf.birthYear) || 2000, createdAt: serverTimestamp()
-    })
+    const ref = await addDoc(collection(db, 'familyMembers'), { ...mf, birthYear: parseInt(mf.birthYear) || 2000, createdAt: serverTimestamp() })
     setSelId(ref.id)
     setMf({ name: '', relation: '', birthYear: '', gender: '남' })
     setAddMember(false)
   }
 
-  const saveRecord = async () => {
-    if (!selId || !rf.diagnosis.trim()) return
-    await addDoc(collection(db, 'familyMembers', selId, 'records'), {
-      ...rf, createdAt: serverTimestamp(),
-    })
-    setRf({ date: new Date().toISOString().slice(0, 10), diagnosis: '', treatment: '', nextVisit: '', status: 'ongoing', note: '' })
-    setAddRecord(false)
+  const saveRecord = async (payload) => {
+    if (!selId) return
+    if (editRecord) {
+      await updateDoc(doc(db, 'familyMembers', selId, 'records', editRecord.id), { ...payload, updatedAt: serverTimestamp() })
+    } else {
+      await addDoc(collection(db, 'familyMembers', selId, 'records'), { ...payload, createdAt: serverTimestamp() })
+    }
+    setAddRecord(false); setEditRecord(null)
+  }
+
+  const deleteRecord = async (rid) => {
+    if (!window.confirm('이 기록을 삭제하시겠습니까?')) return
+    await deleteDoc(doc(db, 'familyMembers', selId, 'records', rid))
   }
 
   const deleteMember = async () => {
     if (!selId) return
     await deleteDoc(doc(db, 'familyMembers', selId))
-    setDelConfirm(false)
-    setSelId(null)
+    setDelConfirm(false); setSelId(null)
   }
 
-  const deleteRecord = async (rid) => {
-    await deleteDoc(doc(db, 'familyMembers', selId, 'records', rid))
-    setDetail(null)
-  }
-
-  const sel  = members.find(m => m.id === selId)
+  const sel = members.find(m => m.id === selId)
   const recs = records[selId] || []
+  const filteredRecs = filterStatus === 'all' ? recs : recs.filter(r => r.status === filterStatus)
 
   if (loading) return <Spinner />
 
-  // ── 공통 시트들 ──────────────────────────────────────────
+  const formSheet = (addRecord || editRecord) ? (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '16px 12px' }}>
+      <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 680, padding: '24px 28px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', marginTop: 20, marginBottom: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid #f0ede8' }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a' }}>{editRecord ? '기록 수정' : '이상 내용 기록'}</div>
+            {sel && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{sel.name}</div>}
+          </div>
+          <button onClick={() => { setAddRecord(false); setEditRecord(null) }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af' }}>x</button>
+        </div>
+        <IssueForm initial={editRecord} onSave={saveRecord} onClose={() => { setAddRecord(false); setEditRecord(null) }} />
+      </div>
+    </div>
+  ) : null
+
   const Sheets = (
     <>
       {addMember && (
         <Sheet title="가족 추가" onClose={() => setAddMember(false)}>
-          <div className="mb-3">
-            <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5 }}>이름 또는 별칭</label>
-            <input value={mf.name} onChange={e => setMf(p => ({ ...p, name: e.target.value }))} placeholder="예: 배우자, 어머니"
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-          </div>
-          <div className="mb-3">
-            <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5 }}>관계</label>
-            <input value={mf.relation} onChange={e => setMf(p => ({ ...p, relation: e.target.value }))} placeholder="배우자 / 자녀 / 부모"
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-          </div>
-          <div className="mb-3">
-            <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5 }}>출생연도</label>
-            <input type="number" value={mf.birthYear} onChange={e => setMf(p => ({ ...p, birthYear: e.target.value }))} placeholder="예: 1990"
-              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-          </div>
-          <div className="mb-3">
-            <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 5 }}>성별</label>
-            <SegmentButtons options={[{ val: '남', label: '남' }, { val: '여', label: '여' }]}
-              value={mf.gender} onChange={v => setMf(p => ({ ...p, gender: v }))} />
-          </div>
-          <button onClick={saveMember} style={{ width: '100%', padding: '12px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginTop: 4 }}>
-            추가하기
-          </button>
-        </Sheet>
-      )}
-
-      {addRecord && (
-        <Sheet title="진료 기록 작성" onClose={() => setAddRecord(false)}>
-          {[['진료일','date','date'],['진단명','diagnosis','text'],['치료/처방','treatment','text'],['다음 방문일','nextVisit','date']].map(([l,k,t]) => (
-            <div key={k} style={{ marginBottom: 10 }}>
-              <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>{l}</label>
-              {k === 'treatment'
-                ? <textarea value={rf[k]} onChange={e => setRf(p => ({...p,[k]:e.target.value}))} placeholder="약물명, 용량, 용법 기록"
-                    style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', minHeight:72 }} />
-                : <input type={t} value={rf[k]} onChange={e => setRf(p => ({...p,[k]:e.target.value}))}
-                    style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit' }} />
-              }
+          {[['이름 또는 별칭','name','text','예: 배우자, 어머니'],['관계','relation','text','배우자 / 자녀 / 부모'],['출생연도','birthYear','number','예: 1990']].map(([l,k,t,ph]) => (
+            <div key={k} style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 4, fontWeight: 600 }}>{l}</label>
+              <input type={t} value={mf[k]} onChange={e => setMf(p => ({...p,[k]:e.target.value}))} placeholder={ph}
+                style={{ width: '100%', padding: '9px 11px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
             </div>
           ))}
-          <div style={{ marginBottom:10 }}>
-            <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>상태</label>
-            <SegmentButtons options={[{val:'ongoing',label:'진행중'},{val:'resolved',label:'완료'},{val:'followup',label:'추적필요'}]}
-              value={rf.status} onChange={v => setRf(p => ({...p,status:v}))} />
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 12, color: '#6b7280', marginBottom: 4, fontWeight: 600 }}>성별</label>
+            <SegmentButtons options={[{val:'남',label:'남'},{val:'여',label:'여'}]} value={mf.gender} onChange={v => setMf(p => ({...p,gender:v}))} />
           </div>
-          <div style={{ marginBottom:12 }}>
-            <label style={{ display:'block', fontSize:12, color:'#6b7280', marginBottom:4, fontWeight:600 }}>메모</label>
-            <textarea value={rf.note} onChange={e => setRf(p => ({...p,note:e.target.value}))} placeholder="추가 메모"
-              style={{ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', resize:'vertical', minHeight:60 }} />
-          </div>
-          <button onClick={saveRecord} style={{ width:'100%', padding:'12px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:'pointer' }}>저장</button>
+          <button onClick={saveMember} style={{ width: '100%', padding: '12px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>추가하기</button>
         </Sheet>
       )}
-
-      {detail && (
-        <Sheet title="진료 상세" onClose={() => setDetail(null)}>
-          {(() => {
-            const sm = STATUS[detail.status] || STATUS.ongoing
-            const fu = followUpStatus(detail.nextVisit, detail.status)
-            const hasDrugs = detail.drugs?.some(d => d.name)
-            return (
-              <>
-                {/* 헤더 */}
-                <div className="mb-4">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                    <div>
-                      <span style={{ fontSize: 18, fontWeight: 700 }}>{detail.diagnosis || detail.chiefComplaint}</span>
-                      {detail.kcd && (
-                        <div style={{ marginTop: 4 }}>
-                          <span style={{ fontSize: 11, background: '#0F6E56', color: '#fff', borderRadius: 5, padding: '2px 8px', marginRight: 6 }}>{detail.kcd.code}</span>
-                          <span style={{ fontSize: 12, color: '#6b7280' }}>{detail.kcd.name}</span>
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded-lg shrink-0 ml-2"
-                      style={{ background: sm.bg, color: sm.color, fontWeight: 600 }}>{sm.label}</span>
-                  </div>
-                  <div style={{ fontSize: 13, color: '#9ca3af' }}>
-                    진료일 {detail.date}
-                    {detail.nextVisit && ` · 다음 ${detail.nextVisit}${fu === 'overdue' ? ' ⚠️' : fu === 'soon' ? ' 🔔' : ''}`}
-                  </div>
-                </div>
-
-                {/* 주호소 */}
-                {detail.chiefComplaint && (
-                  <div style={{ background: '#f8f6f2', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>주호소</div>
-                    <div style={{ fontSize: 14, color: '#1a1a1a' }}>{detail.chiefComplaint}</div>
-                  </div>
-                )}
-
-                {/* 처방 약물 (신버전) */}
-                {hasDrugs && (
-                  <div style={{ background: '#f8f6f2', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>처방 약물</div>
-                    {detail.drugs.filter(d => d.name).map((d, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', minWidth: 0, flex: 1 }}>{d.name}</span>
-                        <span style={{ fontSize: 12, color: '#6b7280', shrink: 0 }}>{[d.dosage, d.usage, d.duration && d.duration+'일'].filter(Boolean).join(' · ')}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 구버전 treatment */}
-                {!hasDrugs && detail.treatment && (
-                  <div style={{ background: '#f8f6f2', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>치료 / 처방</div>
-                    <div style={{ fontSize: 14, color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{detail.treatment}</div>
-                  </div>
-                )}
-
-                {/* Progress Note */}
-                {detail.progressNote && (
-                  <div style={{ background: '#f8f6f2', borderRadius: 10, padding: '11px 14px', marginBottom: 10 }}>
-                    <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>Progress Note</div>
-                    <div style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{detail.progressNote}</div>
-                  </div>
-                )}
-
-                {/* 메모 */}
-                {detail.note && (
-                  <div style={{ background: '#fffbeb', borderRadius: 10, padding: '11px 14px', marginBottom: 10, border: '1px solid #fde68a' }}>
-                    <div style={{ fontSize: 11, color: '#92400e', marginBottom: 4 }}>메모</div>
-                    <div style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.6 }}>{detail.note}</div>
-                  </div>
-                )}
-
-                {/* AI 검토 패널 — 케이스 스터디 탭에서 이용 가능 */}
-
-                <DangerButton onClick={() => deleteRecord(detail.id)}>기록 삭제</DangerButton>
-              </>
-            )
-          })()}
-        </Sheet>
-      )}
-
       {delConfirm && (
         <Sheet title="가족 삭제" onClose={() => setDelConfirm(false)}>
-          <p style={{ fontSize: 14, color: '#374151', marginBottom: 16 }}>
-            '{sel?.name}'을(를) 삭제하면 모든 진료 기록도 함께 삭제됩니다.
-          </p>
+          <p style={{ fontSize: 14, color: '#374151', marginBottom: 16 }}>'{sel?.name}'을 삭제하면 모든 기록도 함께 삭제됩니다.</p>
           <DangerButton onClick={deleteMember}>삭제하기</DangerButton>
         </Sheet>
       )}
     </>
   )
 
-  // ── 기록 카드 (공통) ─────────────────────────────────────
-  const RecordCard = ({ r }) => {
-    const sm = STATUS[r.status] || STATUS.ongoing
-    const fu = followUpStatus(r.nextVisit, r.status)
-    const hasKcd = r.kcd?.code
-    return (
-      <div onClick={() => setDetail(r)}
-        className="bg-white rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-sm"
-        style={{
-          border: fu === 'overdue' ? '1px solid #fca5a5' : fu === 'soon' ? '1px solid #fcd34d' : '1px solid #f0ede8',
-        }}>
-        <div className="flex justify-between items-start mb-1.5">
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a' }}>{r.diagnosis || r.chiefComplaint}</span>
-            {hasKcd && <span style={{ fontSize: 11, background: '#e6f4ef', color: '#0F6E56', borderRadius: 5, padding: '1px 6px', marginLeft: 6, fontWeight: 600 }}>{r.kcd.code}</span>}
-          </div>
-          <span className="text-xs px-2 py-0.5 rounded-md ml-2 shrink-0"
-            style={{ background: sm.bg, color: sm.color, fontWeight: 600 }}>{sm.label}</span>
-        </div>
-        <RecordSummary r={r} />
-        <div className="flex gap-3 text-xs mt-2" style={{ color: '#9ca3af' }}>
-          <span>{r.date}</span>
-          {r.nextVisit && (
-            <span style={{ color: fu === 'overdue' ? '#dc2626' : fu === 'soon' ? '#d97706' : '#9ca3af' }}>
-              다음 {r.nextVisit}{fu === 'overdue' ? ' ⚠️' : fu === 'soon' ? ' 🔔' : ''}
-            </span>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // ── 모바일 레이아웃 ──────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="pb-20">
-        <div className="px-4 pt-4 pb-3 overflow-x-auto">
-          <div className="flex gap-2" style={{ minWidth: 'max-content' }}>
+      <div style={{ paddingBottom: 80 }}>
+        {/* 멤버 선택 */}
+        <div style={{ padding: '12px 16px 8px', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: 8, minWidth: 'max-content' }}>
             {members.map(m => {
-              const hasAlert = (records[m.id] || []).some(r => followUpStatus(r.nextVisit, r.status))
+              const mRecs = records[m.id] || []
+              const hasAlert = mRecs.some(r => followUpStatus(r.nextVisit, r.status))
               const active = selId === m.id
               return (
-                <button key={m.id} onClick={() => { setSelId(m.id); setMemberTab('records') }}
-                  className="flex items-center gap-1 px-4 py-2 rounded-full text-sm font-medium"
-                  style={{ background: active ? '#0F6E56' : '#fff', color: active ? '#fff' : '#374151', border: active ? 'none' : '1px solid #e5e7eb', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                <button key={m.id} onClick={() => setSelId(m.id)}
+                  style={{ padding: '7px 16px', borderRadius: 20, border: active ? 'none' : '1px solid #e5e7eb', background: active ? '#0F6E56' : '#fff', color: active ? '#fff' : '#374151', fontSize: 13, fontWeight: active ? 700 : 400, cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}>
                   {m.name}
-                  {hasAlert && <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#EF9F27', display: 'inline-block' }} />}
+                  {hasAlert && <span style={{ width: 6, height: 6, borderRadius: '50%', background: active ? '#fff' : '#ef4444', display: 'inline-block' }} />}
                 </button>
               )
             })}
-            <button onClick={() => setAddMember(true)} style={{ padding: '8px 16px', borderRadius: 20, border: '1px dashed #d1d5db', color: '#9ca3af', background: 'none', cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>+ 가족 추가</button>
+            <button onClick={() => setAddMember(true)} style={{ padding: '7px 14px', borderRadius: 20, border: '1px dashed #d1d5db', color: '#9ca3af', background: 'none', cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>+ 추가</button>
           </div>
         </div>
-
         {sel && (
-          <div className="px-4 pb-4">
-            <div className="rounded-2xl p-5 text-white" style={{ background: '#0F6E56' }}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <div style={{ fontSize: 19, fontWeight: 700 }}>{sel.name}</div>
-                  <div style={{ fontSize: 13, opacity: 0.75, marginTop: 3 }}>{sel.relation} · {sel.gender} · {getAge(sel.birthYear)}세</div>
-                </div>
-                <div className="text-right">
-                  <div style={{ fontSize: 26, fontWeight: 700 }}>{recs.length}</div>
-                  <div style={{ fontSize: 11, opacity: 0.65 }}>진료 기록</div>
-                </div>
+          <div style={{ margin: '0 16px 14px', borderRadius: 16, padding: '16px 20px', background: '#0F6E56', color: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{sel.name}</div>
+                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{sel.relation}  /  {sel.gender}  /  {getAge(sel.birthYear)}세</div>
               </div>
-              <div className="flex gap-2 mt-4">
-                {[['진행중','ongoing'],['완료','resolved'],['추적','followup']].map(([l,s]) => (
-                  <div key={l} className="text-xs px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.18)' }}>
-                    {l} {recs.filter(r=>r.status===s).length}건
-                  </div>
-                ))}
-              </div>
+              <MemberInitial name={sel.name} size={44} />
             </div>
+            <StatusSummary recs={recs} small={false} />
           </div>
         )}
-
-        <div className="px-4">
-          {/* 서브 탭 토글 */}
+        <div style={{ padding: '0 16px' }}>
           <div style={{ display: 'flex', gap: 4, background: '#f0ede8', borderRadius: 10, padding: 4, marginBottom: 14 }}>
-            {[['records', '📋 진료 기록'], ['checkup', '🏥 건강검진']].map(([k, l]) => (
-              <button key={k} onClick={() => setMemberTab(k)}
-                style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: memberTab === k ? '#fff' : 'transparent', color: memberTab === k ? '#0F6E56' : '#9ca3af', fontSize: 13, fontWeight: memberTab === k ? 700 : 400, cursor: 'pointer', boxShadow: memberTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none' }}>
-                {l}
-              </button>
+            {[['tracking','트래킹'],['checkup','건강검진']].map(([k,l]) => (
+              <button key={k} onClick={() => setMemberTab(k)} style={{ flex: 1, padding: '7px 0', borderRadius: 7, border: 'none', background: memberTab === k ? '#fff' : 'transparent', color: memberTab === k ? '#0F6E56' : '#9ca3af', fontSize: 13, fontWeight: memberTab === k ? 700 : 400, cursor: 'pointer' }}>{l}</button>
             ))}
           </div>
-
           {memberTab === 'checkup' ? (
             sel && <HealthCheckup memberId={sel.id} memberGender={sel.gender} />
           ) : (
             <>
-              <div className="flex justify-between items-center mb-3">
-                <span style={{ fontSize: 14, fontWeight: 700 }}>진료 기록</span>
-                <button onClick={() => setAddRecord(true)} className="px-4 py-1.5 rounded-full text-sm font-semibold text-white"
-                  style={{ background: '#0F6E56', border: 'none', cursor: 'pointer' }}>+ 추가</button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', gap: 5 }}>
+                  {[['all','전체'],['followup','추적'],['ongoing','진행'],['resolved','완료']].map(([v,l]) => (
+                    <button key={v} onClick={() => setFilterStatus(v)}
+                      style={{ padding: '4px 10px', borderRadius: 12, border: filterStatus === v ? 'none' : '1px solid #e5e7eb', background: filterStatus === v ? '#0F6E56' : '#fff', color: filterStatus === v ? '#fff' : '#6b7280', fontSize: 11, cursor: 'pointer', fontWeight: filterStatus === v ? 700 : 400 }}>{l}</button>
+                  ))}
+                </div>
+                <button onClick={() => setAddRecord(true)} style={{ padding: '6px 14px', borderRadius: 20, background: '#0F6E56', color: '#fff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>+ 기록</button>
               </div>
-              {recs.length === 0
-                ? <div className="text-center py-12 text-sm" style={{ color: '#9ca3af' }}>📋 진료 기록이 없습니다</div>
-                : <div className="flex flex-col gap-2.5">{recs.map(r => <RecordCard key={r.id} r={r} />)}</div>
+              {filteredRecs.length === 0
+                ? <div style={{ textAlign: 'center', padding: '40px 0', color: '#9ca3af', fontSize: 13 }}>기록이 없습니다</div>
+                : <div>{filteredRecs.map(r => <IssueCard key={r.id} r={r} onEdit={setEditRecord} onDelete={deleteRecord} />)}</div>
               }
             </>
           )}
-          {sel && <button onClick={() => setDelConfirm(true)} className="w-full mt-6 py-2.5 text-xs rounded-lg"
-            style={{ background: 'none', border: '1px solid #fecaca', color: '#ef4444', cursor: 'pointer' }}>
-            '{sel.name}' 삭제
-          </button>}
         </div>
         {Sheets}
+        {formSheet}
       </div>
     )
   }
 
-  // ── 데스크탑 레이아웃 ────────────────────────────────────
+  // 데스크탑
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {/* 좌측 멤버 패널 */}
-      <div style={{ width: 260, background: '#fff', borderRight: '1px solid #ece9e3', display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <div style={{ padding: '20px 16px 14px', borderBottom: '1px solid #f0ede8' }}>
-          <div className="flex justify-between items-center">
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>가족 구성원</span>
-            <button onClick={() => setAddMember(true)}
-              style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-              + 추가
-            </button>
-          </div>
+      <div style={{ width: 260, background: '#fff', borderRight: '1px solid #ece9e3', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '18px 14px 12px', borderBottom: '1px solid #f0ede8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>가족 구성원</span>
+          <button onClick={() => setAddMember(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '4px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>+ 추가</button>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
           {members.map(m => {
             const mRecs = records[m.id] || []
-            const hasAlert = mRecs.some(r => followUpStatus(r.nextVisit, r.status))
             const active = selId === m.id
-            const ongoingCount = mRecs.filter(r => r.status === 'ongoing').length
             return (
-              <button key={m.id} onClick={() => { setSelId(m.id); setMemberTab('records') }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '12px', borderRadius: 12, border: 'none', background: active ? '#f0faf5' : 'transparent', cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
+              <button key={m.id} onClick={() => { setSelId(m.id); setMemberTab('tracking') }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px', borderRadius: 12, border: 'none', background: active ? '#f0faf5' : 'transparent', cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
                 <MemberInitial name={m.name} size={40} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: active ? 700 : 500, color: active ? '#0F6E56' : '#1a1a1a', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    {m.name}
-                    {hasAlert && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF9F27', display: 'inline-block', flexShrink: 0 }} />}
-                  </div>
-                  <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>
-                    {m.relation} · {getAge(m.birthYear)}세
-                    {ongoingCount > 0 && <span style={{ marginLeft: 6, color: '#d97706' }}>진행중 {ongoingCount}</span>}
-                  </div>
+                  <div style={{ fontSize: 14, fontWeight: active ? 700 : 500, color: active ? '#0F6E56' : '#1a1a1a' }}>{m.name}</div>
+                  <div style={{ fontSize: 11, color: '#9ca3af' }}>{m.relation}  /  {getAge(m.birthYear)}세</div>
+                  <StatusSummary recs={mRecs} small={true} />
                 </div>
               </button>
             )
@@ -443,39 +540,27 @@ export default function FamilyTab() {
         </div>
       </div>
 
-      {/* 우측 패널 */}
       <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef' }}>
         {!sel
-          ? <div className="flex items-center justify-center h-full" style={{ color: '#9ca3af' }}>
-              <div className="text-center"><div style={{ fontSize: 40, marginBottom: 12 }}>👈</div><div style={{ fontSize: 14 }}>왼쪽에서 가족을 선택하세요</div></div>
+          ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af' }}>
+              <div style={{ textAlign: 'center' }}><div style={{ fontSize: 36, marginBottom: 10 }}></div><div style={{ fontSize: 14 }}>왼쪽에서 가족을 선택하세요</div></div>
             </div>
-          : <div style={{ maxWidth: 800, padding: '28px 32px' }}>
-              {/* 멤버 헤더 */}
-              <div className="rounded-2xl p-6 mb-6 text-white" style={{ background: '#0F6E56' }}>
-                <div className="flex items-center gap-4">
-                  <MemberInitial name={sel.name} size={56} />
+          : <div style={{ maxWidth: 820, padding: '28px 32px' }}>
+              <div style={{ borderRadius: 18, padding: '22px 28px', background: '#0F6E56', color: '#fff', marginBottom: 22 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                  <MemberInitial name={sel.name} size={52} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 22, fontWeight: 700 }}>{sel.name}</div>
-                    <div style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>{sel.relation} · {sel.gender} · {getAge(sel.birthYear)}세</div>
+                    <div style={{ fontSize: 21, fontWeight: 700 }}>{sel.name}</div>
+                    <div style={{ fontSize: 13, opacity: 0.75, marginTop: 3 }}>{sel.relation}  /  {sel.gender}  /  {getAge(sel.birthYear)}세</div>
                   </div>
-                  <div className="flex gap-3">
-                    {[['진행중','ongoing'],['완료','resolved'],['추적','followup']].map(([l,s]) => (
-                      <div key={l} className="text-center" style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: '10px 18px' }}>
-                        <div style={{ fontSize: 22, fontWeight: 700 }}>{recs.filter(r=>r.status===s).length}</div>
-                        <div style={{ fontSize: 11, opacity: 0.75 }}>{l}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <button onClick={() => setDelConfirm(true)} style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.3)', background: 'transparent', color: 'rgba(255,255,255,0.7)', fontSize: 11, cursor: 'pointer' }}>삭제</button>
                 </div>
+                <StatusSummary recs={recs} small={false} />
               </div>
 
-              {/* 서브 탭 */}
               <div style={{ display: 'flex', gap: 4, background: '#f0ede8', borderRadius: 10, padding: 4, marginBottom: 20 }}>
-                {[['records', '📋 진료 기록'], ['checkup', '🏥 건강검진']].map(([k, l]) => (
-                  <button key={k} onClick={() => setMemberTab(k)}
-                    style={{ flex: 1, padding: '8px 0', borderRadius: 7, border: 'none', background: memberTab === k ? '#fff' : 'transparent', color: memberTab === k ? '#0F6E56' : '#9ca3af', fontSize: 13, fontWeight: memberTab === k ? 700 : 400, cursor: 'pointer', boxShadow: memberTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none' }}>
-                    {l}
-                  </button>
+                {[['tracking','트래킹'],['checkup','건강검진']].map(([k,l]) => (
+                  <button key={k} onClick={() => setMemberTab(k)} style={{ flex: 1, padding: '8px 0', borderRadius: 7, border: 'none', background: memberTab === k ? '#fff' : 'transparent', color: memberTab === k ? '#0F6E56' : '#9ca3af', fontSize: 13, fontWeight: memberTab === k ? 700 : 400, cursor: 'pointer', boxShadow: memberTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none' }}>{l}</button>
                 ))}
               </div>
 
@@ -483,20 +568,21 @@ export default function FamilyTab() {
                 <HealthCheckup memberId={sel.id} memberGender={sel.gender} />
               ) : (
                 <>
-                  <div className="flex justify-between items-center mb-4">
-                    <span style={{ fontSize: 15, fontWeight: 700 }}>
-                      진료 기록 <span style={{ color: '#9ca3af', fontWeight: 400 }}>({recs.length})</span>
-                    </span>
-                    <div className="flex gap-2">
-                      <button onClick={() => setDelConfirm(true)} style={{ padding: '7px 14px', borderRadius: 8, border: '1px solid #fecaca', background: 'none', color: '#ef4444', fontSize: 12, cursor: 'pointer' }}>멤버 삭제</button>
-                      <button onClick={() => setAddRecord(true)} style={{ padding: '7px 16px', borderRadius: 8, background: '#0F6E56', color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ 기록 추가</button>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {[['all','전체'],['followup','추적필요'],['ongoing','진행중'],['resolved','완료']].map(([v,l]) => (
+                        <button key={v} onClick={() => setFilterStatus(v)}
+                          style={{ padding: '5px 12px', borderRadius: 16, border: filterStatus === v ? 'none' : '1px solid #e5e7eb', background: filterStatus === v ? '#0F6E56' : '#fff', color: filterStatus === v ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', fontWeight: filterStatus === v ? 700 : 400 }}>{l} {v === 'all' ? '(' + recs.length + ')' : '(' + recs.filter(r => r.status === v).length + ')'}</button>
+                      ))}
                     </div>
+                    <button onClick={() => setAddRecord(true)} style={{ padding: '8px 18px', borderRadius: 20, background: '#0F6E56', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 기록 추가</button>
                   </div>
-                  {recs.length === 0
-                    ? <div className="text-center py-16" style={{ color: '#9ca3af', fontSize: 14 }}><div style={{ fontSize: 32, marginBottom: 8 }}>📋</div>진료 기록이 없습니다</div>
-                    : <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        {recs.map(r => <RecordCard key={r.id} r={r} />)}
+                  {filteredRecs.length === 0
+                    ? <div style={{ textAlign: 'center', padding: '60px 0', color: '#9ca3af' }}>
+                        <div style={{ fontSize: 14, marginBottom: 12 }}>기록이 없습니다</div>
+                        <button onClick={() => setAddRecord(true)} style={{ padding: '9px 22px', borderRadius: 20, background: '#0F6E56', color: '#fff', border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>첫 기록 추가하기</button>
                       </div>
+                    : <div>{filteredRecs.map(r => <IssueCard key={r.id} r={r} onEdit={setEditRecord} onDelete={deleteRecord} />)}</div>
                   }
                 </>
               )}
@@ -504,6 +590,7 @@ export default function FamilyTab() {
         }
       </div>
       {Sheets}
+      {formSheet}
     </div>
   )
 }
