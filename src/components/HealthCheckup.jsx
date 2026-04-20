@@ -232,7 +232,7 @@ const CHECKUP_CATEGORIES = [
   },
 ]
 
-const CHECKUP_ITEMS = CHECKUP_CATEGORIES.flatMap(c => c.items)
+const CHECKUP_ITEMS = CHECKUP_CATEGORIES.flatMap(c => chk.items)
 const NUM_ITEMS = CHECKUP_ITEMS.filter(i => i.type !== 'text')
 
 const STATUS_COLORS = {
@@ -288,6 +288,115 @@ function detectFindingAbnormal(items) {
     if (hasWarning) result.push({ key: item.key, label: item.label, value: v })
   })
   return result
+}
+
+
+// ---- AI 검진 분석 컴포넌트 ----
+function AiCheckupAnalysis({ abnormalItems, findingItems, memberInfo }) {
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [open, setOpen] = useState(false)
+
+  const analyze = async () => {
+    setLoading(true); setError(null)
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'checkup_analysis',
+          caseData: { abnormalItems, findingItems, memberInfo }
+        })
+      })
+      if (!res.ok) throw new Error('서버 오류 ' + res.status)
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setResult(data); setOpen(true)
+    } catch(e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  const RISK_STYLE = {
+    '위험': { bg:'#fee2e2', color:'#991b1b', border:'#fca5a5' },
+    '주의': { bg:'#fef3c7', color:'#92400e', border:'#fde68a' },
+    '경계': { bg:'#fffbeb', color:'#92400e', border:'#fde68a' },
+    '정상': { bg:'#f0faf5', color:'#0F6E56', border:'#6ee7b7' },
+  }
+  const riskSt = result ? (RISK_STYLE[result.riskLevel] || RISK_STYLE['경계']) : null
+
+  return (
+    <div style={{ marginTop:14, borderTop:'1px solid #f0ede8', paddingTop:12 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>AI 검진 결과 분석</div>
+          <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>이상 항목 기반 의사 관점 종합 분석</div>
+        </div>
+        <button onClick={analyze} disabled={loading}
+          style={{ padding:'7px 16px', borderRadius:8, border:'none', background:loading?'#d1d5db':'#0F6E56', color:'#fff', fontSize:12, fontWeight:700, cursor:loading?'not-allowed':'pointer', flexShrink:0 }}>
+          {loading ? '분석 중...' : 'AI 분석'}
+        </button>
+      </div>
+      {error && <div style={{ marginTop:8, background:'#fee2e2', borderRadius:7, padding:'8px 12px', fontSize:12, color:'#991b1b' }}>오류: {error}</div>}
+      {result && open && (
+        <div style={{ marginTop:12 }}>
+          {/* 위험도 배지 */}
+          {result.riskLevel && (
+            <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:riskSt.bg, color:riskSt.color, border:'1px solid '+riskSt.border, borderRadius:8, padding:'5px 12px', marginBottom:12, fontWeight:700, fontSize:13 }}>
+              위험도: {result.riskLevel}
+            </div>
+          )}
+          {/* 임상 소견 */}
+          {result.impression && (
+            <div style={{ background:'#f8f6f2', borderRadius:9, padding:'11px 14px', marginBottom:10, border:'1px solid #f0ede8' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:5 }}>임상적 의의 / 예상 진단</div>
+              <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.8 }}>{result.impression}</div>
+            </div>
+          )}
+          {/* 환자 설명 */}
+          {result.explanation && (
+            <div style={{ background:'#eff6ff', borderRadius:9, padding:'11px 14px', marginBottom:10, border:'1px solid #bfdbfe' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#1d4ed8', marginBottom:5 }}>환자 설명 방법</div>
+              <div style={{ fontSize:13, color:'#1d4ed8', lineHeight:1.8 }}>{result.explanation}</div>
+            </div>
+          )}
+          {/* 생활습관 */}
+          {result.lifestyle && result.lifestyle.length > 0 && (
+            <div style={{ background:'#f0faf5', borderRadius:9, padding:'11px 14px', marginBottom:10, border:'1px solid #6ee7b7' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#0F6E56', marginBottom:5 }}>생활습관 교정</div>
+              {result.lifestyle.map((item, i) => (
+                <div key={i} style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.7, paddingLeft:12, position:'relative' }}>
+                  <span style={{ position:'absolute', left:0, color:'#0F6E56' }}>-</span>{item}
+                </div>
+              ))}
+            </div>
+          )}
+          {/* 치료 방향 */}
+          {result.treatment && (
+            <div style={{ background:'#fef3c7', borderRadius:9, padding:'11px 14px', marginBottom:10, border:'1px solid #fde68a' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#92400e', marginBottom:5 }}>치료 및 추가 검사</div>
+              <div style={{ fontSize:13, color:'#92400e', lineHeight:1.8 }}>{result.treatment}</div>
+            </div>
+          )}
+          {/* 추적 계획 */}
+          {result.followUp && (
+            <div style={{ background:'#f5f3ff', borderRadius:9, padding:'11px 14px', marginBottom:10, border:'1px solid #ddd6fe' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#7c3aed', marginBottom:5 }}>추적 관찰 계획</div>
+              <div style={{ fontSize:13, color:'#7c3aed', lineHeight:1.8 }}>{result.followUp}</div>
+            </div>
+          )}
+          {/* 진료 메모 */}
+          {result.doctorNote && (
+            <div style={{ background:'#f8f6f2', borderRadius:9, padding:'10px 13px', border:'1px solid #e5e7eb' }}>
+              <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:4 }}>처방/진료 주의사항</div>
+              <div style={{ fontSize:12, color:'#374151', lineHeight:1.7 }}>{result.doctorNote}</div>
+            </div>
+          )}
+          <button onClick={() => setOpen(false)} style={{ marginTop:8, fontSize:11, color:'#9ca3af', background:'none', border:'none', cursor:'pointer' }}>접기</button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function HealthCheckup({ memberId, memberGender }) {
@@ -427,7 +536,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
     const sorted = [...checkups].sort((a,b) => a.date.localeCompare(b.date))
     const result = {}
     NUM_ITEMS.forEach(item => {
-      result[item.key] = sorted.filter(c => c.items?.[item.key]!=null).map(c => ({ date: c.date, value: parseFloat(c.items[item.key]) }))
+      result[item.key] = sorted.filter(c => chk.items?.[item.key]!=null).map(c => ({ date: chk.date, value: parseFloat(chk.items[item.key]) }))
     })
     return result
   }, [checkups])
@@ -615,27 +724,27 @@ export default function HealthCheckup({ memberId, memberGender }) {
             <div style={{ marginBottom:10 }}>검진 기록이 없습니다</div>
             <button onClick={() => setShowAdd(true)} style={{ padding:'8px 20px', borderRadius:20, background:'#0F6E56', color:'#fff', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 검진 기록 추가</button>
           </div>
-        : checkups.map(c => {
-            const abnormal = detectAbnormal(c.items, memberGender)
-            const findingAbnormal = detectFindingAbnormal(c.items)
-            const isExpanded = expandedCheckup === c.id
-            const filledItems = CHECKUP_ITEMS.filter(item => c.items?.[item.key] != null && c.items[item.key] !== '')
+        : checkups.map(chk => {
+            const abnormal = detectAbnormal(chk.items, memberGender)
+            const findingAbnormal = detectFindingAbnormal(chk.items)
+            const isExpanded = expandedCheckup === chk.id
+            const filledItems = CHECKUP_ITEMS.filter(item => chk.items?.[item.key] != null && chk.items[item.key] !== '')
 
             return (
-              <div key={c.id} style={{ background:'#fff', borderRadius:12, marginBottom:12, border: (abnormal.length>0||findingAbnormal.length>0) ? '1px solid #fde68a' : '1px solid #f0ede8', overflow:'hidden' }}>
+              <div key={chk.id} style={{ background:'#fff', borderRadius:12, marginBottom:12, border: (abnormal.length>0||findingAbnormal.length>0) ? '1px solid #fde68a' : '1px solid #f0ede8', overflow:'hidden' }}>
                 {/* 카드 헤더 */}
-                <div style={{ padding:'14px 16px', cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }} onClick={() => setExpandedCheckup(isExpanded ? null : c.id)}>
+                <div style={{ padding:'14px 16px', cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }} onClick={() => setExpandedCheckup(isExpanded ? null : chk.id)}>
                   <div>
-                    <div style={{ fontSize:14, fontWeight:700, color:'#1a1a1a', marginBottom:4 }}>{c.date} 검진</div>
+                    <div style={{ fontSize:14, fontWeight:700, color:'#1a1a1a', marginBottom:4 }}>{chk.date} 검진</div>
                     <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
                       <span style={{ fontSize:11, color:'#9ca3af' }}>{filledItems.length}개 항목</span>
                       {abnormal.length > 0 && <span style={{ fontSize:11, background:'#fef3c7', color:'#92400e', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>{abnormal.length}개 수치 이상</span>}
                       {findingAbnormal.length > 0 && <span style={{ fontSize:11, background:'#fee2e2', color:'#991b1b', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>{findingAbnormal.length}개 소견 이상</span>}
-                      {(c.imagingFiles||[]).length > 0 && <span style={{ fontSize:11, background:'#f5f3ff', color:'#7c3aed', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>영상 {(c.imagingFiles||[]).length}장</span>}
+                      {(chk.imagingFiles||[]).length > 0 && <span style={{ fontSize:11, background:'#f5f3ff', color:'#7c3aed', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>영상 {(chk.imagingFiles||[]).length}장</span>}
                     </div>
                   </div>
                   <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-                    <button onClick={e => { e.stopPropagation(); delCheckup(c.id) }} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
+                    <button onClick={e => { e.stopPropagation(); delCheckup(chk.id) }} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
                     <span style={{ fontSize:12, color:'#9ca3af' }}>{isExpanded?'v':'>'}</span>
                   </div>
                 </div>
@@ -655,37 +764,41 @@ export default function HealthCheckup({ memberId, memberGender }) {
                 {isExpanded && (
                   <div style={{ borderTop:'1px solid #f0ede8', padding:'16px' }}>
                     {CHECKUP_CATEGORIES.map(cat => {
-                      const catItems = cat.items.filter(item => c.items?.[item.key] != null && c.items[item.key] !== '')
+                      const catItems = cat.items.filter(item => chk.items?.[item.key] != null && chk.items[item.key] !== '')
                       if (catItems.length === 0) return null
                       return (
                         <div key={cat.key} style={{ marginBottom:16 }}>
                           <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8', textTransform:'uppercase', letterSpacing:'0.5px' }}>{cat.label}</div>
-                          {cat.items.some(i => i.type === 'text')
-                            ? <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                                {catItems.map(item => {
-                                  const isAbnormal = findingAbnormal.find(f => f.key === item.key)
-                                  return (
-                                    <div key={item.key} style={{ background:isAbnormal?'#fee2e2':'#f8f6f2', borderRadius:7, padding:'8px 11px', border:isAbnormal?'1px solid #fca5a5':'none' }}>
-                                      <div style={{ fontSize:11, color:'#9ca3af', marginBottom:3 }}>{item.label}</div>
-                                      <div style={{ fontSize:13, color:isAbnormal?'#991b1b':'#1a1a1a', lineHeight:1.6 }}>{c.items[item.key]}</div>
-                                    </div>
-                                  )
-                                })}
-                              </div>
-                            : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(100px,1fr))', gap:6 }}>
-                                {catItems.map(item => {
-                                  const v = parseFloat(c.items[item.key])
+                          {true && (
+                              <div>
+                                {catItems.filter(item => item.type === 'text').length > 0 && (
+                                  <div style={{ display:'flex', flexDirection:'column', gap:6, marginBottom:8 }}>
+                                    {catItems.filter(item => item.type === 'text').map(item => {
+                                      const isAbnormal = findingAbnormal.find(f => f.key === item.key)
+                                      return (
+                                        <div key={item.key} style={{ background:isAbnormal?'#fee2e2':'#f8f6f2', borderRadius:7, padding:'8px 11px', border:isAbnormal?'1px solid #fca5a5':'none' }}>
+                                          <div style={{ fontSize:11, color:'#9ca3af', marginBottom:3 }}>{item.label}</div>
+                                          <div style={{ fontSize:13, color:isAbnormal?'#991b1b':'#1a1a1a', lineHeight:1.6 }}>{chk.items[item.key]}</div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                                {catItems.filter(item => item.type !== 'text').length > 0 && (
+                                  <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(100px,1fr))', gap:6 }}>
+                                {catItems.filter(item => item.type !== 'text').map(item => {
+                                  const v = parseFloat(chk.items[item.key])
                                   const ws = item.warn?.(v, memberGender)
                                   const clr = ws ? (STATUS_COLORS[ws] || '#6b7280') : '#374151'
                                   const td = trendData[item.key]
-                                  const prev = td?.find(d => d.date < c.date)
+                                  const prev = td?.find(d => d.date < chk.date)
                                   const trend = prev ? (v > prev.value ? '^' : v < prev.value ? 'v' : '') : ''
                                   const trendClr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
                                   return (
                                     <div key={item.key} style={{ background:ws?(STATUS_COLORS[ws]||'#6b7280')+'12':'#f8f6f2', borderRadius:7, padding:'7px 9px', border:ws?'1px solid '+(STATUS_COLORS[ws]||'#6b7280')+'30':'none' }}>
                                       <div style={{ fontSize:10, color:'#9ca3af', marginBottom:2 }}>{item.label}</div>
                                       <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
-                                        <span style={{ fontSize:15, fontWeight:700, color:clr }}>{c.items[item.key]}</span>
+                                        <span style={{ fontSize:15, fontWeight:700, color:clr }}>{chk.items[item.key]}</span>
                                         {item.unit && <span style={{ fontSize:10, color:'#9ca3af' }}>{item.unit}</span>}
                                         {trend && <span style={{ fontSize:11, color:trendClr, fontWeight:700 }}>{trend}</span>}
                                       </div>
@@ -694,17 +807,19 @@ export default function HealthCheckup({ memberId, memberGender }) {
                                   )
                                 })}
                               </div>
-                          }
+                                )}
+                              </div>
+                          )}
                         </div>
                       )
                     })}
 
                     {/* 영상검사 이미지 */}
-                    {(c.imagingFiles||[]).length > 0 && (
+                    {(chk.imagingFiles||[]).length > 0 && (
                       <div style={{ marginBottom:14 }}>
                         <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8', textTransform:'uppercase', letterSpacing:'0.5px' }}>영상검사 이미지</div>
                         <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                          {c.imagingFiles.map((f,i) => (
+                          {chk.imagingFiles.map((f,i) => (
                             <div key={i} style={{ textAlign:'center' }}>
                               <img src={f.url} alt={f.label} onClick={() => window.open(f.url,'_blank')}
                                 style={{ width:100, height:100, objectFit:'cover', borderRadius:8, border:'1px solid #ddd6fe', cursor:'zoom-in' }} />
@@ -715,7 +830,14 @@ export default function HealthCheckup({ memberId, memberGender }) {
                       </div>
                     )}
 
-                    {c.note && <div style={{ background:'#fffbeb', borderRadius:8, padding:'8px 12px', fontSize:12, color:'#92400e', lineHeight:1.6 }}>{c.note}</div>}
+                    {chk.note && <div style={{ background:'#fffbeb', borderRadius:8, padding:'8px 12px', fontSize:12, color:'#92400e', lineHeight:1.6 }}>{chk.note}</div>}
+                    {(abnormal.length > 0 || findingAbnormal.length > 0) && (
+                      <AiCheckupAnalysis
+                        abnormalItems={abnormal}
+                        findingItems={findingAbnormal}
+                        memberInfo={{ gender: memberGender, age: '' }}
+                      />
+                    )}
                   </div>
                 )}
               </div>
