@@ -1,142 +1,245 @@
-import { useState, useEffect, useMemo } from 'react'
-import { collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc, serverTimestamp, query, orderBy, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Sheet } from './ui'
 
-// ---- 전체 건강검진 항목 (카테고리별) ----
+const CLOUD_NAME = 'dfcvmvlen'
+const UPLOAD_PRESET = 'clinicnote_uploads'
+
+async function uploadToCloudinary(file, onProgress) {
+  if (file.size > 20 * 1024 * 1024) throw new Error(file.name + ' 파일이 20MB를 초과합니다.')
+  const ext = file.name.split('.').pop().toLowerCase()
+  const isImg = ['jpg','jpeg','png','gif','webp'].includes(ext)
+  const fd = new FormData()
+  fd.append('file', file)
+  fd.append('upload_preset', UPLOAD_PRESET)
+  fd.append('folder', 'clinicnote_checkup')
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/' + (isImg ? 'image' : 'raw') + '/upload')
+    xhr.upload.onprogress = (e) => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100)) }
+    xhr.onload = () => {
+      if (xhr.status === 200) { const r = JSON.parse(xhr.responseText); resolve({ url: r.secure_url, name: file.name, mime: file.type, size: file.size }) }
+      else reject(new Error('업로드 실패 (' + xhr.status + ')'))
+    }
+    xhr.onerror = () => reject(new Error('네트워크 오류'))
+    xhr.send(fd)
+  })
+}
+
+// ---- 검진 항목 정의 ----
+// type: 'num' = 숫자입력, 'text' = 소견문자입력
 const CHECKUP_CATEGORIES = [
   {
     key: 'body', label: '신체계측',
     items: [
-      { key:'height',     label:'신장(키)',         unit:'cm'  },
-      { key:'weight',     label:'체중',             unit:'kg'  },
-      { key:'bmi',        label:'BMI',              unit:'',    warn:(v) => v>=30?'비만':v>=25?'과체중':v<18.5?'저체중':null },
-      { key:'waist',      label:'허리둘레',           unit:'cm',  warn:(v,g) => (g==='여'?v>=85:v>=90)?'위험':null },
-      { key:'bodyFat',    label:'체지방률',           unit:'%'   },
-      { key:'abdomFat',   label:'복부지방률',          unit:''    },
+      { key:'height',   label:'신장',     unit:'cm',  type:'num' },
+      { key:'weight',   label:'체중',     unit:'kg',  type:'num' },
+      { key:'bmi',      label:'BMI',      unit:'',    type:'num', warn:(v) => v>=30?'비만':v>=25?'과체중':v<18.5?'저체중':null },
+      { key:'waist',    label:'허리둘레',  unit:'cm',  type:'num', warn:(v,g) => (g==='여'?v>=85:v>=90)?'위험':null },
+      { key:'bodyFat',  label:'체지방률',  unit:'%',   type:'num' },
+      { key:'abdomFat', label:'복부지방률', unit:'',    type:'num' },
     ]
   },
   {
     key: 'vital', label: '활력징후',
     items: [
-      { key:'sbp',   label:'수축기혈압',  unit:'mmHg', warn:(v) => v>=140?'위험':v>=130?'주의':null },
-      { key:'dbp',   label:'이완기혈압',  unit:'mmHg', warn:(v) => v>=90?'위험':v>=80?'주의':null },
-      { key:'hr',    label:'심박수',     unit:'회/분' },
+      { key:'sbp', label:'수축기혈압', unit:'mmHg', type:'num', warn:(v) => v>=140?'위험':v>=130?'주의':null },
+      { key:'dbp', label:'이완기혈압', unit:'mmHg', type:'num', warn:(v) => v>=90?'위험':v>=80?'주의':null },
+      { key:'hr',  label:'심박수',    unit:'회/분', type:'num' },
     ]
   },
   {
     key: 'cbc', label: '혈액일반 (CBC)',
     items: [
-      { key:'wbc',         label:'WBC(백혈구)',       unit:'10^3/uL', warn:(v) => v>10?'높음':v<4?'낮음':null },
-      { key:'rbc',         label:'RBC(적혈구)',       unit:'10^6/uL' },
-      { key:'hemoglobin',  label:'혈색소(Hb)',        unit:'g/dL',    warn:(v,g) => (g==='여'?v<12:v<13)?'빈혈':null },
-      { key:'hct',         label:'HCT(헤마토크릿)',    unit:'%'       },
-      { key:'platelet',    label:'혈소판',            unit:'10^3/uL', warn:(v) => v<150?'낮음':v>400?'높음':null },
-      { key:'mcv',         label:'MCV',              unit:'fL'      },
-      { key:'mch',         label:'MCH',              unit:'pg'      },
-      { key:'mchc',        label:'MCHC',             unit:'g/dL'    },
-      { key:'rdw',         label:'RDW',              unit:'%'       },
-      { key:'mpv',         label:'MPV',              unit:'fL'      },
-      { key:'pdw',         label:'PDW',              unit:'%'       },
-      { key:'pct',         label:'PCT',              unit:'%'       },
-      { key:'neutrophil',  label:'중성구(Neutrophil)', unit:'%'      },
-      { key:'lymphocyte',  label:'림프구(Lymphocyte)', unit:'%'      },
-      { key:'monocyte',    label:'단핵구(Monocyte)',   unit:'%'      },
-      { key:'eosinophil',  label:'호산구(Eosinophil)', unit:'%'      },
-      { key:'basophil',    label:'호염기구(Basophil)', unit:'%'      },
+      { key:'wbc',            label:'WBC',            unit:'10^3/uL', type:'num', warn:(v) => v>10?'높음':v<4?'낮음':null },
+      { key:'rbc',            label:'RBC',            unit:'10^6/uL', type:'num' },
+      { key:'hemoglobin',     label:'혈색소(Hb)',       unit:'g/dL',   type:'num', warn:(v,g) => (g==='여'?v<12:v<13)?'빈혈':null },
+      { key:'hct',            label:'HCT',            unit:'%',       type:'num' },
+      { key:'platelet',       label:'혈소판',           unit:'10^3/uL', type:'num', warn:(v) => v<150?'낮음':v>400?'높음':null },
+      { key:'mcv',            label:'MCV',            unit:'fL',      type:'num' },
+      { key:'mch',            label:'MCH',            unit:'pg',      type:'num' },
+      { key:'mchc',           label:'MCHC',           unit:'g/dL',    type:'num' },
+      { key:'rdw',            label:'RDW',            unit:'%',       type:'num' },
+      { key:'mpv',            label:'MPV',            unit:'fL',      type:'num' },
+      { key:'pdw',            label:'PDW',            unit:'%',       type:'num' },
+      { key:'pct',            label:'PCT',            unit:'%',       type:'num' },
+      { key:'neutrophil',     label:'중성구(Seg.)',     unit:'%',       type:'num' },
+      { key:'bandNeutrophil', label:'간상핵중성구(Band)',unit:'%',       type:'num' },
+      { key:'lymphocyte',     label:'림프구',           unit:'%',       type:'num' },
+      { key:'monocyte',       label:'단핵구',           unit:'%',       type:'num' },
+      { key:'eosinophil',     label:'호산구',           unit:'%',       type:'num' },
+      { key:'basophil',       label:'호염기구',          unit:'%',       type:'num' },
+      { key:'blast',          label:'Blast',          unit:'%',       type:'num' },
+      { key:'promyelocyte',   label:'Promyelocyte',   unit:'%',       type:'num' },
+      { key:'myelocyte',      label:'Myelocyte',      unit:'%',       type:'num' },
+      { key:'metamyelocyte',  label:'Metamyelocyte',  unit:'%',       type:'num' },
     ]
   },
   {
     key: 'lipid', label: '지질검사',
     items: [
-      { key:'tc',  label:'총콜레스테롤',   unit:'mg/dL', warn:(v) => v>=240?'위험':v>=200?'경계':null },
-      { key:'ldl', label:'LDL콜레스테롤',  unit:'mg/dL', warn:(v) => v>=160?'위험':v>=130?'경계':null },
-      { key:'hdl', label:'HDL콜레스테롤',  unit:'mg/dL', warn:(v) => v<40?'위험':v<60?'경계':null },
-      { key:'tg',  label:'중성지방(TG)',   unit:'mg/dL', warn:(v) => v>=500?'위험':v>=200?'높음':v>=150?'경계':null },
+      { key:'tc',  label:'총콜레스테롤',  unit:'mg/dL', type:'num', warn:(v) => v>=240?'위험':v>=200?'경계':null },
+      { key:'ldl', label:'LDL콜레스테롤', unit:'mg/dL', type:'num', warn:(v) => v>=160?'위험':v>=130?'경계':null },
+      { key:'hdl', label:'HDL콜레스테롤', unit:'mg/dL', type:'num', warn:(v) => v<40?'위험':v<60?'경계':null },
+      { key:'tg',  label:'중성지방',     unit:'mg/dL', type:'num', warn:(v) => v>=500?'위험':v>=200?'높음':v>=150?'경계':null },
     ]
   },
   {
     key: 'glucose', label: '혈당/당뇨',
     items: [
-      { key:'glucose', label:'공복혈당',    unit:'mg/dL', warn:(v) => v>=126?'당뇨':v>=100?'공복혈당장애':null },
-      { key:'hba1c',   label:'당화혈색소',   unit:'%',     warn:(v) => v>=6.5?'당뇨':v>=5.7?'주의':null },
+      { key:'glucose', label:'공복혈당',  unit:'mg/dL', type:'num', warn:(v) => v>=126?'당뇨':v>=100?'공복혈당장애':null },
+      { key:'hba1c',   label:'당화혈색소', unit:'%',     type:'num', warn:(v) => v>=6.5?'당뇨':v>=5.7?'주의':null },
     ]
   },
   {
     key: 'liver', label: '간기능',
     items: [
-      { key:'ast',              label:'AST(GOT)',      unit:'U/L',   warn:(v) => v>=40?'주의':null },
-      { key:'alt',              label:'ALT(GPT)',      unit:'U/L',   warn:(v) => v>=56?'위험':v>=40?'주의':null },
-      { key:'ggt',              label:'감마GTP',        unit:'U/L',   warn:(v) => v>=51?'주의':null },
-      { key:'alp',              label:'ALP',           unit:'U/L'   },
-      { key:'ldh',              label:'LDH',           unit:'U/L',   warn:(v) => v>=214?'높음':null },
-      { key:'bilirubin',        label:'총빌리루빈',      unit:'mg/dL' },
-      { key:'directBilirubin',  label:'직접빌리루빈',    unit:'mg/dL' },
-      { key:'protein',          label:'총단백',         unit:'g/dL'  },
-      { key:'albumin',          label:'알부민',         unit:'g/dL'  },
-      { key:'globulin',         label:'글로불린',        unit:'g/dL'  },
-      { key:'agRatio',          label:'A/G ratio',     unit:''      },
+      { key:'ast',             label:'AST(GOT)',  unit:'U/L',   type:'num', warn:(v) => v>=40?'주의':null },
+      { key:'alt',             label:'ALT(GPT)',  unit:'U/L',   type:'num', warn:(v) => v>=56?'위험':v>=40?'주의':null },
+      { key:'ggt',             label:'감마GTP',    unit:'U/L',   type:'num', warn:(v) => v>=51?'주의':null },
+      { key:'alp',             label:'ALP',       unit:'U/L',   type:'num' },
+      { key:'ldh',             label:'LDH',       unit:'U/L',   type:'num', warn:(v) => v>=214?'높음':null },
+      { key:'bilirubin',       label:'총빌리루빈',  unit:'mg/dL', type:'num' },
+      { key:'directBilirubin', label:'직접빌리루빈', unit:'mg/dL', type:'num' },
+      { key:'protein',         label:'총단백',     unit:'g/dL',  type:'num' },
+      { key:'albumin',         label:'알부민',     unit:'g/dL',  type:'num' },
+      { key:'globulin',        label:'글로불린',    unit:'g/dL',  type:'num' },
+      { key:'agRatio',         label:'A/G ratio', unit:'',      type:'num' },
     ]
   },
   {
     key: 'kidney', label: '신장기능',
     items: [
-      { key:'bun',        label:'BUN(요소질소)',    unit:'mg/dL' },
-      { key:'creatinine', label:'크레아티닌',       unit:'mg/dL', warn:(v,g) => (g==='여'?v>=1.3:v>=1.5)?'주의':null },
-      { key:'egfr',       label:'eGFR',           unit:'mL/min' },
-      { key:'bcRatio',    label:'BUN/Cr ratio',   unit:''      },
+      { key:'bun',        label:'BUN',        unit:'mg/dL',   type:'num' },
+      { key:'creatinine', label:'크레아티닌',   unit:'mg/dL',   type:'num', warn:(v,g) => (g==='여'?v>=1.3:v>=1.5)?'주의':null },
+      { key:'egfr',       label:'eGFR',       unit:'mL/min',  type:'num' },
+      { key:'bcRatio',    label:'BUN/Cr',     unit:'',        type:'num' },
     ]
   },
   {
     key: 'electrolyte', label: '전해질',
     items: [
-      { key:'sodium',    label:'나트륨(Na)',    unit:'mEq/L' },
-      { key:'potassium', label:'칼륨(K)',       unit:'mEq/L', warn:(v) => v>5.5?'높음':v<3.5?'낮음':null },
-      { key:'chloride',  label:'염소(Cl)',      unit:'mEq/L' },
-      { key:'calcium',   label:'칼슘(Ca)',      unit:'mg/dL' },
-      { key:'phosphorus',label:'인(P)',         unit:'mg/dL' },
+      { key:'sodium',    label:'나트륨(Na)', unit:'mEq/L', type:'num' },
+      { key:'potassium', label:'칼륨(K)',    unit:'mEq/L', type:'num', warn:(v) => v>5.5?'높음':v<3.5?'낮음':null },
+      { key:'chloride',  label:'염소(Cl)',   unit:'mEq/L', type:'num' },
     ]
   },
   {
     key: 'thyroid', label: '갑상선',
     items: [
-      { key:'tsh',    label:'TSH',      unit:'mIU/L', warn:(v) => v>4.5?'저하증의심':v<0.4?'항진증의심':null },
-      { key:'t3',     label:'T3',       unit:'nmol/L' },
-      { key:'freeT4', label:'Free T4',  unit:'ng/dL'  },
+      { key:'tsh',    label:'TSH',     unit:'mIU/L', type:'num', warn:(v) => v>4.5?'저하증의심':v<0.4?'항진증의심':null },
+      { key:'t3',     label:'T3',      unit:'nmol/L',type:'num' },
+      { key:'freeT4', label:'Free T4', unit:'ng/dL', type:'num' },
     ]
   },
   {
-    key: 'other', label: '기타 검사',
+    key: 'other_lab', label: '기타 혈액검사',
     items: [
-      { key:'uric',      label:'요산',           unit:'mg/dL', warn:(v,g) => (g==='여'?v>=6:v>=7)?'주의':null },
-      { key:'crp',       label:'CRP(정량)',       unit:'mg/dL', warn:(v) => v>=1?'높음':null },
-      { key:'vitaminD',  label:'비타민D',          unit:'ng/mL', warn:(v) => v<20?'결핍':v<30?'부족':null },
-      { key:'amylase',   label:'아밀라제',          unit:'U/L'   },
-      { key:'lipase',    label:'리파제',            unit:'U/L'   },
+      { key:'uric',      label:'요산',          unit:'mg/dL', type:'num', warn:(v,g) => (g==='여'?v>=6:v>=7)?'주의':null },
+      { key:'crp',       label:'CRP(정량)',      unit:'mg/dL', type:'num', warn:(v) => v>=1?'높음':null },
+      { key:'vitaminD',  label:'비타민D',         unit:'ng/mL', type:'num', warn:(v) => v<20?'결핍':v<30?'부족':null },
+      { key:'amylase',   label:'아밀라제',         unit:'U/L',   type:'num' },
+      { key:'lipase',    label:'리파제',           unit:'U/L',   type:'num' },
+      { key:'raFactor',  label:'RA인자(RF)',      unit:'IU/mL', type:'num', warn:(v) => v>=14?'높음':null },
+      { key:'calcium',   label:'칼슘(Ca)',         unit:'mg/dL', type:'num' },
+      { key:'phosphorus',label:'인(P)',            unit:'mg/dL', type:'num' },
+      { key:'occultBlood',label:'대변잠혈(Occult)', unit:'',      type:'text' },
+      { key:'rpr',       label:'RPR(매독)',        unit:'',      type:'text' },
+    ]
+  },
+  {
+    key: 'hepatitis', label: '간염 / 감염',
+    items: [
+      { key:'havAb',  label:'A형간염 항체(HAV Ab)', unit:'', type:'text' },
+      { key:'hbsAg',  label:'B형간염 항원(HBs Ag)', unit:'', type:'text' },
+      { key:'hbsAb',  label:'B형간염 항체(HBs Ab)', unit:'', type:'text' },
+      { key:'hcvAb',  label:'C형간염 항체(HCV Ab)', unit:'', type:'text' },
     ]
   },
   {
     key: 'tumor', label: '종양표지자',
     items: [
-      { key:'cea',   label:'CEA',    unit:'ng/mL', warn:(v) => v>=5?'높음':null },
-      { key:'afp',   label:'AFP',    unit:'ng/mL', warn:(v) => v>=7?'높음':null },
-      { key:'ca125', label:'CA-125', unit:'U/mL',  warn:(v) => v>=35?'높음':null },
-      { key:'ca199', label:'CA19-9', unit:'U/mL',  warn:(v) => v>=37?'높음':null },
+      { key:'cea',   label:'CEA',    unit:'ng/mL', type:'num', warn:(v) => v>=5?'높음':null },
+      { key:'afp',   label:'AFP',    unit:'ng/mL', type:'num', warn:(v) => v>=7?'높음':null },
+      { key:'ca125', label:'CA-125', unit:'U/mL',  type:'num', warn:(v) => v>=35?'높음':null },
+      { key:'ca199', label:'CA19-9', unit:'U/mL',  type:'num', warn:(v) => v>=37?'높음':null },
+    ]
+  },
+  {
+    key: 'eye', label: '안과검사',
+    items: [
+      { key:'visionL',    label:'시력(좌)',    unit:'', type:'num' },
+      { key:'visionR',    label:'시력(우)',    unit:'', type:'num' },
+      { key:'corrVisionL',label:'교정시력(좌)', unit:'', type:'num' },
+      { key:'corrVisionR',label:'교정시력(우)', unit:'', type:'num' },
+      { key:'iopL',       label:'안압(좌)',    unit:'mmHg', type:'num' },
+      { key:'iopR',       label:'안압(우)',    unit:'mmHg', type:'num' },
+      { key:'fundusL',    label:'안저(좌) 소견', unit:'', type:'text' },
+      { key:'fundusR',    label:'안저(우) 소견', unit:'', type:'text' },
+    ]
+  },
+  {
+    key: 'hearing', label: '청력검사',
+    items: [
+      { key:'hearingL',     label:'청력검사(좌)',   unit:'dB', type:'num' },
+      { key:'hearingR',     label:'청력검사(우)',   unit:'dB', type:'num' },
+      { key:'corrHearingL', label:'교정청력(좌)',   unit:'dB', type:'num' },
+      { key:'corrHearingR', label:'교정청력(우)',   unit:'dB', type:'num' },
+    ]
+  },
+  {
+    key: 'bone', label: '골밀도 (DEXA)',
+    items: [
+      { key:'bmdSpineT', label:'T-score(요추)', unit:'', type:'num', warn:(v) => v<=-2.5?'골다공증':v<=-1?'골감소증':null },
+      { key:'bmdHipT',   label:'T-score(대퇴)', unit:'', type:'num', warn:(v) => v<=-2.5?'골다공증':v<=-1?'골감소증':null },
+      { key:'bmdSpineZ', label:'Z-score(요추)', unit:'', type:'num' },
+    ]
+  },
+  {
+    key: 'urine', label: '소변검사 (RU)',
+    items: [
+      { key:'urinePh',          label:'pH(소변)',         unit:'', type:'num' },
+      { key:'urineProtein',     label:'단백(소변)',         unit:'', type:'text' },
+      { key:'urineGlucose',     label:'당(소변)',           unit:'', type:'text' },
+      { key:'urineBlood',       label:'잠혈(소변)',         unit:'', type:'text' },
+      { key:'urineWbc',         label:'WBC(소변)',         unit:'', type:'text' },
+      { key:'urineNitrite',     label:'아질산염(Nitrite)', unit:'', type:'text' },
+      { key:'urineKetone',      label:'케톤(소변)',         unit:'', type:'text' },
+      { key:'urineUrobilinogen',label:'우로빌리노겐',        unit:'', type:'text' },
+      { key:'urineBilirubin',   label:'빌리루빈(소변)',      unit:'', type:'text' },
+      { key:'specificGravity',  label:'비중(소변)',         unit:'', type:'num' },
+      { key:'urineMicroscopy',  label:'현미경(소변)',       unit:'', type:'text' },
+    ]
+  },
+  {
+    key: 'imaging', label: '영상/기능검사 소견',
+    items: [
+      { key:'ecg',         label:'심전도',     unit:'', type:'text' },
+      { key:'chestXray',   label:'흉부X선',     unit:'', type:'text' },
+      { key:'abdomUs',     label:'복부초음파',   unit:'', type:'text' },
+      { key:'thyroidUs',   label:'갑상선초음파',  unit:'', type:'text' },
+      { key:'breastUs',    label:'유방초음파',   unit:'', type:'text' },
+      { key:'mammography', label:'유방촬영',    unit:'', type:'text' },
+      { key:'egd',         label:'위내시경',    unit:'', type:'text' },
+      { key:'colonoscopy', label:'대장내시경',   unit:'', type:'text' },
+      { key:'mri',         label:'MRI',        unit:'', type:'text' },
+      { key:'ct',          label:'CT',         unit:'', type:'text' },
+      { key:'xray',        label:'기타X선',         unit:'', type:'text' },
+      { key:'gyCytology',  label:'자궁경부세포검사', unit:'', type:'text' },
+      { key:'etc',         label:'기타 소견',        unit:'', type:'text' },
     ]
   },
 ]
 
-// 전체 항목 flat list
 const CHECKUP_ITEMS = CHECKUP_CATEGORIES.flatMap(c => c.items)
-
-// AI 판독용 키 목록 (JSON 프롬프트용)
-const ALL_KEYS_JSON = '{' + CHECKUP_ITEMS.map(i => '"'+i.key+'":null').join(',') + ',"checkupDate":null}'
+const NUM_ITEMS = CHECKUP_ITEMS.filter(i => i.type !== 'text')
 
 const STATUS_COLORS = {
   '위험':'#dc2626','주의':'#d97706','공복혈당장애':'#d97706','경계':'#d97706',
-  '높음':'#d97706','당뇨':'#dc2626','빈혈':'#dc2626','비만':'#d97706',
-  '과체중':'#d97706','저체중':'#9ca3af','저하증의심':'#2563eb','항진증의심':'#dc2626',
-  '낮음':'#9ca3af','결핍':'#dc2626','부족':'#d97706',
+  '높음':'#d97706','당뇨':'#dc2626','빈혈':'#dc2626','비만':'#d97706','과체중':'#d97706',
+  '저체중':'#9ca3af','저하증의심':'#2563eb','항진증의심':'#dc2626','낮음':'#9ca3af',
+  '결핍':'#dc2626','부족':'#d97706','골다공증':'#dc2626','골감소증':'#d97706',
 }
 
 function Sparkline({ values, color = '#0F6E56', width = 100, height = 36 }) {
@@ -147,7 +250,7 @@ function Sparkline({ values, color = '#0F6E56', width = 100, height = 36 }) {
   const pts = nums.map((v,i) => {
     const x = pad + (i/(nums.length-1))*(width-2*pad)
     const y = height - pad - ((v-min)/range)*(height-2*pad)
-    return x.toFixed(1) + ',' + y.toFixed(1)
+    return x.toFixed(1)+','+y.toFixed(1)
   }).join(' ')
   return (
     <svg width={width} height={height} style={{ overflow:'visible' }}>
@@ -161,6 +264,32 @@ function Sparkline({ values, color = '#0F6E56', width = 100, height = 36 }) {
   )
 }
 
+// 이상 항목 감지
+function detectAbnormal(items, gender) {
+  const result = []
+  NUM_ITEMS.forEach(item => {
+    if (!item.warn) return
+    const v = parseFloat(items?.[item.key])
+    if (isNaN(v)) return
+    const ws = item.warn(v, gender)
+    if (ws) result.push({ key: item.key, label: item.label, value: v, unit: item.unit, status: ws })
+  })
+  return result
+}
+
+// 소견 이상 감지 (특정 키워드)
+const FINDING_WARNINGS = ['의심','이상','병변','용종','암','종양','결절','낭종','협착','역류','만성','급성','비정상','비정형','재검','추적','요망']
+function detectFindingAbnormal(items) {
+  const result = []
+  CHECKUP_ITEMS.filter(i => i.type === 'text').forEach(item => {
+    const v = items?.[item.key]
+    if (!v) return
+    const hasWarning = FINDING_WARNINGS.some(w => v.includes(w))
+    if (hasWarning) result.push({ key: item.key, label: item.label, value: v })
+  })
+  return result
+}
+
 export default function HealthCheckup({ memberId, memberGender }) {
   const [checkups, setCheckups] = useState([])
   const [loading, setLoading] = useState(true)
@@ -171,11 +300,12 @@ export default function HealthCheckup({ memberId, memberGender }) {
   const [newNote, setNewNote] = useState('')
   const [saving, setSaving] = useState(false)
   const [scanning, setScanning] = useState(false)
-  const [scanImg, setScanImg] = useState(null)
   const [scanImgs, setScanImgs] = useState([])
   const [scanResults, setScanResults] = useState([])
-  const [scanError, setScanError] = useState(null)
-  const [openCats, setOpenCats] = useState(() => Object.fromEntries(CHECKUP_CATEGORIES.map(c => [c.key, c.key === 'body' || c.key === 'vital' || c.key === 'lipid' || c.key === 'glucose'])))
+  const [openCats, setOpenCats] = useState(() => ({ body:true, vital:true, lipid:true, glucose:true }))
+  const [imagingFiles, setImagingFiles] = useState([])
+  const [uploadProgress, setUploadProgress] = useState({})
+  const [expandedCheckup, setExpandedCheckup] = useState(null)
 
   useEffect(() => {
     if (!memberId) return
@@ -183,15 +313,52 @@ export default function HealthCheckup({ memberId, memberGender }) {
     return onSnapshot(q, snap => { setCheckups(snap.docs.map(d => ({id:d.id,...d.data()}))); setLoading(false) })
   }, [memberId])
 
+  // 이상 항목 자동 트래킹 등록
+  const autoTrack = async (checkupDate, abnormal, findingAbnormal) => {
+    const allAbnormal = [
+      ...abnormal.map(a => ({ title: a.label + ' 이상 (' + a.value + a.unit + ', ' + a.status + ')', source: 'lab' })),
+      ...findingAbnormal.map(f => ({ title: f.label + ' 이상 소견', source: 'finding' }))
+    ]
+    if (allAbnormal.length === 0) return
+    // 기존 records 조회
+    const existing = await getDocs(collection(db,'familyMembers',memberId,'records'))
+    const existingTitles = existing.docs.map(d => d.data().title || '')
+    const nextVisit = new Date(checkupDate)
+    nextVisit.setFullYear(nextVisit.getFullYear() + 1)
+    const nextVisitStr = nextVisit.toISOString().slice(0,10)
+    for (const item of allAbnormal) {
+      const alreadyExists = existingTitles.some(t => t.includes(item.title.split('(')[0].trim()))
+      if (!alreadyExists) {
+        await addDoc(collection(db,'familyMembers',memberId,'records'), {
+          title: item.title,
+          date: checkupDate,
+          nextVisit: nextVisitStr,
+          status: 'followup',
+          note: checkupDate + ' 건강검진에서 발견된 이상 항목. 1년 후 재검 권고.',
+          images: [], cloudFiles: [],
+          createdAt: serverTimestamp()
+        })
+      }
+    }
+  }
+
   const saveCheckup = async () => {
-    const filtered = Object.fromEntries(Object.entries(newItems).filter(([,v]) => v!==''))
-    if (Object.keys(filtered).length === 0) return
+    const filteredNum = Object.fromEntries(Object.entries(newItems).filter(([,v]) => v!==''))
+    if (Object.keys(filteredNum).length === 0 && imagingFiles.length === 0) return
     setSaving(true)
+    const abnormal = detectAbnormal(filteredNum, memberGender)
+    const findingAbnormal = detectFindingAbnormal(filteredNum)
     await addDoc(collection(db,'familyMembers',memberId,'checkups'), {
-      date: newDate, items: filtered, note: newNote, createdAt: serverTimestamp()
+      date: newDate, items: filteredNum, note: newNote,
+      imagingFiles: imagingFiles,
+      createdAt: serverTimestamp()
     })
+    // 이상 항목 자동 트래킹
+    if (abnormal.length > 0 || findingAbnormal.length > 0) {
+      await autoTrack(newDate, abnormal, findingAbnormal)
+    }
     setNewItems({}); setNewNote(''); setSaving(false); setShowAdd(false)
-    setScanImg(null); setScanImgs([]); setScanResults([])
+    setScanImgs([]); setScanResults([]); setImagingFiles([])
   }
 
   const delCheckup = async (id) => {
@@ -203,11 +370,10 @@ export default function HealthCheckup({ memberId, memberGender }) {
     const file = e.target.files[0]
     if (!file) return
     e.target.value = ''
-    setScanning(true); setScanError(null)
+    setScanning(true)
     const reader = new FileReader()
     reader.onload = async (ev) => {
       const base64 = ev.target.result
-      setScanImg(base64)
       setScanImgs(p => [...p, base64])
       try {
         const b64data = base64.split(',')[1]
@@ -222,21 +388,17 @@ export default function HealthCheckup({ memberId, memberGender }) {
         if (parsed.error) throw new Error(parsed.error)
         const extracted = {}
         CHECKUP_ITEMS.forEach(item => {
-          if (parsed[item.key] != null && parsed[item.key] !== '') {
+          if (parsed[item.key] != null && String(parsed[item.key]).trim() !== '') {
             extracted[item.key] = String(parsed[item.key])
           }
         })
         setNewItems(p => ({ ...p, ...extracted }))
         if (parsed.checkupDate) setNewDate(parsed.checkupDate)
-        // 판독된 항목이 속한 카테고리 자동 펼치기
         const foundCats = new Set()
-        CHECKUP_CATEGORIES.forEach(cat => {
-          if (cat.items.some(item => extracted[item.key])) foundCats.add(cat.key)
-        })
-        if (foundCats.size > 0) setOpenCats(p => { const n = {...p}; foundCats.forEach(k => { n[k] = true }); return n })
+        CHECKUP_CATEGORIES.forEach(cat => { if (cat.items.some(item => extracted[item.key])) foundCats.add(cat.key) })
+        if (foundCats.size > 0) setOpenCats(p => { const n={...p}; foundCats.forEach(k => { n[k]=true }); return n })
         const count = Object.keys(extracted).length
-        const result = count > 0 ? ('사진 ' + scanImgs.length + ': ' + count + '개 항목 자동 입력됨') : ('사진 ' + scanImgs.length + ': 수치 미검출')
-        setScanResults(p => [...p, result])
+        setScanResults(p => [...p, count > 0 ? ('사진 ' + scanImgs.length + ': ' + count + '개 항목 자동 입력') : ('사진 ' + scanImgs.length + ': 수치 미검출')])
       } catch(err) {
         setScanResults(p => [...p, '판독 실패: ' + err.message])
       } finally {
@@ -246,148 +408,168 @@ export default function HealthCheckup({ memberId, memberGender }) {
     reader.readAsDataURL(file)
   }
 
+  const handleImagingUpload = async (e) => {
+    const files = Array.from(e.target.files)
+    e.target.value = ''
+    for (const file of files) {
+      const key = file.name + Date.now()
+      setUploadProgress(p => ({ ...p, [key]: 0 }))
+      try {
+        const result = await uploadToCloudinary(file, (pct) => setUploadProgress(p => ({ ...p, [key]: pct })))
+        const label = prompt('이 이미지의 레이블을 입력하세요 (예: 위내시경, 복부초음파, 흉부X선)', file.name.split('.')[0]) || file.name
+        setImagingFiles(p => [...p, { ...result, label }])
+      } catch(err) { alert(err.message) }
+      finally { setUploadProgress(p => { const n={...p}; delete n[key]; return n }) }
+    }
+  }
+
   const trendData = useMemo(() => {
     const sorted = [...checkups].sort((a,b) => a.date.localeCompare(b.date))
     const result = {}
-    CHECKUP_ITEMS.forEach(item => {
-      result[item.key] = sorted.filter(c => c.items?.[item.key]!=null).map(c => ({
-        date: c.date, value: parseFloat(c.items[item.key])
-      }))
+    NUM_ITEMS.forEach(item => {
+      result[item.key] = sorted.filter(c => c.items?.[item.key]!=null).map(c => ({ date: c.date, value: parseFloat(c.items[item.key]) }))
     })
     return result
   }, [checkups])
 
   const iStyle = { width:'100%', padding:'7px 9px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' }
   const lblStyle = { display:'block', fontSize:11, color:'#6b7280', marginBottom:3, fontWeight:600 }
+  const uploading = Object.entries(uploadProgress)
 
   const addModalJsx = showAdd ? (
-    <Sheet title="건강검진 기록 추가" onClose={() => { setShowAdd(false); setScanImg(null); setScanError(null); setScanImgs([]); setScanResults([]) }}>
-      {/* AI 사진 판독 */}
+    <Sheet title="건강검진 기록 추가" onClose={() => { setShowAdd(false); setScanImgs([]); setScanResults([]); setImagingFiles([]) }}>
+      {/* AI 판독 */}
       <div style={{ marginBottom:16, background:'#eff6ff', borderRadius:10, padding:'12px 14px', border:'1px solid #bfdbfe' }}>
-        <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:6 }}>AI 사진 자동 판독</div>
-        <div style={{ fontSize:11, color:'#6b7280', marginBottom:10 }}>검진 결과지 사진을 올리면 수치를 자동 인식합니다. 여러 장 올리면 누적 반영됩니다.</div>
-        <label style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', background: scanning ? '#d1d5db' : '#2563eb', color:'#fff', borderRadius:8, fontSize:12, cursor: scanning ? 'not-allowed' : 'pointer', fontWeight:700 }}>
+        <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:6 }}>AI 결과지 자동 판독</div>
+        <div style={{ fontSize:11, color:'#6b7280', marginBottom:10 }}>검진 결과지 사진 여러 장 올리면 수치가 누적 자동 입력됩니다.</div>
+        <label style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', background:scanning?'#d1d5db':'#2563eb', color:'#fff', borderRadius:8, fontSize:12, cursor:scanning?'not-allowed':'pointer', fontWeight:700 }}>
           {scanning ? 'AI 판독 중...' : '결과지 사진 업로드'}
           <input type="file" accept="image/*" onChange={handleScanImage} disabled={scanning} style={{ display:'none' }} />
         </label>
-        {scanning && <div style={{ marginTop:8, fontSize:12, color:'#2563eb' }}>이미지 분석 중... (10~20초 소요)</div>}
-        {scanResults.length > 0 && (
-          <div style={{ marginTop:8 }}>
-            {scanResults.map((r, i) => (
-              <div key={i} style={{ fontSize:11, color: r.includes('입력됨') ? '#0F6E56' : '#dc2626', background: r.includes('입력됨') ? '#f0faf5' : '#fee2e2', borderRadius:6, padding:'5px 9px', marginBottom:4 }}>
-                {r}
-              </div>
-            ))}
+        {scanning && <div style={{ fontSize:11, color:'#2563eb', marginTop:6 }}>분석 중... (10~20초 소요)</div>}
+        {scanResults.map((r,i) => <div key={i} style={{ fontSize:11, color:r.includes('입력')?'#0F6E56':'#dc2626', background:r.includes('입력')?'#f0faf5':'#fee2e2', borderRadius:6, padding:'4px 8px', marginTop:5 }}>{r}</div>)}
+        {scanImgs.length > 0 && <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginTop:8 }}>{scanImgs.map((img,i) => <img key={i} src={img} alt="" style={{ width:64, height:64, objectFit:'cover', borderRadius:7, border:'1px solid #bfdbfe' }} />)}</div>}
+      </div>
+
+      {/* 영상검사 이미지 첨부 */}
+      <div style={{ marginBottom:16, background:'#f5f3ff', borderRadius:10, padding:'12px 14px', border:'1px solid #ddd6fe' }}>
+        <div style={{ fontSize:12, fontWeight:700, color:'#7c3aed', marginBottom:6 }}>영상검사 이미지 첨부 (내시경 / 초음파 / MRI / X선 등)</div>
+        <label style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 13px', background:'#7c3aed', color:'#fff', borderRadius:8, fontSize:12, cursor:'pointer', fontWeight:600 }}>
+          이미지 선택
+          <input type="file" accept="image/*,.pdf" multiple onChange={handleImagingUpload} style={{ display:'none' }} />
+        </label>
+        {uploading.length > 0 && uploading.map(([key,pct]) => (
+          <div key={key} style={{ marginTop:8 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'#7c3aed', marginBottom:3 }}><span>업로드 중...</span><span>{pct}%</span></div>
+            <div style={{ background:'#ddd6fe', borderRadius:4, height:4 }}><div style={{ background:'#7c3aed', borderRadius:4, height:4, width:pct+'%', transition:'width 0.3s' }} /></div>
           </div>
-        )}
-        {scanImgs.length > 0 && (
-          <div style={{ display:'flex', gap:6, marginTop:8, flexWrap:'wrap' }}>
-            {scanImgs.map((img, i) => (
-              <img key={i} src={img} alt={'결과지' + (i+1)} style={{ width:68, height:68, objectFit:'cover', borderRadius:7, border:'1px solid #bfdbfe' }} />
+        ))}
+        {imagingFiles.length > 0 && (
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:10 }}>
+            {imagingFiles.map((f,i) => (
+              <div key={i} style={{ position:'relative' }}>
+                <img src={f.url} alt={f.label} style={{ width:80, height:80, objectFit:'cover', borderRadius:8, border:'1px solid #ddd6fe' }} />
+                <div style={{ fontSize:10, color:'#7c3aed', fontWeight:600, maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginTop:2 }}>{f.label}</div>
+                <button onClick={() => setImagingFiles(p => p.filter((_,idx) => idx!==i))}
+                  style={{ position:'absolute', top:-5, right:-5, width:16, height:16, borderRadius:'50%', background:'#ef4444', color:'#fff', border:'none', fontSize:10, cursor:'pointer', fontWeight:700 }}>x</button>
+              </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* 검진일 */}
       <div style={{ marginBottom:14 }}>
         <label style={lblStyle}>검진일</label>
         <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} style={iStyle} />
       </div>
 
-      {/* 카테고리별 항목 입력 */}
-      <div style={{ marginBottom:14 }}>
-        <div style={{ fontSize:12, fontWeight:700, color:'#374151', marginBottom:10 }}>측정값 입력 (AI 판독 결과 확인 후 수정 가능)</div>
-        {CHECKUP_CATEGORIES.map(cat => {
-          const filledCount = cat.items.filter(item => newItems[item.key]).length
-          return (
-            <div key={cat.key} style={{ marginBottom:8, border:'1px solid #e5e7eb', borderRadius:10, overflow:'hidden' }}>
-              <button onClick={() => setOpenCats(p => ({...p,[cat.key]:!p[cat.key]}))}
-                style={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', background: filledCount > 0 ? '#f0faf5' : '#f9fafb', border:'none', cursor:'pointer', textAlign:'left' }}>
-                <span style={{ fontSize:13, fontWeight:700, color: filledCount > 0 ? '#0F6E56' : '#374151' }}>{cat.label}</span>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  {filledCount > 0 && <span style={{ fontSize:11, color:'#0F6E56', background:'#dcfce7', borderRadius:10, padding:'1px 8px', fontWeight:700 }}>{filledCount}개 입력됨</span>}
-                  <span style={{ fontSize:12, color:'#9ca3af' }}>{openCats[cat.key] ? 'v' : '>'}</span>
-                </div>
-              </button>
-              {openCats[cat.key] && (
-                <div style={{ padding:'10px 12px 12px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-                  {cat.items.map(item => (
-                    <div key={item.key}>
-                      <label style={{ ...lblStyle, color: newItems[item.key] ? '#0F6E56' : '#6b7280' }}>
-                        {item.label} {item.unit && <span style={{ color:'#9ca3af', fontWeight:400 }}>({item.unit})</span>}
-                      </label>
-                      <input type="number" step="any" value={newItems[item.key]||''} onChange={e => setNewItems(p => ({...p,[item.key]:e.target.value}))}
-                        placeholder="-" style={{ ...iStyle, textAlign:'center', background: newItems[item.key] ? '#f0faf5' : '#fff', borderColor: newItems[item.key] ? '#6ee7b7' : '#e5e7eb' }} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      {/* 카테고리별 항목 */}
+      {CHECKUP_CATEGORIES.map(cat => {
+        const filledCount = cat.items.filter(item => newItems[item.key]).length
+        return (
+          <div key={cat.key} style={{ marginBottom:8, border:'1px solid #e5e7eb', borderRadius:10, overflow:'hidden' }}>
+            <button onClick={() => setOpenCats(p => ({...p,[cat.key]:!p[cat.key]}))}
+              style={{ width:'100%', display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 12px', background:filledCount>0?'#f0faf5':'#f9fafb', border:'none', cursor:'pointer', textAlign:'left' }}>
+              <span style={{ fontSize:13, fontWeight:700, color:filledCount>0?'#0F6E56':'#374151' }}>{cat.label}</span>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                {filledCount > 0 && <span style={{ fontSize:10, color:'#0F6E56', background:'#dcfce7', borderRadius:10, padding:'1px 8px', fontWeight:700 }}>{filledCount}개 입력</span>}
+                <span style={{ fontSize:12, color:'#9ca3af' }}>{openCats[cat.key]?'v':'>'}</span>
+              </div>
+            </button>
+            {openCats[cat.key] && (
+              <div style={{ padding:'10px 12px 12px', display:'grid', gridTemplateColumns:cat.items.some(i=>i.type==='text')?'1fr':'1fr 1fr', gap:8 }}>
+                {cat.items.map(item => (
+                  <div key={item.key}>
+                    <label style={{ ...lblStyle, color:newItems[item.key]?'#0F6E56':'#6b7280' }}>
+                      {item.label}{item.unit&&<span style={{ color:'#9ca3af', fontWeight:400 }}> ({item.unit})</span>}
+                    </label>
+                    {item.type === 'text'
+                      ? <textarea value={newItems[item.key]||''} onChange={e => setNewItems(p => ({...p,[item.key]:e.target.value}))}
+                          placeholder="소견 입력..." rows={2}
+                          style={{ ...iStyle, resize:'vertical', lineHeight:1.5 }} />
+                      : <input type="number" step="any" value={newItems[item.key]||''} onChange={e => setNewItems(p => ({...p,[item.key]:e.target.value}))}
+                          placeholder="-" style={{ ...iStyle, textAlign:'center', background:newItems[item.key]?'#f0faf5':'#fff', borderColor:newItems[item.key]?'#6ee7b7':'#e5e7eb' }} />
+                    }
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })}
 
-      <div style={{ marginBottom:16 }}>
-        <label style={lblStyle}>메모</label>
-        <textarea value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="이상소견, 의사 코멘트, 특이사항 등..." style={{ ...iStyle, resize:'vertical', minHeight:60, lineHeight:1.6 }} />
+      <div style={{ marginBottom:16, marginTop:8 }}>
+        <label style={lblStyle}>추가 메모</label>
+        <textarea value={newNote} onChange={e => setNewNote(e.target.value)} placeholder="이상소견, 의사 코멘트 등..." style={{ ...iStyle, resize:'vertical', minHeight:60, lineHeight:1.6 }} />
+      </div>
+      <div style={{ background:'#fffbeb', borderRadius:8, padding:'9px 12px', fontSize:11, color:'#92400e', marginBottom:12, border:'1px solid #fde68a' }}>
+        저장 시 이상 수치 항목은 트래킹 탭에 자동 등록되어 1년 후 재검 알림이 설정됩니다.
       </div>
       <button onClick={saveCheckup} disabled={saving}
         style={{ width:'100%', padding:'11px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
-        {saving?'저장 중...':'저장'}
+        {saving?'저장 및 트래킹 등록 중...':'저장'}
       </button>
     </Sheet>
   ) : null
 
   const trendModalJsx = showTrend ? (
     <Sheet title="건강 추이 분석" onClose={() => setShowTrend(false)}>
-      <p style={{ fontSize:13, color:'#6b7280', marginBottom:16 }}>2회 이상 기록된 항목의 추이를 보여줍니다.</p>
-      {CHECKUP_CATEGORIES.map(cat => {
-        const trendItems = cat.items.filter(item => trendData[item.key]?.length >= 2)
+      {CHECKUP_CATEGORIES.filter(cat => cat.items.some(item => item.type!=='text' && trendData[item.key]?.length >= 2)).map(cat => {
+        const trendItems = cat.items.filter(item => item.type!=='text' && trendData[item.key]?.length >= 2)
         if (trendItems.length === 0) return null
         return (
           <div key={cat.key} style={{ marginBottom:16 }}>
             <div style={{ fontSize:12, fontWeight:700, color:'#6b7280', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8' }}>{cat.label}</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-              {trendItems.map(item => {
-                const td = trendData[item.key]
-                const last = td[td.length-1]?.value
-                const prev = td[td.length-2]?.value
-                const trend = last > prev ? '^' : last < prev ? 'v' : '-'
-                const trendClr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
-                const warnStatus = item.warn?.(last, memberGender==='여'?'여':'남')
-                return (
-                  <div key={item.key} style={{ background:'#f8f6f2', borderRadius:10, padding:'10px 13px' }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                      <div>
-                        <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{item.label}</span>
-                        {item.unit && <span style={{ fontSize:11, color:'#9ca3af', marginLeft:4 }}>{item.unit}</span>}
-                        {warnStatus && <span style={{ fontSize:10, background:(STATUS_COLORS[warnStatus]||'#6b7280')+'18', color:STATUS_COLORS[warnStatus]||'#6b7280', borderRadius:4, padding:'1px 7px', marginLeft:7, fontWeight:700 }}>{warnStatus}</span>}
-                      </div>
-                      <div style={{ display:'flex', alignItems:'center', gap:5 }}>
-                        <span style={{ fontSize:15, fontWeight:700, color:'#1a1a1a' }}>{last}</span>
-                        <span style={{ fontSize:14, fontWeight:700, color:trendClr }}>{trend}</span>
-                      </div>
+            {trendItems.map(item => {
+              const td = trendData[item.key]
+              const last = td[td.length-1]?.value
+              const prev = td[td.length-2]?.value
+              const trend = last > prev ? '^' : last < prev ? 'v' : '-'
+              const clr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
+              const ws = item.warn?.(last, memberGender)
+              return (
+                <div key={item.key} style={{ background:'#f8f6f2', borderRadius:10, padding:'10px 13px', marginBottom:8 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                    <div>
+                      <span style={{ fontSize:13, fontWeight:700 }}>{item.label}</span>
+                      {item.unit && <span style={{ fontSize:11, color:'#9ca3af', marginLeft:4 }}>{item.unit}</span>}
+                      {ws && <span style={{ fontSize:10, background:(STATUS_COLORS[ws]||'#6b7280')+'18', color:STATUS_COLORS[ws]||'#6b7280', borderRadius:4, padding:'1px 7px', marginLeft:7, fontWeight:700 }}>{ws}</span>}
                     </div>
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
-                      <Sparkline values={td.map(d => d.value)} color={warnStatus?STATUS_COLORS[warnStatus]||'#0F6E56':'#0F6E56'} width={130} height={40} />
-                      <div style={{ display:'flex', gap:8, fontSize:11, color:'#9ca3af' }}>
-                        {td.slice(-4).map(d => (
-                          <div key={d.date} style={{ textAlign:'center' }}>
-                            <div style={{ marginBottom:2 }}>{d.value}</div>
-                            <div>{d.date.slice(2)}</div>
-                          </div>
-                        ))}
-                      </div>
+                    <span style={{ fontSize:15, fontWeight:700, color:clr }}>{last} {trend}</span>
+                  </div>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
+                    <Sparkline values={td.map(d => d.value)} color={ws?STATUS_COLORS[ws]||'#0F6E56':'#0F6E56'} width={130} height={40} />
+                    <div style={{ display:'flex', gap:8, fontSize:11, color:'#9ca3af' }}>
+                      {td.slice(-4).map(d => <div key={d.date} style={{ textAlign:'center' }}><div style={{ marginBottom:2 }}>{d.value}</div><div>{d.date.slice(2)}</div></div>)}
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
         )
       })}
-      {CHECKUP_ITEMS.filter(item => trendData[item.key]?.length >= 2).length === 0 && (
+      {NUM_ITEMS.filter(item => trendData[item.key]?.length >= 2).length === 0 && (
         <div style={{ textAlign:'center', padding:'32px 0', color:'#9ca3af', fontSize:13 }}>2회 이상 기록된 항목이 없습니다</div>
       )}
     </Sheet>
@@ -396,27 +578,26 @@ export default function HealthCheckup({ memberId, memberGender }) {
   if (loading) return <div style={{ padding:20, color:'#9ca3af', fontSize:13 }}>로딩 중...</div>
 
   const latestCheckup = checkups[0]
-  const abnormalItems = latestCheckup ? CHECKUP_ITEMS.filter(item => {
-    const v = parseFloat(latestCheckup.items?.[item.key])
-    return item.warn && item.warn(v, memberGender) != null
-  }) : []
+  const latestAbnormal = latestCheckup ? detectAbnormal(latestCheckup.items, memberGender) : []
+  const latestFindingAbnormal = latestCheckup ? detectFindingAbnormal(latestCheckup.items) : []
 
   return (
     <div>
-      {/* 최신 이상 항목 요약 */}
-      {abnormalItems.length > 0 && (
+      {/* 이상 항목 요약 배너 */}
+      {(latestAbnormal.length > 0 || latestFindingAbnormal.length > 0) && (
         <div style={{ background:'#fffbeb', borderRadius:12, padding:'12px 16px', marginBottom:16, border:'1px solid #fde68a' }}>
-          <div style={{ fontSize:12, fontWeight:700, color:'#92400e', marginBottom:6 }}>[!] 최근 검진 이상 항목 ({latestCheckup.date})</div>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
-            {abnormalItems.map(item => {
-              const v = parseFloat(latestCheckup.items[item.key])
-              const ws = item.warn(v, memberGender)
-              return (
-                <span key={item.key} style={{ fontSize:11, background:(STATUS_COLORS[ws]||'#6b7280')+'18', color:STATUS_COLORS[ws]||'#6b7280', borderRadius:6, padding:'3px 9px', fontWeight:700 }}>
-                  {item.label} {v} <span style={{ opacity:0.7 }}>({ws})</span>
-                </span>
-              )
-            })}
+          <div style={{ fontSize:12, fontWeight:700, color:'#92400e', marginBottom:8 }}>[!] 최근 검진 이상 항목 ({latestCheckup.date})</div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+            {latestAbnormal.map(a => (
+              <span key={a.key} style={{ fontSize:11, background:(STATUS_COLORS[a.status]||'#6b7280')+'18', color:STATUS_COLORS[a.status]||'#6b7280', borderRadius:6, padding:'3px 9px', fontWeight:700 }}>
+                {a.label} {a.value}{a.unit} ({a.status})
+              </span>
+            ))}
+            {latestFindingAbnormal.map(f => (
+              <span key={f.key} style={{ fontSize:11, background:'#fee2e2', color:'#991b1b', borderRadius:6, padding:'3px 9px', fontWeight:700 }}>
+                {f.label} - 소견 있음
+              </span>
+            ))}
           </div>
         </div>
       )}
@@ -424,65 +605,123 @@ export default function HealthCheckup({ memberId, memberGender }) {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
         <span style={{ fontSize:14, fontWeight:700 }}>건강검진 기록 <span style={{ color:'#9ca3af', fontWeight:400 }}>({checkups.length}회)</span></span>
         <div style={{ display:'flex', gap:6 }}>
-          {checkups.length >= 2 && (
-            <button onClick={() => setShowTrend(true)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #e5e7eb', background:'#fff', color:'#374151', fontSize:12, cursor:'pointer', fontWeight:600 }}>추이 분석</button>
-          )}
+          {checkups.length >= 2 && <button onClick={() => setShowTrend(true)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #e5e7eb', background:'#fff', color:'#374151', fontSize:12, cursor:'pointer', fontWeight:600 }}>추이 분석</button>}
           <button onClick={() => setShowAdd(true)} style={{ padding:'6px 14px', borderRadius:7, background:'#0F6E56', color:'#fff', border:'none', fontSize:12, fontWeight:700, cursor:'pointer' }}>+ 검진 추가</button>
         </div>
       </div>
 
-      {checkups.length === 0 ? (
-        <div style={{ textAlign:'center', padding:'40px 0', color:'#9ca3af', fontSize:13 }}>
-          <div style={{ marginBottom:10, fontSize:14 }}>건강검진 기록이 없습니다</div>
-          <button onClick={() => setShowAdd(true)} style={{ padding:'8px 20px', borderRadius:20, background:'#0F6E56', color:'#fff', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 검진 기록 추가</button>
-        </div>
-      ) : checkups.map(c => {
-        const abnormal = CHECKUP_ITEMS.filter(item => {
-          const v = parseFloat(c.items?.[item.key])
-          return item.warn && item.warn(v, memberGender) != null
-        })
-        const filledItems = CHECKUP_ITEMS.filter(item => c.items?.[item.key] != null)
-        return (
-          <div key={c.id} style={{ background:'#fff', borderRadius:12, padding:'14px 16px', marginBottom:10, border:'1px solid #f0ede8' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10 }}>
-              <div>
-                <div style={{ fontSize:14, fontWeight:700, color:'#1a1a1a' }}>{c.date}</div>
-                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>{filledItems.length}개 항목 기록</div>
-              </div>
-              <button onClick={() => delCheckup(c.id)} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
-            </div>
-            {abnormal.length > 0 && (
-              <div style={{ display:'flex', flexWrap:'wrap', gap:5, marginBottom:10 }}>
-                {abnormal.map(item => {
-                  const v = parseFloat(c.items[item.key])
-                  const ws = item.warn(v, memberGender)
-                  return (
-                    <span key={item.key} style={{ fontSize:11, background:(STATUS_COLORS[ws]||'#6b7280')+'18', color:STATUS_COLORS[ws]||'#6b7280', borderRadius:6, padding:'2px 8px', fontWeight:700 }}>
-                      {item.label} {v}
-                    </span>
-                  )
-                })}
-              </div>
-            )}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px,1fr))', gap:6 }}>
-              {filledItems.map(item => {
-                const v = parseFloat(c.items[item.key])
-                const ws = item.warn?.(v, memberGender)
-                const clr = ws ? (STATUS_COLORS[ws] || '#6b7280') : '#374151'
-                return (
-                  <div key={item.key} style={{ background:'#f8f6f2', borderRadius:7, padding:'7px 9px' }}>
-                    <div style={{ fontSize:10, color:'#9ca3af', marginBottom:2 }}>{item.label}</div>
-                    <div style={{ fontSize:14, fontWeight:700, color:clr }}>{c.items[item.key]}<span style={{ fontSize:10, color:'#9ca3af', marginLeft:2 }}>{item.unit}</span></div>
-                    {ws && <div style={{ fontSize:10, color:clr, marginTop:1 }}>{ws}</div>}
-                  </div>
-                )
-              })}
-            </div>
-            {c.note && <div style={{ marginTop:10, fontSize:12, color:'#6b7280', background:'#fffbeb', borderRadius:7, padding:'7px 10px', lineHeight:1.6 }}>{c.note}</div>}
+      {checkups.length === 0
+        ? <div style={{ textAlign:'center', padding:'40px 0', color:'#9ca3af', fontSize:13 }}>
+            <div style={{ marginBottom:10 }}>검진 기록이 없습니다</div>
+            <button onClick={() => setShowAdd(true)} style={{ padding:'8px 20px', borderRadius:20, background:'#0F6E56', color:'#fff', border:'none', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 검진 기록 추가</button>
           </div>
-        )
-      })}
+        : checkups.map(c => {
+            const abnormal = detectAbnormal(c.items, memberGender)
+            const findingAbnormal = detectFindingAbnormal(c.items)
+            const isExpanded = expandedCheckup === c.id
+            const filledItems = CHECKUP_ITEMS.filter(item => c.items?.[item.key] != null && c.items[item.key] !== '')
 
+            return (
+              <div key={c.id} style={{ background:'#fff', borderRadius:12, marginBottom:12, border: (abnormal.length>0||findingAbnormal.length>0) ? '1px solid #fde68a' : '1px solid #f0ede8', overflow:'hidden' }}>
+                {/* 카드 헤더 */}
+                <div style={{ padding:'14px 16px', cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'flex-start' }} onClick={() => setExpandedCheckup(isExpanded ? null : c.id)}>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:700, color:'#1a1a1a', marginBottom:4 }}>{c.date} 검진</div>
+                    <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                      <span style={{ fontSize:11, color:'#9ca3af' }}>{filledItems.length}개 항목</span>
+                      {abnormal.length > 0 && <span style={{ fontSize:11, background:'#fef3c7', color:'#92400e', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>{abnormal.length}개 수치 이상</span>}
+                      {findingAbnormal.length > 0 && <span style={{ fontSize:11, background:'#fee2e2', color:'#991b1b', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>{findingAbnormal.length}개 소견 이상</span>}
+                      {(c.imagingFiles||[]).length > 0 && <span style={{ fontSize:11, background:'#f5f3ff', color:'#7c3aed', borderRadius:6, padding:'1px 7px', fontWeight:700 }}>영상 {(c.imagingFiles||[]).length}장</span>}
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                    <button onClick={e => { e.stopPropagation(); delCheckup(c.id) }} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
+                    <span style={{ fontSize:12, color:'#9ca3af' }}>{isExpanded?'v':'>'}</span>
+                  </div>
+                </div>
+
+                {/* 이상 항목 미리보기 (접힌 상태) */}
+                {!isExpanded && (abnormal.length > 0 || findingAbnormal.length > 0) && (
+                  <div style={{ padding:'0 16px 12px', display:'flex', flexWrap:'wrap', gap:5 }}>
+                    {abnormal.map(a => (
+                      <span key={a.key} style={{ fontSize:11, background:(STATUS_COLORS[a.status]||'#6b7280')+'18', color:STATUS_COLORS[a.status]||'#6b7280', borderRadius:6, padding:'2px 8px', fontWeight:700 }}>
+                        {a.label} {a.value}{a.unit}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* 펼친 상태 - 전체 결과 카테고리별 표시 */}
+                {isExpanded && (
+                  <div style={{ borderTop:'1px solid #f0ede8', padding:'16px' }}>
+                    {CHECKUP_CATEGORIES.map(cat => {
+                      const catItems = cat.items.filter(item => c.items?.[item.key] != null && c.items[item.key] !== '')
+                      if (catItems.length === 0) return null
+                      return (
+                        <div key={cat.key} style={{ marginBottom:16 }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8', textTransform:'uppercase', letterSpacing:'0.5px' }}>{cat.label}</div>
+                          {cat.items.some(i => i.type === 'text')
+                            ? <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                                {catItems.map(item => {
+                                  const isAbnormal = findingAbnormal.find(f => f.key === item.key)
+                                  return (
+                                    <div key={item.key} style={{ background:isAbnormal?'#fee2e2':'#f8f6f2', borderRadius:7, padding:'8px 11px', border:isAbnormal?'1px solid #fca5a5':'none' }}>
+                                      <div style={{ fontSize:11, color:'#9ca3af', marginBottom:3 }}>{item.label}</div>
+                                      <div style={{ fontSize:13, color:isAbnormal?'#991b1b':'#1a1a1a', lineHeight:1.6 }}>{c.items[item.key]}</div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            : <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(100px,1fr))', gap:6 }}>
+                                {catItems.map(item => {
+                                  const v = parseFloat(c.items[item.key])
+                                  const ws = item.warn?.(v, memberGender)
+                                  const clr = ws ? (STATUS_COLORS[ws] || '#6b7280') : '#374151'
+                                  const td = trendData[item.key]
+                                  const prev = td?.find(d => d.date < c.date)
+                                  const trend = prev ? (v > prev.value ? '^' : v < prev.value ? 'v' : '') : ''
+                                  const trendClr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
+                                  return (
+                                    <div key={item.key} style={{ background:ws?(STATUS_COLORS[ws]||'#6b7280')+'12':'#f8f6f2', borderRadius:7, padding:'7px 9px', border:ws?'1px solid '+(STATUS_COLORS[ws]||'#6b7280')+'30':'none' }}>
+                                      <div style={{ fontSize:10, color:'#9ca3af', marginBottom:2 }}>{item.label}</div>
+                                      <div style={{ display:'flex', alignItems:'baseline', gap:3 }}>
+                                        <span style={{ fontSize:15, fontWeight:700, color:clr }}>{c.items[item.key]}</span>
+                                        {item.unit && <span style={{ fontSize:10, color:'#9ca3af' }}>{item.unit}</span>}
+                                        {trend && <span style={{ fontSize:11, color:trendClr, fontWeight:700 }}>{trend}</span>}
+                                      </div>
+                                      {ws && <div style={{ fontSize:10, color:clr, marginTop:1, fontWeight:600 }}>{ws}</div>}
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                          }
+                        </div>
+                      )
+                    })}
+
+                    {/* 영상검사 이미지 */}
+                    {(c.imagingFiles||[]).length > 0 && (
+                      <div style={{ marginBottom:14 }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8', textTransform:'uppercase', letterSpacing:'0.5px' }}>영상검사 이미지</div>
+                        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                          {c.imagingFiles.map((f,i) => (
+                            <div key={i} style={{ textAlign:'center' }}>
+                              <img src={f.url} alt={f.label} onClick={() => window.open(f.url,'_blank')}
+                                style={{ width:100, height:100, objectFit:'cover', borderRadius:8, border:'1px solid #ddd6fe', cursor:'zoom-in' }} />
+                              <div style={{ fontSize:10, color:'#7c3aed', fontWeight:600, marginTop:3, maxWidth:100, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.label}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {c.note && <div style={{ background:'#fffbeb', borderRadius:8, padding:'8px 12px', fontSize:12, color:'#92400e', lineHeight:1.6 }}>{c.note}</div>}
+                  </div>
+                )}
+              </div>
+            )
+          })
+      }
       {addModalJsx}
       {trendModalJsx}
     </div>
