@@ -136,6 +136,43 @@ export default async function handler(req, res) {
     }
   }
 
+  // checkup_analysis: 검진 이상항목 AI 분석
+  if (type === 'checkup_analysis') {
+    const { abnormalItems, findingItems, memberInfo } = caseData || {}
+    const age = memberInfo?.age || '불명'
+    const gender = memberInfo?.gender || '불명'
+    const abnormalText = (abnormalItems||[]).map(a => a.label+' '+a.value+(a.unit||'')+' ('+a.status+')').join(', ')
+    const findingText = (findingItems||[]).map(f => f.label+': '+f.value).join(' / ')
+    const analysisPrompt = `당신은 대한민국 전문의입니다. 아래 건강검진 이상 결과를 분석하고 JSON으로 응답하세요. 마크다운 없이 순수 JSON만 출력하세요.
+
+환자: ${gender} / ${age}세
+이상 수치: ${abnormalText || '없음'}
+이상 소견: ${findingText || '없음'}
+
+다음 JSON 형식으로 응답하세요:
+{
+  "impression": "예상 진단 및 임상적 의의 (2-3문장)",
+  "riskLevel": "정상/경계/주의/위험 중 하나",
+  "explanation": "환자에게 쉽게 설명하는 방법 (비전문용어, 3-4문장)",
+  "lifestyle": ["생활습관 교정 항목1", "항목2", "항목3"],
+  "treatment": "권고 치료 및 추가 검사 방향",
+  "followUp": "향후 추적 관찰 계획 (언제, 어떤 검사)",
+  "doctorNote": "처방 및 진료 시 주의사항"
+}`
+
+    try {
+      const data = await callAnthropic(apiKey, analysisPrompt, { max_tokens: 1500 })
+      if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
+      const text = data.content?.[0]?.text || ''
+      const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
+      if (s === -1) return res.status(500).json({ error: 'JSON 없음' })
+      return res.status(200).json(JSON.parse(clean.slice(s, e+1)))
+    } catch(err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   const prompt = prompts[type]
   if (!prompt) return res.status(400).json({ error: 'Invalid type' })
 
