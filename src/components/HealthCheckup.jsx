@@ -232,7 +232,7 @@ const CHECKUP_CATEGORIES = [
   },
 ]
 
-const CHECKUP_ITEMS = CHECKUP_CATEGORIES.flatMap(c => chk.items)
+const CHECKUP_ITEMS = CHECKUP_CATEGORIES.flatMap(c => c.items)
 const NUM_ITEMS = CHECKUP_ITEMS.filter(i => i.type !== 'text')
 
 const STATUS_COLORS = {
@@ -536,7 +536,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
     const sorted = [...checkups].sort((a,b) => a.date.localeCompare(b.date))
     const result = {}
     NUM_ITEMS.forEach(item => {
-      result[item.key] = sorted.filter(c => chk.items?.[item.key]!=null).map(c => ({ date: chk.date, value: parseFloat(chk.items[item.key]) }))
+      result[item.key] = sorted.filter(c => c.items?.[item.key]!=null).map(c => ({ date: c.date, value: parseFloat(c.items[item.key]) }))
     })
     return result
   }, [checkups])
