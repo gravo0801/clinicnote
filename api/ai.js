@@ -98,7 +98,7 @@ export default async function handler(req, res) {
     const { imageBase64, imageMime } = caseData || {}
     if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' })
     const mime = imageMime || 'image/jpeg'
-    const scanPrompt = '이 건강검진 결과지 이미지에서 수치를 추출하세요. JSON만 출력하세요. 없는 항목은 null로. {"weight":null,"bmi":null,"waist":null,"sbp":null,"dbp":null,"glucose":null,"hba1c":null,"tc":null,"ldl":null,"hdl":null,"tg":null,"alt":null,"ast":null,"ggt":null,"creatinine":null,"uric":null,"hemoglobin":null,"tsh":null,"checkupDate":null} checkupDate는 YYYY-MM-DD 형식. 수치는 숫자값.'
+    const scanPrompt = '이 건강검진 결과지 이미지에서 수치를 추출하세요. JSON만 출력하고 없는 항목은 null로. checkupDate는 YYYY-MM-DD형식, 나머지는 숫자값. JSON키: height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,lymphocyte,monocyte,eosinophil,basophil,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,checkupDate'
     const scanBody = JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 800,
