@@ -403,6 +403,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
   const [checkups, setCheckups] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
+  const [editCheckup, setEditCheckup] = useState(null)
   const [showTrend, setShowTrend] = useState(false)
   const [newDate, setNewDate] = useState(new Date().toISOString().slice(0,10))
   const [newItems, setNewItems] = useState({})
@@ -451,23 +452,42 @@ export default function HealthCheckup({ memberId, memberGender }) {
     }
   }
 
+  const openEdit = (chk) => {
+    setEditCheckup(chk)
+    setNewDate(chk.date || new Date().toISOString().slice(0,10))
+    setNewItems(chk.items || {})
+    setNewNote(chk.note || '')
+    setImagingFiles(chk.imagingFiles || [])
+    setScanImgs([]); setScanResults([])
+    // 입력된 항목 카테고리 펼치기
+    const filled = new Set()
+    CHECKUP_CATEGORIES.forEach(cat => { if (cat.items.some(item => chk.items?.[item.key])) filled.add(cat.key) })
+    if (filled.size > 0) setOpenCats(p => { const n={...p}; filled.forEach(k => { n[k]=true }); return n })
+  }
+
+  const closeForm = () => {
+    setShowAdd(false); setEditCheckup(null)
+    setNewDate(new Date().toISOString().slice(0,10))
+    setNewItems({}); setNewNote('')
+    setScanImgs([]); setScanResults([]); setImagingFiles([])
+  }
+
   const saveCheckup = async () => {
     const filteredNum = Object.fromEntries(Object.entries(newItems).filter(([,v]) => v!==''))
     if (Object.keys(filteredNum).length === 0 && imagingFiles.length === 0) return
     setSaving(true)
     const abnormal = detectAbnormal(filteredNum, memberGender)
     const findingAbnormal = detectFindingAbnormal(filteredNum)
-    await addDoc(collection(db,'familyMembers',memberId,'checkups'), {
-      date: newDate, items: filteredNum, note: newNote,
-      imagingFiles: imagingFiles,
-      createdAt: serverTimestamp()
-    })
-    // 이상 항목 자동 트래킹
-    if (abnormal.length > 0 || findingAbnormal.length > 0) {
-      await autoTrack(newDate, abnormal, findingAbnormal)
+    const payload = { date: newDate, items: filteredNum, note: newNote, imagingFiles }
+    if (editCheckup) {
+      await updateDoc(doc(db,'familyMembers',memberId,'checkups',editCheckup.id), { ...payload, updatedAt: serverTimestamp() })
+    } else {
+      await addDoc(collection(db,'familyMembers',memberId,'checkups'), { ...payload, createdAt: serverTimestamp() })
+      if (abnormal.length > 0 || findingAbnormal.length > 0) {
+        await autoTrack(newDate, abnormal, findingAbnormal)
+      }
     }
-    setNewItems({}); setNewNote(''); setSaving(false); setShowAdd(false)
-    setScanImgs([]); setScanResults([]); setImagingFiles([])
+    setSaving(false); closeForm()
   }
 
   const delCheckup = async (id) => {
@@ -517,6 +537,8 @@ export default function HealthCheckup({ memberId, memberGender }) {
     reader.readAsDataURL(file)
   }
 
+  const [pendingLabels, setPendingLabels] = useState({})
+
   const handleImagingUpload = async (e) => {
     const files = Array.from(e.target.files)
     e.target.value = ''
@@ -525,8 +547,9 @@ export default function HealthCheckup({ memberId, memberGender }) {
       setUploadProgress(p => ({ ...p, [key]: 0 }))
       try {
         const result = await uploadToCloudinary(file, (pct) => setUploadProgress(p => ({ ...p, [key]: pct })))
-        const label = prompt('이 이미지의 레이블을 입력하세요 (예: 위내시경, 복부초음파, 흉부X선)', file.name.split('.')[0]) || file.name
-        setImagingFiles(p => [...p, { ...result, label }])
+        // Use filename as default label - user can edit inline after upload
+        const defaultLabel = file.name.replace(/\.[^.]+$/, '')
+        setImagingFiles(p => [...p, { ...result, label: defaultLabel, _key: key }])
       } catch(err) { alert(err.message) }
       finally { setUploadProgress(p => { const n={...p}; delete n[key]; return n }) }
     }
@@ -545,8 +568,8 @@ export default function HealthCheckup({ memberId, memberGender }) {
   const lblStyle = { display:'block', fontSize:11, color:'#6b7280', marginBottom:3, fontWeight:600 }
   const uploading = Object.entries(uploadProgress)
 
-  const addModalJsx = showAdd ? (
-    <Sheet title="건강검진 기록 추가" onClose={() => { setShowAdd(false); setScanImgs([]); setScanResults([]); setImagingFiles([]) }}>
+  const addModalJsx = (showAdd || editCheckup) ? (
+    <Sheet title={editCheckup ? '건강검진 기록 수정' : '건강검진 기록 추가'} onClose={closeForm}>
       {/* AI 판독 */}
       <div style={{ marginBottom:16, background:'#eff6ff', borderRadius:10, padding:'12px 14px', border:'1px solid #bfdbfe' }}>
         <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:6 }}>AI 결과지 자동 판독</div>
@@ -574,11 +597,13 @@ export default function HealthCheckup({ memberId, memberGender }) {
           </div>
         ))}
         {imagingFiles.length > 0 && (
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginTop:10 }}>
+          <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:10 }}>
             {imagingFiles.map((f,i) => (
-              <div key={i} style={{ position:'relative' }}>
-                <img src={f.url} alt={f.label} style={{ width:80, height:80, objectFit:'cover', borderRadius:8, border:'1px solid #ddd6fe' }} />
-                <div style={{ fontSize:10, color:'#7c3aed', fontWeight:600, maxWidth:80, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginTop:2 }}>{f.label}</div>
+              <div key={i} style={{ position:'relative', textAlign:'center' }}>
+                <img src={f.url} alt={f.label} style={{ width:80, height:80, objectFit:'cover', borderRadius:8, border:'1px solid #ddd6fe', display:'block' }} />
+                <input value={f.label} onChange={e => setImagingFiles(p => p.map((ff,idx) => idx===i ? {...ff,label:e.target.value} : ff))}
+                  placeholder="레이블"
+                  style={{ width:80, marginTop:3, padding:'2px 4px', fontSize:10, borderRadius:5, border:'1px solid #ddd6fe', outline:'none', fontFamily:'inherit', textAlign:'center', boxSizing:'border-box' }} />
                 <button onClick={() => setImagingFiles(p => p.filter((_,idx) => idx!==i))}
                   style={{ position:'absolute', top:-5, right:-5, width:16, height:16, borderRadius:'50%', background:'#ef4444', color:'#fff', border:'none', fontSize:10, cursor:'pointer', fontWeight:700 }}>x</button>
               </div>
@@ -636,7 +661,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
       </div>
       <button onClick={saveCheckup} disabled={saving}
         style={{ width:'100%', padding:'11px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
-        {saving?'저장 및 트래킹 등록 중...':'저장'}
+        {saving ? '저장 중...' : editCheckup ? '수정 완료' : '저장'}
       </button>
     </Sheet>
   ) : null
@@ -744,6 +769,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
                     </div>
                   </div>
                   <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                    <button onClick={e => { e.stopPropagation(); openEdit(chk) }} style={{ fontSize:11, color:'#2563eb', background:'none', border:'1px solid #bfdbfe', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>수정</button>
                     <button onClick={e => { e.stopPropagation(); delCheckup(chk.id) }} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'3px 8px', cursor:'pointer' }}>삭제</button>
                     <span style={{ fontSize:12, color:'#9ca3af' }}>{isExpanded?'v':'>'}</span>
                   </div>
