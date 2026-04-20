@@ -93,6 +93,40 @@ export default async function handler(req, res) {
     }
   }
 
+  // checkup_scan: 건강검진 결과지 이미지 판독
+  if (type === 'checkup_scan') {
+    const { imageBase64, imageMime } = caseData || {}
+    if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' })
+    const mime = imageMime || 'image/jpeg'
+    const scanPrompt = '이 건강검진 결과지 이미지에서 수치를 추출하세요. JSON만 출력하세요. 없는 항목은 null로. {"weight":null,"bmi":null,"waist":null,"sbp":null,"dbp":null,"glucose":null,"hba1c":null,"tc":null,"ldl":null,"hdl":null,"tg":null,"alt":null,"ast":null,"ggt":null,"creatinine":null,"uric":null,"hemoglobin":null,"tsh":null,"checkupDate":null} checkupDate는 YYYY-MM-DD 형식. 수치는 숫자값.'
+    const scanBody = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 800,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: imageBase64 } },
+          { type: 'text', text: scanPrompt }
+        ]
+      }]
+    })
+    const https = await import('https')
+    const scanRes = await new Promise((resolve, reject) => {
+      const opts = { hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(scanBody), 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' } }
+      const req = https.default.request(opts, (r) => { let d = ''; r.on('data', c => { d += c }); r.on('end', () => resolve(JSON.parse(d))) })
+      req.on('error', reject); req.write(scanBody); req.end()
+    })
+    const text = scanRes.content?.[0]?.text || ''
+    const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
+    const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
+    if (s === -1) return res.status(500).json({ error: '수치를 찾지 못했습니다.' })
+    try {
+      return res.status(200).json(JSON.parse(clean.slice(s, e+1)))
+    } catch(err) {
+      return res.status(500).json({ error: '파싱 오류: ' + err.message })
+    }
+  }
+
   const prompt = prompts[type]
   if (!prompt) return res.status(400).json({ error: 'Invalid type' })
 
