@@ -106,7 +106,19 @@ export default async function handler(req, res) {
     const { imageBase64, imageMime } = caseData || {}
     if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' })
     const mime = imageMime || 'image/jpeg'
-    const scanPrompt = '이 건강검진 결과지 이미지에서 보이는 모든 수치와 소견을 추출하세요. 반드시 JSON만 출력하고 마크다운 없이 순수 JSON만 반환하세요. 없는 항목은 포함하지 마세요. 숫자 항목은 숫자값, 소견/결과 항목은 문자열. 검진일(checkupDate)은 YYYY-MM-DD 형식. 키 목록: height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,bandNeutrophil,lymphocyte,monocyte,eosinophil,basophil,blast,promyelocyte,myelocyte,metamyelocyte,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,raFactor,occultBlood,rpr,havAb,hbsAg,hbsAb,hcvAb,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,fundusL,fundusR,hearingL,hearingR,corrHearingL,corrHearingR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,urineProtein,urineGlucose,urineBlood,urineWbc,urineNitrite,urineKetone,urineUrobilinogen,urineBilirubin,specificGravity,urineMicroscopy,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,gyCytology,checkupDate'
+    const scanPrompt = `이 건강검진 결과지 이미지에서 모든 항목을 추출하세요.
+
+규칙:
+1. 반드시 순수 JSON만 출력 (마크다운 없음)
+2. 없는 항목은 포함하지 마세요
+3. 숫자 항목(혈액수치 등)은 숫자값으로
+4. 소견 항목(초음파/내시경/영상/골밀도 판독 결과 등)은 이미지에 보이는 한글/영문 결과 문자열을 그대로 복사
+5. 특히 다음 소견 항목들은 결과지에 적힌 내용을 빠짐없이 그대로 추출: fundusL, fundusR, ecg, chestXray, abdomUs, thyroidUs, breastUs, mammography, egd, colonoscopy, mri, ct, gyCytology, urineMicroscopy, occultBlood, rpr, havAb, hbsAg, hbsAb, hcvAb, urineProtein, urineGlucose, urineBlood, urineWbc, urineNitrite, urineKetone, urineUrobilinogen, urineBilirubin, hearingL, hearingR
+6. checkupDate는 YYYY-MM-DD 형식
+
+추출할 키 목록(숫자): height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,bandNeutrophil,lymphocyte,monocyte,eosinophil,basophil,blast,promyelocyte,myelocyte,metamyelocyte,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,raFactor,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,specificGravity
+
+추출할 키 목록(소견 문자열): fundusL,fundusR,hearingL,hearingR,corrHearingL,corrHearingR,urineMicroscopy,urineProtein,urineGlucose,urineBlood,urineWbc,urineNitrite,urineKetone,urineUrobilinogen,urineBilirubin,occultBlood,rpr,havAb,hbsAg,hbsAb,hcvAb,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,gyCytology,checkupDate`
     const multimodalMessages = [{
       role: 'user',
       content: [
