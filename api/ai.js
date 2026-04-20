@@ -26,11 +26,15 @@ function callAnthropic(apiKey, prompt, extraOpts) {
       let data = ''
       res.on('data', c => { data += c })
       res.on('end', () => {
-        if (res.statusCode !== 200) {
-          reject(new Error(`API 오류 (${res.statusCode}): ${data.slice(0, 200)}`))
-          return
+        try {
+          const parsed = JSON.parse(data)
+          if (res.statusCode !== 200) {
+            // 오류 응답도 파싱해서 반환 (에러 메시지 포함)
+            resolve(parsed)
+            return
+          }
+          resolve(parsed)
         }
-        try { resolve(JSON.parse(data)) }
         catch (e) { reject(new Error(`파싱 오류: ${e.message}`)) }
       })
     })
@@ -112,13 +116,22 @@ export default async function handler(req, res) {
     }]
     try {
       const scanRes = await callAnthropic(apiKey, multimodalMessages, { max_tokens: 2500 })
+      // 오류 응답 체크
+      if (scanRes.error) {
+        return res.status(500).json({ error: 'API 오류: ' + JSON.stringify(scanRes.error) })
+      }
       const text = scanRes.content?.[0]?.text || ''
-      if (!text) return res.status(500).json({ error: 'AI 응답 없음' })
+      if (!text) {
+        const reason = scanRes.stop_reason || 'unknown'
+        return res.status(500).json({ error: 'AI 응답 없음 (stop_reason: ' + reason + ')' })
+      }
       const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
       const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
-      if (s === -1) return res.status(500).json({ error: '수치를 찾지 못했습니다. 결과지 이미지인지 확인해 주세요.' })
-      return res.status(200).json(JSON.parse(clean.slice(s, e+1)))
+      if (s === -1) return res.status(500).json({ error: '수치 파싱 실패. 원문: ' + text.slice(0,100) })
+      const parsed = JSON.parse(clean.slice(s, e+1))
+      return res.status(200).json(parsed)
     } catch(err) {
+      console.error('checkup_scan error:', err.message)
       return res.status(500).json({ error: '판독 오류: ' + err.message })
     }
   }
