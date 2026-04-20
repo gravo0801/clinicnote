@@ -7,7 +7,7 @@ function callAnthropic(apiKey, prompt, extraOpts) {
       ? prompt
       : [{ role: 'user', content: prompt }]
     const body = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: extraOpts?.model || 'claude-haiku-4-5-20251001',
       max_tokens: extraOpts?.max_tokens || 2000,
       messages,
     })
@@ -106,19 +106,20 @@ export default async function handler(req, res) {
     const { imageBase64, imageMime } = caseData || {}
     if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' })
     const mime = imageMime || 'image/jpeg'
-    const scanPrompt = `이 건강검진 결과지 이미지에서 모든 항목을 추출하세요.
+    const scanPrompt = `당신은 한국어 건강검진 결과지를 분석하는 전문가입니다. 이미지에서 모든 검사 결과를 추출하여 JSON으로 반환하세요.
 
-규칙:
-1. 반드시 순수 JSON만 출력 (마크다운 없음)
-2. 없는 항목은 포함하지 마세요
-3. 숫자 항목(혈액수치 등)은 숫자값으로
-4. 소견 항목(초음파/내시경/영상/골밀도 판독 결과 등)은 이미지에 보이는 한글/영문 결과 문자열을 그대로 복사
-5. 특히 다음 소견 항목들은 결과지에 적힌 내용을 빠짐없이 그대로 추출: fundusL, fundusR, ecg, chestXray, abdomUs, thyroidUs, breastUs, mammography, egd, colonoscopy, mri, ct, gyCytology, urineMicroscopy, occultBlood, rpr, havAb, hbsAg, hbsAb, hcvAb, urineProtein, urineGlucose, urineBlood, urineWbc, urineNitrite, urineKetone, urineUrobilinogen, urineBilirubin, hearingL, hearingR
-6. checkupDate는 YYYY-MM-DD 형식
+중요 규칙:
+- 순수 JSON만 출력. 마크다운 절대 금지.
+- 이미지에 없는 항목은 포함하지 마세요.
+- 숫자 검사값은 숫자로, 소견/판독문은 이미지의 한글 텍스트를 그대로 복사하세요.
+- 소견 항목들 (abdomUs, thyroidUs, egd, colonoscopy, chestXray, ecg, breastUs, mammography, fundusL, fundusR, mri, ct, gyCytology 등)은 결과지에 적힌 한글 소견을 전부 그대로 입력하세요. 예: abdomUs 에 "신장 단순 낭종(우측: 약 0.6cm, 좌측: 0.8cm) 그 외 특이사항 없음" 과 같이 전체 문장을 넣으세요.
+- 소변검사 결과(urineProtein, urineGlucose 등)는 "Negative", "Positive", "1+" 등 결과 문자열을 그대로.
+- 간염 항체(havAb, hbsAg, hbsAb, hcvAb)는 "Positive", "Negative" 또는 수치를 그대로.
+- checkupDate는 YYYY-MM-DD 형식.
 
-추출할 키 목록(숫자): height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,bandNeutrophil,lymphocyte,monocyte,eosinophil,basophil,blast,promyelocyte,myelocyte,metamyelocyte,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,raFactor,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,specificGravity
+숫자 키: height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,bandNeutrophil,lymphocyte,monocyte,eosinophil,basophil,blast,promyelocyte,myelocyte,metamyelocyte,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,raFactor,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,specificGravity
 
-추출할 키 목록(소견 문자열): fundusL,fundusR,hearingL,hearingR,corrHearingL,corrHearingR,urineMicroscopy,urineProtein,urineGlucose,urineBlood,urineWbc,urineNitrite,urineKetone,urineUrobilinogen,urineBilirubin,occultBlood,rpr,havAb,hbsAg,hbsAb,hcvAb,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,gyCytology,checkupDate`
+소견 문자열 키: fundusL,fundusR,hearingL,hearingR,corrHearingL,corrHearingR,urineMicroscopy,urineProtein,urineGlucose,urineBlood,urineWbc,urineNitrite,urineKetone,urineUrobilinogen,urineBilirubin,occultBlood,rpr,havAb,hbsAg,hbsAb,hcvAb,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,gyCytology,checkupDate`
     const multimodalMessages = [{
       role: 'user',
       content: [
@@ -127,7 +128,8 @@ export default async function handler(req, res) {
       ]
     }]
     try {
-      const scanRes = await callAnthropic(apiKey, multimodalMessages, { max_tokens: 2500 })
+      // Sonnet for better Korean OCR accuracy
+      const scanRes = await callAnthropic(apiKey, multimodalMessages, { max_tokens: 3000, model: 'claude-sonnet-4-20250514' })
       // 오류 응답 체크
       if (scanRes.error) {
         return res.status(500).json({ error: 'API 오류: ' + JSON.stringify(scanRes.error) })
