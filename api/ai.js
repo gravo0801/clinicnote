@@ -1,11 +1,15 @@
 import https from 'https'
 
-function callAnthropic(apiKey, prompt) {
+function callAnthropic(apiKey, prompt, extraOpts) {
   return new Promise((resolve, reject) => {
+    // prompt can be string (text) or array (multimodal)
+    const messages = Array.isArray(prompt)
+      ? prompt
+      : [{ role: 'user', content: prompt }]
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }],
+      max_tokens: extraOpts?.max_tokens || 2000,
+      messages,
     })
     const options = {
       hostname: 'api.anthropic.com',
@@ -98,32 +102,24 @@ export default async function handler(req, res) {
     const { imageBase64, imageMime } = caseData || {}
     if (!imageBase64) return res.status(400).json({ error: 'imageBase64 required' })
     const mime = imageMime || 'image/jpeg'
-    const scanPrompt = '이 건강검진 결과지 이미지에서 수치와 소견을 추출하세요. JSON만 출력, 없는 항목은 null로. 숫자항목은 숫자값, 소견항목은 문자열. JSON키: height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,lymphocyte,monocyte,eosinophil,basophil,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,fundusL,fundusR,hearingL,hearingR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,urineProtein,urineGlucose,urineBlood,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,checkupDate'
-    const scanBody = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 800,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: mime, data: imageBase64 } },
-          { type: 'text', text: scanPrompt }
-        ]
-      }]
-    })
-    const https = await import('https')
-    const scanRes = await new Promise((resolve, reject) => {
-      const opts = { hostname: 'api.anthropic.com', path: '/v1/messages', method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(scanBody), 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' } }
-      const req = https.default.request(opts, (r) => { let d = ''; r.on('data', c => { d += c }); r.on('end', () => resolve(JSON.parse(d))) })
-      req.on('error', reject); req.write(scanBody); req.end()
-    })
-    const text = scanRes.content?.[0]?.text || ''
-    const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
-    const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
-    if (s === -1) return res.status(500).json({ error: '수치를 찾지 못했습니다.' })
+    const scanPrompt = '이 건강검진 결과지 이미지에서 보이는 모든 수치와 소견을 추출하세요. 반드시 JSON만 출력하고 마크다운 없이 순수 JSON만 반환하세요. 없는 항목은 포함하지 마세요. 숫자 항목은 숫자값, 소견/결과 항목은 문자열. 검진일(checkupDate)은 YYYY-MM-DD 형식. 키 목록: height,weight,bmi,waist,bodyFat,abdomFat,sbp,dbp,hr,wbc,rbc,hemoglobin,hct,platelet,mcv,mch,mchc,rdw,mpv,pdw,pct,neutrophil,bandNeutrophil,lymphocyte,monocyte,eosinophil,basophil,blast,promyelocyte,myelocyte,metamyelocyte,tc,ldl,hdl,tg,glucose,hba1c,ast,alt,ggt,alp,ldh,bilirubin,directBilirubin,protein,albumin,globulin,agRatio,bun,creatinine,egfr,bcRatio,sodium,potassium,chloride,calcium,phosphorus,tsh,t3,freeT4,uric,crp,vitaminD,amylase,lipase,cea,afp,ca125,ca199,raFactor,occultBlood,rpr,havAb,hbsAg,hbsAb,hcvAb,visionL,visionR,corrVisionL,corrVisionR,iopL,iopR,fundusL,fundusR,hearingL,hearingR,corrHearingL,corrHearingR,bmdSpineT,bmdHipT,bmdSpineZ,urinePh,urineProtein,urineGlucose,urineBlood,urineWbc,urineNitrite,urineKetone,urineUrobilinogen,urineBilirubin,specificGravity,urineMicroscopy,ecg,chestXray,abdomUs,thyroidUs,breastUs,mammography,egd,colonoscopy,mri,ct,gyCytology,checkupDate'
+    const multimodalMessages = [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: mime, data: imageBase64 } },
+        { type: 'text', text: scanPrompt }
+      ]
+    }]
     try {
+      const scanRes = await callAnthropic(apiKey, multimodalMessages, { max_tokens: 2500 })
+      const text = scanRes.content?.[0]?.text || ''
+      if (!text) return res.status(500).json({ error: 'AI 응답 없음' })
+      const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
+      if (s === -1) return res.status(500).json({ error: '수치를 찾지 못했습니다. 결과지 이미지인지 확인해 주세요.' })
       return res.status(200).json(JSON.parse(clean.slice(s, e+1)))
     } catch(err) {
-      return res.status(500).json({ error: '파싱 오류: ' + err.message })
+      return res.status(500).json({ error: '판독 오류: ' + err.message })
     }
   }
 
