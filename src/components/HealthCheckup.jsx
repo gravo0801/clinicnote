@@ -48,7 +48,7 @@ function Sparkline({ values, color = '#0F6E56', width = 100, height = 36 }) {
   )
 }
 
-const STATUS_COLORS = { '위험':'#dc2626','주의':'#d97706','공복혈당장애':'#d97706','경계':'#d97706','주의':'#d97706','높음':'#d97706','당뇨':'#dc2626','빈혈':'#dc2626','비만':'#d97706','과체중':'#d97706','저체중':'#9ca3af','저하증의심':'#2563eb','항진증의심':'#dc2626' }
+const STATUS_COLORS = { '위험':'#dc2626','주의':'#d97706','공복혈당장애':'#d97706','경계':'#d97706','높음':'#d97706','당뇨':'#dc2626','빈혈':'#dc2626','비만':'#d97706','과체중':'#d97706','저체중':'#9ca3af','저하증의심':'#2563eb','항진증의심':'#dc2626' }
 
 export default function HealthCheckup({ memberId, memberGender }) {
   const [checkups, setCheckups] = useState([])
@@ -96,20 +96,95 @@ export default function HealthCheckup({ memberId, memberGender }) {
   const iStyle = { width:'100%', padding:'7px 9px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' }
   const lblStyle = { display:'block', fontSize:11, color:'#6b7280', marginBottom:3, fontWeight:600 }
 
+  const [scanning, setScanning] = useState(false)
+  const [scanImg, setScanImg] = useState(null)
+  const [scanError, setScanError] = useState(null)
+
+  const handleScanImage = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    e.target.value = ''
+    setScanning(true); setScanError(null)
+    const reader = new FileReader()
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result
+      setScanImg(base64)
+      try {
+        const b64data = base64.split(',')[1]
+        const mime = base64.split(';')[0].split(':')[1]
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mime, data: b64data } },
+                { type: 'text', text: '이 건강검진 결과지 이미지에서 수치를 추출하세요. JSON만 출력하세요. 없는 항목은 null로. {"weight":null,"bmi":null,"waist":null,"sbp":null,"dbp":null,"glucose":null,"hba1c":null,"tc":null,"ldl":null,"hdl":null,"tg":null,"alt":null,"ast":null,"ggt":null,"creatinine":null,"uric":null,"hemoglobin":null,"tsh":null,"checkupDate":null} checkupDate는 YYYY-MM-DD 형식. 나머지는 숫자값.' }
+              ]
+            }]
+          })
+        })
+        const data = await res.json()
+        const text = data.content?.[0]?.text || ''
+        const clean = text.replace(/```json/g,'').replace(/```/g,'').trim()
+        const s = clean.indexOf('{'), en = clean.lastIndexOf('}')
+        if (s === -1) throw new Error('결과 없음')
+        const parsed = JSON.parse(clean.slice(s, en+1))
+        const extracted = {}
+        CHECKUP_ITEMS.forEach(item => {
+          if (parsed[item.key] != null && parsed[item.key] !== '') {
+            extracted[item.key] = String(parsed[item.key])
+          }
+        })
+        setNewItems(p => ({ ...p, ...extracted }))
+        if (parsed.checkupDate) setNewDate(parsed.checkupDate)
+        const count = Object.keys(extracted).length
+        setScanError(count > 0 ? ('AI 판독 완료: ' + count + '개 항목 자동 입력됨. 확인 후 저장하세요.') : '수치를 찾지 못했습니다. 수동으로 입력해 주세요.')
+      } catch(err) {
+        setScanError('판독 실패: ' + err.message + '. 수동으로 입력해 주세요.')
+      } finally {
+        setScanning(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
   const addModalJsx = showAdd ? (
-    <Sheet title="건강검진 기록 추가" onClose={() => setShowAdd(false)}>
+    <Sheet title="건강검진 기록 추가" onClose={() => { setShowAdd(false); setScanImg(null); setScanError(null) }}>
+      <div style={{ marginBottom:16, background:'#eff6ff', borderRadius:10, padding:'12px 14px', border:'1px solid #bfdbfe' }}>
+        <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:8 }}>AI 사진 자동 판독</div>
+        <div style={{ fontSize:11, color:'#6b7280', marginBottom:10 }}>건강검진 결과지 사진을 업로드하면 수치를 자동으로 인식하여 입력합니다.</div>
+        <label style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', background: scanning ? '#d1d5db' : '#2563eb', color:'#fff', borderRadius:8, fontSize:12, cursor: scanning ? 'not-allowed' : 'pointer', fontWeight:700 }}>
+          {scanning ? 'AI 판독 중...' : '결과지 사진 업로드'}
+          <input type="file" accept="image/*" onChange={handleScanImage} disabled={scanning} style={{ display:'none' }} />
+        </label>
+        {scanning && <div style={{ marginTop:8, fontSize:12, color:'#2563eb' }}>이미지 분석 중입니다... (10~20초 소요)</div>}
+        {scanError && (
+          <div style={{ marginTop:8, fontSize:12, color: scanError.includes('완료') ? '#0F6E56' : '#dc2626', background: scanError.includes('완료') ? '#f0faf5' : '#fee2e2', borderRadius:7, padding:'7px 10px', lineHeight:1.5 }}>
+            {scanError}
+          </div>
+        )}
+        {scanImg && !scanning && (
+          <div style={{ marginTop:8 }}>
+            <img src={scanImg} alt="검진결과지" style={{ maxWidth:'100%', maxHeight:120, objectFit:'contain', borderRadius:7, border:'1px solid #bfdbfe' }} />
+          </div>
+        )}
+      </div>
       <div style={{ marginBottom:14 }}>
         <label style={lblStyle}>검진일</label>
         <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} style={iStyle} />
       </div>
       <div style={{ marginBottom:14 }}>
-        <div style={{ fontSize:12, fontWeight:700, color:'#374151', marginBottom:10 }}>측정값 입력 (해당 항목만 입력)</div>
+        <div style={{ fontSize:12, fontWeight:700, color:'#374151', marginBottom:10 }}>측정값 (AI 판독 결과 확인 후 수정 가능)</div>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
           {CHECKUP_ITEMS.map(item => (
-            <div key={item.key}>
+            <div key={item.key} style={{ position:'relative' }}>
               <label style={lblStyle}>{item.label} {item.unit && <span style={{ color:'#9ca3af', fontWeight:400 }}>({item.unit})</span>}</label>
               <input type="number" step="any" value={newItems[item.key]||''} onChange={e => setNewItems(p => ({...p,[item.key]:e.target.value}))}
-                placeholder="-" style={{ ...iStyle, textAlign:'center' }} />
+                placeholder="-" style={{ ...iStyle, textAlign:'center', background: newItems[item.key] ? '#f0faf5' : '#fff', borderColor: newItems[item.key] ? '#6ee7b7' : '#e5e7eb' }} />
             </div>
           ))}
         </div>
@@ -133,10 +208,10 @@ export default function HealthCheckup({ memberId, memberGender }) {
           const td = trendData[item.key]
           const last = td[td.length-1]?.value
           const prev = td[td.length-2]?.value
-          const trend = last > prev ? '↑' : last < prev ? '↓' : '→'
+          const trend = last > prev ? '^' : last < prev ? 'v' : '->'
           const item2 = CHECKUP_ITEMS.find(i => i.key===item.key)
           const warnStatus = item2?.warn?.(last, memberGender==='여'?'여':'남')
-          const trendClr = trend==='↑'?'#ef4444':trend==='↓'?'#10b981':'#9ca3af'
+          const trendClr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
           return (
             <div key={item.key} style={{ background:'#f8f6f2', borderRadius:10, padding:'12px 14px' }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
@@ -240,7 +315,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
                       <div style={{ display:'flex', gap:8, alignItems:'center' }}>
                         {hasWarn && <span style={{ fontSize:11, color:'#dc2626', fontWeight:600 }}>이상 {warnItems.length}항목</span>}
                         <button onClick={() => delCheckup(c.id)} style={{ background:'none', border:'none', color:'#d1d5db', fontSize:14, cursor:'pointer', padding:0, lineHeight:1 }}
-                          onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>×</button>
+                          onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>x</button>
                       </div>
                     </div>
                     {/* 항목 값 */}
