@@ -6,7 +6,7 @@ import { COMMON_DRUGS } from '../data/commonDrugs'
 
 const CATEGORIES = ['전체','내과일반','상기도감염','소화기','근골격/통증','소아과','피부','이비인후과','외상','비뇨기','기타']
 
-const iStyle = { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' }
+const iStyle = { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#0D1117' }
 const lblStyle = { display:'block', fontSize:11, color:'#6b7280', marginBottom:4, fontWeight:600 }
 
 // 약물 자동완성 (프리셋 폼용)
@@ -31,13 +31,13 @@ function DrugNameInput({ value, onChange, suggestions }) {
       {open && hits.length > 0 && (
         <div style={{
           position:'absolute', top:'100%', left:0, minWidth:240, width:'max-content', maxWidth:340,
-          zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:6,
+          zIndex:9999, background:'#fff', border:'1px solid #C7F7E8', borderRadius:6,
           boxShadow:'0 6px 20px rgba(0,0,0,0.15)', maxHeight:220, overflowY:'auto',
         }}>
           {hits.map(n => (
             <div key={n} onMouseDown={e => { e.preventDefault(); onChange(n); setOpen(false) }}
-              style={{ padding:'8px 11px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', whiteSpace:'nowrap' }}
-              onMouseEnter={e => e.currentTarget.style.background='#f0faf5'} onMouseLeave={e => e.currentTarget.style.background='#fff'}>
+              style={{ padding:'8px 11px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#0D1117', whiteSpace:'nowrap' }}
+              onMouseEnter={e => e.currentTarget.style.background='#EDFFF8'} onMouseLeave={e => e.currentTarget.style.background='#fff'}>
               💊 {n}
             </div>
           ))}
@@ -73,7 +73,7 @@ function PresetForm({ initial, onSave, onClose, allDrugNames }) {
         <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
           {CATEGORIES.filter(c => c !== '전체').map(c => (
             <button key={c} onClick={() => setCategory(c)}
-              style={{ padding:'5px 12px', borderRadius:20, border: category===c?'none':'1px solid #e5e7eb', background: category===c?'#0F6E56':'#fff', color: category===c?'#fff':'#6b7280', fontSize:12, cursor:'pointer', fontWeight: category===c?600:400 }}>
+              style={{ padding:'5px 12px', borderRadius:20, border: category===c?'none':'1px solid #e5e7eb', background: category===c?'#00C07F':'#fff', color: category===c?'#fff':'#6b7280', fontSize:12, cursor:'pointer', fontWeight: category===c?600:400 }}>
               {c}
             </button>
           ))}
@@ -82,10 +82,10 @@ function PresetForm({ initial, onSave, onClose, allDrugNames }) {
       <div style={{ marginBottom:14 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
           <label style={lblStyle}>처방 약물 *</label>
-          <button onClick={addDrug} style={{ background:'#f0faf5', color:'#0F6E56', border:'none', borderRadius:6, padding:'3px 10px', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ 추가</button>
+          <button onClick={addDrug} style={{ background:'#EDFFF8', color:'#00C07F', border:'none', borderRadius:6, padding:'3px 10px', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ 추가</button>
         </div>
         {drugs.map((d, i) => (
-          <div key={i} style={{ background:'#f8f6f2', borderRadius:9, padding:10, marginBottom:8 }}>
+          <div key={i} style={{ background:'#F8F9FB', borderRadius:9, padding:10, marginBottom:8 }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:7 }}>
               <span style={{ fontSize:11, fontWeight:700, color:'#6b7280' }}>약물 {i+1}</span>
               {drugs.length > 1 && <button onClick={() => delDrug(i)} style={{ background:'none', border:'none', color:'#ef4444', fontSize:12, cursor:'pointer' }}>삭제</button>}
@@ -109,7 +109,7 @@ function PresetForm({ initial, onSave, onClose, allDrugNames }) {
         ))}
       </div>
       <button onClick={handleSave} disabled={!name.trim()}
-        style={{ width:'100%', padding:'11px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:!name.trim()?'not-allowed':'pointer', opacity:!name.trim()?0.5:1 }}>
+        style={{ width:'100%', padding:'11px', background:'#00C07F', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:!name.trim()?'not-allowed':'pointer', opacity:!name.trim()?0.5:1 }}>
         저장
       </button>
     </div>
@@ -118,22 +118,22 @@ function PresetForm({ initial, onSave, onClose, allDrugNames }) {
 
 // 프리셋 카드
 function PresetCard({ preset, onEdit, onDelete, onInsert, compact }) {
-  const catColor = { '내과일반':'#0F6E56','상기도감염':'#2563eb','소화기':'#059669','근골격/통증':'#7c3aed','소아과':'#db2777','피부':'#d97706','이비인후과':'#0891b2','외상':'#dc2626','비뇨기':'#6366f1','기타':'#6b7280' }
+  const catColor = { '내과일반':'#00C07F','상기도감염':'#2563eb','소화기':'#059669','근골격/통증':'#7c3aed','소아과':'#db2777','피부':'#d97706','이비인후과':'#0891b2','외상':'#dc2626','비뇨기':'#6366f1','기타':'#6b7280' }
   const c = catColor[preset.category] || '#6b7280'
   return (
-    <div style={{ background:'#fff', borderRadius:11, padding:'13px 14px', border:'1px solid #f0ede8', borderLeft:`3px solid ${c}` }}>
+    <div style={{ background:'#fff', borderRadius:11, padding:'13px 14px', border:'1px solid #F0F4F8', borderLeft:`3px solid ${c}` }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:3 }}>
-            <span style={{ fontSize:14, fontWeight:700, color:'#1a1a1a' }}>{preset.name}</span>
+            <span style={{ fontSize:14, fontWeight:700, color:'#0D1117' }}>{preset.name}</span>
             {preset.shortcut && (
-              <span style={{ fontSize:11, background:'#f0faf5', color:'#0F6E56', border:'1px solid #d1fae5', borderRadius:5, padding:'1px 7px', fontWeight:700, fontFamily:'monospace' }}>#{preset.shortcut}</span>
+              <span style={{ fontSize:11, background:'#EDFFF8', color:'#00C07F', border:'1px solid #C7F7E8', borderRadius:5, padding:'1px 7px', fontWeight:700, fontFamily:'monospace' }}>#{preset.shortcut}</span>
             )}
           </div>
           <span style={{ fontSize:11, background: `${c}18`, color: c, borderRadius:20, padding:'2px 8px', fontWeight:600 }}>{preset.category}</span>
         </div>
         <div style={{ display:'flex', gap:6, flexShrink:0 }}>
-          {onInsert && <button onClick={onInsert} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:6, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer' }}>삽입</button>}
+          {onInsert && <button onClick={onInsert} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:6, padding:'5px 12px', fontSize:12, fontWeight:700, cursor:'pointer' }}>삽입</button>}
           <button onClick={onEdit} style={{ background:'none', border:'1px solid #e5e7eb', borderRadius:6, padding:'4px 9px', fontSize:11, cursor:'pointer', color:'#6b7280' }}>수정</button>
           <button onClick={onDelete} style={{ background:'none', border:'1px solid #fca5a5', borderRadius:6, padding:'4px 9px', fontSize:11, cursor:'pointer', color:'#ef4444' }}>삭제</button>
         </div>
@@ -141,7 +141,7 @@ function PresetCard({ preset, onEdit, onDelete, onInsert, compact }) {
       <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
         {(preset.drugs||[]).map((d, i) => (
           <div key={i} style={{ display:'flex', gap:6, alignItems:'center', fontSize:12 }}>
-            <span style={{ color:'#1a1a1a', fontWeight:500, flex:1 }}>💊 {d.name}</span>
+            <span style={{ color:'#0D1117', fontWeight:500, flex:1 }}>💊 {d.name}</span>
             <span style={{ color:'#6b7280', flexShrink:0 }}>{[d.dosage, `${d.freq||3}회`, d.duration&&d.duration+'일', d.usage].filter(Boolean).join(' · ')}</span>
           </div>
         ))}
@@ -205,7 +205,7 @@ export default function PresetRxTab({ onInsert }) {
             style={{ ...iStyle, paddingLeft:32 }} />
         </div>
         <button onClick={() => { setSheet('add'); setEditTarget(null) }}
-          style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, padding:'8px 16px', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
+          style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:8, padding:'8px 16px', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
           + 추가
         </button>
       </div>
@@ -222,7 +222,7 @@ export default function PresetRxTab({ onInsert }) {
             const cnt = c === '전체' ? presets.length : presets.filter(p => p.category === c).length
             return (
               <button key={c} onClick={() => setCatFilter(c)}
-                style={{ padding:'5px 12px', borderRadius:20, border: catFilter===c?'none':'1px solid #e5e7eb', background: catFilter===c?'#0F6E56':'#fff', color: catFilter===c?'#fff':'#6b7280', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontWeight: catFilter===c?700:400, flexShrink:0 }}>
+                style={{ padding:'5px 12px', borderRadius:20, border: catFilter===c?'none':'1px solid #e5e7eb', background: catFilter===c?'#00C07F':'#fff', color: catFilter===c?'#fff':'#6b7280', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontWeight: catFilter===c?700:400, flexShrink:0 }}>
                 {c} {cnt > 0 && <span style={{ opacity:0.75 }}>({cnt})</span>}
               </button>
             )
@@ -236,7 +236,7 @@ export default function PresetRxTab({ onInsert }) {
           ? <div style={{ textAlign:'center', padding:'48px 0', color:'#9ca3af' }}>
               <div style={{ fontSize:28, marginBottom:8 }}>📋</div>
               <div style={{ fontSize:13, marginBottom:14 }}>약속처방이 없습니다</div>
-              <button onClick={() => setSheet('add')} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:20, padding:'7px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 약속처방 추가하기</button>
+              <button onClick={() => setSheet('add')} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:20, padding:'7px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 약속처방 추가하기</button>
             </div>
           : filtered.map(p => (
             <PresetCard key={p.id} preset={p}
@@ -272,7 +272,7 @@ export function PresetSelector({ onInsert, onClose }) {
 
   if (loading) return <div style={{ padding:20, textAlign:'center', color:'#9ca3af', fontSize:13 }}>로딩 중...</div>
 
-  const catColor = { '내과일반':'#0F6E56','상기도감염':'#2563eb','소화기':'#059669','근골격/통증':'#7c3aed','소아과':'#db2777','피부':'#d97706','이비인후과':'#0891b2','외상':'#dc2626','비뇨기':'#6366f1','기타':'#6b7280' }
+  const catColor = { '내과일반':'#00C07F','상기도감염':'#2563eb','소화기':'#059669','근골격/통증':'#7c3aed','소아과':'#db2777','피부':'#d97706','이비인후과':'#0891b2','외상':'#dc2626','비뇨기':'#6366f1','기타':'#6b7280' }
 
   return (
     <div>
@@ -284,7 +284,7 @@ export function PresetSelector({ onInsert, onClose }) {
       <div style={{ display:'flex', gap:5, overflowX:'auto', marginBottom:12, paddingBottom:2 }}>
         {CATEGORIES.map(c => (
           <button key={c} onClick={() => setCatFilter(c)}
-            style={{ padding:'4px 10px', borderRadius:20, border: catFilter===c?'none':'1px solid #e5e7eb', background: catFilter===c?'#0F6E56':'#fff', color: catFilter===c?'#fff':'#6b7280', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
+            style={{ padding:'4px 10px', borderRadius:20, border: catFilter===c?'none':'1px solid #e5e7eb', background: catFilter===c?'#00C07F':'#fff', color: catFilter===c?'#fff':'#6b7280', fontSize:11, cursor:'pointer', whiteSpace:'nowrap', flexShrink:0 }}>
             {c}
           </button>
         ))}
@@ -296,11 +296,11 @@ export function PresetSelector({ onInsert, onClose }) {
               const c = catColor[p.category] || '#6b7280'
               return (
                 <div key={p.id} onClick={() => { onInsert(p); onClose() }}
-                  style={{ background:'#f8f6f2', borderRadius:9, padding:'11px 13px', cursor:'pointer', borderLeft:`3px solid ${c}`, transition:'background 0.1s' }}
-                  onMouseEnter={e => e.currentTarget.style.background='#f0faf5'} onMouseLeave={e => e.currentTarget.style.background='#f8f6f2'}>
+                  style={{ background:'#F8F9FB', borderRadius:9, padding:'11px 13px', cursor:'pointer', borderLeft:`3px solid ${c}`, transition:'background 0.1s' }}
+                  onMouseEnter={e => e.currentTarget.style.background='#EDFFF8'} onMouseLeave={e => e.currentTarget.style.background='#F8F9FB'}>
                   <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:5 }}>
-                    <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{p.name}</span>
-                    {p.shortcut && <span style={{ fontSize:10, background:'#f0faf5', color:'#0F6E56', border:'1px solid #d1fae5', borderRadius:4, padding:'1px 6px', fontWeight:700, fontFamily:'monospace' }}>#{p.shortcut}</span>}
+                    <span style={{ fontSize:13, fontWeight:700, color:'#0D1117' }}>{p.name}</span>
+                    {p.shortcut && <span style={{ fontSize:10, background:'#EDFFF8', color:'#00C07F', border:'1px solid #C7F7E8', borderRadius:4, padding:'1px 6px', fontWeight:700, fontFamily:'monospace' }}>#{p.shortcut}</span>}
                     <span style={{ fontSize:10, color: c, fontWeight:600, marginLeft:'auto' }}>{p.category}</span>
                   </div>
                   <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
