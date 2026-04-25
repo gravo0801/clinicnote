@@ -666,47 +666,159 @@ export default function HealthCheckup({ memberId, memberGender }) {
     </Sheet>
   ) : null
 
+  const [trendCatFilter, setTrendCatFilter] = useState('all')
+
   const trendModalJsx = showTrend ? (
-    <Sheet title="건강 추이 분석" onClose={() => setShowTrend(false)}>
-      {CHECKUP_CATEGORIES.filter(cat => cat.items.some(item => item.type!=='text' && trendData[item.key]?.length >= 2)).map(cat => {
-        const trendItems = cat.items.filter(item => item.type!=='text' && trendData[item.key]?.length >= 2)
-        if (trendItems.length === 0) return null
-        return (
-          <div key={cat.key} style={{ marginBottom:16 }}>
-            <div style={{ fontSize:12, fontWeight:700, color:'#6b7280', marginBottom:8, paddingBottom:4, borderBottom:'1px solid #f0ede8' }}>{cat.label}</div>
-            {trendItems.map(item => {
-              const td = trendData[item.key]
-              const last = td[td.length-1]?.value
-              const prev = td[td.length-2]?.value
-              const trend = last > prev ? '^' : last < prev ? 'v' : '-'
-              const clr = trend==='^'?'#ef4444':trend==='v'?'#10b981':'#9ca3af'
-              const ws = item.warn?.(last, memberGender)
+    <div style={{ position:'fixed', inset:0, zIndex:8000, background:'rgba(0,0,0,0.4)', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+      <div style={{ background:'#fff', display:'flex', flexDirection:'column', height:'100%', maxWidth:1100, width:'100%', margin:'0 auto', borderRadius:'0 0 0 0' }}>
+        {/* 헤더 */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 20px', borderBottom:'1px solid #f0ede8', flexShrink:0 }}>
+          <div>
+            <div style={{ fontSize:17, fontWeight:700 }}>연도별 건강 추이표</div>
+            <div style={{ fontSize:12, color:'#9ca3af', marginTop:2 }}>검진 {checkups.length}회 기록  /  항목별 수치 변화</div>
+          </div>
+          <button onClick={() => setShowTrend(false)} style={{ background:'none', border:'none', fontSize:22, cursor:'pointer', color:'#9ca3af', lineHeight:1 }}>x</button>
+        </div>
+
+        {/* 카테고리 탭 */}
+        <div style={{ display:'flex', gap:5, padding:'10px 20px', borderBottom:'1px solid #f0ede8', flexShrink:0, overflowX:'auto' }}>
+          <button onClick={() => setTrendCatFilter('all')}
+            style={{ padding:'5px 12px', borderRadius:16, border:trendCatFilter==='all'?'none':'1px solid #e5e7eb', background:trendCatFilter==='all'?'#0F6E56':'#fff', color:trendCatFilter==='all'?'#fff':'#6b7280', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontWeight:trendCatFilter==='all'?700:400 }}>
+            전체
+          </button>
+          {CHECKUP_CATEGORIES.filter(cat => cat.items.some(item => trendData[item.key]?.length >= 1)).map(cat => (
+            <button key={cat.key} onClick={() => setTrendCatFilter(cat.key)}
+              style={{ padding:'5px 12px', borderRadius:16, border:trendCatFilter===cat.key?'none':'1px solid #e5e7eb', background:trendCatFilter===cat.key?'#0F6E56':'#fff', color:trendCatFilter===cat.key?'#fff':'#6b7280', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontWeight:trendCatFilter===cat.key?700:400 }}>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 테이블 */}
+        <div style={{ flex:1, overflowY:'auto', padding:'0 0 20px' }}>
+          {checkups.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'60px 0', color:'#9ca3af' }}>검진 기록이 없습니다</div>
+          ) : (() => {
+            // 날짜 정렬 (오래된 순)
+            const sorted = [...checkups].sort((a,b) => a.date.localeCompare(b.date))
+            const dates = sorted.map(c => c.date)
+            const catsToShow = trendCatFilter === 'all'
+              ? CHECKUP_CATEGORIES
+              : CHECKUP_CATEGORIES.filter(c => c.key === trendCatFilter)
+
+            return catsToShow.map(cat => {
+              // 이 카테고리에서 하나라도 데이터 있는 항목만
+              const hasData = cat.items.filter(item => sorted.some(c => c.items?.[item.key] != null && c.items[item.key] !== ''))
+              if (hasData.length === 0) return null
+
               return (
-                <div key={item.key} style={{ background:'#f8f6f2', borderRadius:10, padding:'10px 13px', marginBottom:8 }}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
-                    <div>
-                      <span style={{ fontSize:13, fontWeight:700 }}>{item.label}</span>
-                      {item.unit && <span style={{ fontSize:11, color:'#9ca3af', marginLeft:4 }}>{item.unit}</span>}
-                      {ws && <span style={{ fontSize:10, background:(STATUS_COLORS[ws]||'#6b7280')+'18', color:STATUS_COLORS[ws]||'#6b7280', borderRadius:4, padding:'1px 7px', marginLeft:7, fontWeight:700 }}>{ws}</span>}
-                    </div>
-                    <span style={{ fontSize:15, fontWeight:700, color:clr }}>{last} {trend}</span>
+                <div key={cat.key}>
+                  {/* 카테고리 헤더 */}
+                  <div style={{ padding:'12px 20px 6px', background:'#f5f3ef', borderTop:'1px solid #e5e7eb', borderBottom:'1px solid #e5e7eb', fontSize:12, fontWeight:700, color:'#374151', position:'sticky', top:0, zIndex:1 }}>
+                    {cat.label}
                   </div>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
-                    <Sparkline values={td.map(d => d.value)} color={ws?STATUS_COLORS[ws]||'#0F6E56':'#0F6E56'} width={130} height={40} />
-                    <div style={{ display:'flex', gap:8, fontSize:11, color:'#9ca3af' }}>
-                      {td.slice(-4).map(d => <div key={d.date} style={{ textAlign:'center' }}><div style={{ marginBottom:2 }}>{d.value}</div><div>{d.date.slice(2)}</div></div>)}
-                    </div>
+
+                  {/* 테이블 */}
+                  <div style={{ overflowX:'auto' }}>
+                    <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12, minWidth: 200 + dates.length * 90 }}>
+                      <thead>
+                        <tr style={{ background:'#f9fafb' }}>
+                          <th style={{ textAlign:'left', padding:'8px 20px', fontWeight:700, color:'#6b7280', borderBottom:'1px solid #e5e7eb', width:160, position:'sticky', left:0, background:'#f9fafb', zIndex:1 }}>항목</th>
+                          <th style={{ textAlign:'center', padding:'8px 12px', fontWeight:600, color:'#9ca3af', borderBottom:'1px solid #e5e7eb', width:50 }}>단위</th>
+                          {dates.map(d => (
+                            <th key={d} style={{ textAlign:'center', padding:'8px 12px', fontWeight:700, color:'#374151', borderBottom:'1px solid #e5e7eb', minWidth:80 }}>
+                              {d.slice(0,7)}
+                            </th>
+                          ))}
+                          <th style={{ textAlign:'center', padding:'8px 12px', fontWeight:700, color:'#374151', borderBottom:'1px solid #e5e7eb', minWidth:60 }}>추이</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {hasData.map((item, rowIdx) => {
+                          const isText = item.type === 'text'
+                          const values = sorted.map(c => c.items?.[item.key] ?? null)
+                          const numValues = isText ? [] : values.map(v => v != null ? parseFloat(v) : null).filter(v => v != null)
+                          const last = isText ? null : numValues[numValues.length-1]
+                          const prev = isText ? null : numValues[numValues.length-2]
+                          const ws = (!isText && last != null) ? item.warn?.(last, memberGender) : null
+                          const trendArrow = (!isText && last != null && prev != null) ? (last > prev ? 'v' : last < prev ? 'v' : '') : ''
+                          // 화살표 방향 수정: 상승/하강
+                          const trendDir = (!isText && last != null && prev != null) ? (last > prev ? 1 : last < prev ? -1 : 0) : 0
+
+                          return (
+                            <tr key={item.key} style={{ background: rowIdx%2===0 ? '#fff' : '#fafafa', borderBottom:'1px solid #f0ede8' }}>
+                              {/* 항목명 - sticky */}
+                              <td style={{ padding:'8px 20px', fontWeight:600, color:'#374151', position:'sticky', left:0, background:rowIdx%2===0?'#fff':'#fafafa', zIndex:1 }}>
+                                {item.label}
+                              </td>
+                              <td style={{ textAlign:'center', padding:'8px 8px', color:'#9ca3af', fontSize:11 }}>{item.unit || '-'}</td>
+
+                              {/* 각 날짜 수치 */}
+                              {values.map((val, ci) => {
+                                if (val == null) return (
+                                  <td key={ci} style={{ textAlign:'center', padding:'8px 12px', color:'#e5e7eb' }}>-</td>
+                                )
+                                if (isText) return (
+                                  <td key={ci} style={{ textAlign:'left', padding:'6px 10px', fontSize:11, color:'#374151', maxWidth:140, lineHeight:1.4 }}>
+                                    {String(val)}
+                                  </td>
+                                )
+                                const numV = parseFloat(val)
+                                const cellWs = item.warn?.(numV, memberGender)
+                                const cellClr = cellWs ? (STATUS_COLORS[cellWs] || '#374151') : '#374151'
+                                const cellBg = cellWs ? (STATUS_COLORS[cellWs] || '#6b7280') + '12' : 'transparent'
+                                // prev value for this column
+                                const prevVal = ci > 0 ? parseFloat(values.slice(0,ci).filter(v=>v!=null).slice(-1)[0]) : null
+                                const diff = (prevVal != null && !isNaN(prevVal)) ? numV - prevVal : null
+                                return (
+                                  <td key={ci} style={{ textAlign:'center', padding:'6px 12px', background:cellBg }}>
+                                    <div style={{ fontWeight: cellWs ? 700 : 500, color:cellClr, fontSize:13 }}>{val}</div>
+                                    {diff != null && diff !== 0 && (
+                                      <div style={{ fontSize:10, color: diff > 0 ? '#ef4444' : '#10b981', marginTop:1 }}>
+                                        {diff > 0 ? '+' : ''}{diff.toFixed(1)}
+                                      </div>
+                                    )}
+                                    {cellWs && <div style={{ fontSize:9, color:cellClr, fontWeight:700, marginTop:1 }}>{cellWs}</div>}
+                                  </td>
+                                )
+                              })}
+
+                              {/* 추이 스파크라인 */}
+                              <td style={{ textAlign:'center', padding:'4px 12px' }}>
+                                {isText ? (
+                                  <span style={{ fontSize:10, color:'#9ca3af' }}>-</span>
+                                ) : numValues.length >= 2 ? (
+                                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:2 }}>
+                                    <Sparkline values={numValues} color={ws ? (STATUS_COLORS[ws]||'#0F6E56') : '#0F6E56'} width={70} height={28} />
+                                    <span style={{ fontSize:10, color: trendDir > 0 ? '#ef4444' : trendDir < 0 ? '#10b981' : '#9ca3af', fontWeight:700 }}>
+                                      {trendDir > 0 ? '(+)' : trendDir < 0 ? '(-)' : '(=)'}
+                                    </span>
+                                  </div>
+                                ) : <span style={{ fontSize:10, color:'#9ca3af' }}>1회</span>}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )
-            })}
-          </div>
-        )
-      })}
-      {NUM_ITEMS.filter(item => trendData[item.key]?.length >= 2).length === 0 && (
-        <div style={{ textAlign:'center', padding:'32px 0', color:'#9ca3af', fontSize:13 }}>2회 이상 기록된 항목이 없습니다</div>
-      )}
-    </Sheet>
+            })
+          })()}
+        </div>
+
+        {/* 범례 */}
+        <div style={{ padding:'10px 20px', borderTop:'1px solid #f0ede8', display:'flex', gap:16, flexWrap:'wrap', flexShrink:0, background:'#fafaf9' }}>
+          <span style={{ fontSize:11, color:'#6b7280' }}>범례:</span>
+          <span style={{ fontSize:11, color:'#dc2626', fontWeight:700 }}>빨강 = 위험/이상</span>
+          <span style={{ fontSize:11, color:'#d97706', fontWeight:700 }}>주황 = 주의/경계</span>
+          <span style={{ fontSize:11, color:'#ef4444' }}>(+) 상승</span>
+          <span style={{ fontSize:11, color:'#10b981' }}>(-)  하강</span>
+          <span style={{ fontSize:11, color:'#9ca3af' }}>회색 셀 = 해당 검진에 기록 없음</span>
+        </div>
+      </div>
+    </div>
   ) : null
 
   if (loading) return <div style={{ padding:20, color:'#9ca3af', fontSize:13 }}>로딩 중...</div>
@@ -739,7 +851,7 @@ export default function HealthCheckup({ memberId, memberGender }) {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
         <span style={{ fontSize:14, fontWeight:700 }}>건강검진 기록 <span style={{ color:'#9ca3af', fontWeight:400 }}>({checkups.length}회)</span></span>
         <div style={{ display:'flex', gap:6 }}>
-          {checkups.length >= 2 && <button onClick={() => setShowTrend(true)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #e5e7eb', background:'#fff', color:'#374151', fontSize:12, cursor:'pointer', fontWeight:600 }}>추이 분석</button>}
+          {checkups.length >= 1 && <button onClick={() => setShowTrend(true)} style={{ padding:'6px 12px', borderRadius:7, border:'1px solid #e5e7eb', background:'#fff', color:'#374151', fontSize:12, cursor:'pointer', fontWeight:600 }}>연도별 추이표</button>}
           <button onClick={() => setShowAdd(true)} style={{ padding:'6px 14px', borderRadius:7, background:'#0F6E56', color:'#fff', border:'none', fontSize:12, fontWeight:700, cursor:'pointer' }}>+ 검진 추가</button>
         </div>
       </div>
