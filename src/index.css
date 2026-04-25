@@ -2,24 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-* { box-sizing: border-box; }
+/* ── Design Tokens ── */
+:root {
+  --accent:        #00C07F;
+  --accent-light:  rgba(0, 192, 127, 0.08);
+  --accent-mid:    rgba(0, 192, 127, 0.18);
+  --accent-border: rgba(0, 192, 127, 0.28);
+
+  --bg:            #F4F6F9;
+  --surface:       #FFFFFF;
+  --border:        #EDF0F4;
+  --border-strong: #E2E8F0;
+
+  --text-1:        #0D1117;
+  --text-2:        #374151;
+  --text-3:        #6B7280;
+  --text-muted:    #9CA3AF;
+
+  --sidebar-bg:    #0D1117;
+  --sidebar-b:     rgba(255,255,255,0.07);
+  --sidebar-text:  #E2E8F0;
+  --sidebar-muted: #4B5563;
+
+  --radius-card:   12px;
+  --radius-btn:    9px;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: 'Noto Sans KR', system-ui, sans-serif;
-  background: #f5f3ef;
-  color: #1a1a1a;
+  font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-input, textarea, select {
-  font-family: inherit;
-}
-
-button {
-  font-family: inherit;
-}
+input, textarea, select, button { font-family: inherit; }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
