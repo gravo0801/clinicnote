@@ -601,6 +601,122 @@ function NoteForm({ initial, onSave }) {
   )
 }
 
+
+// ---- 인라인 리치뷰 (노트 펼친 상태에서 바로 서식 적용) ----
+function InlineRichView({ content: initialContent, noteId }) {
+  const editorRef = useRef(null)
+  const toolbarRef = useRef(null)
+  const [toolbarPos, setToolbarPos] = useState(null)
+  const [saved, setSaved] = useState(false)
+  const [dirty, setDirty] = useState(false)
+
+  useEffect(() => {
+    if (!editorRef.current) return
+    const isHtml = initialContent?.includes('<') || initialContent?.includes('&')
+    if (isHtml) {
+      editorRef.current.innerHTML = initialContent || ''
+    } else {
+      editorRef.current.innerText = initialContent || ''
+    }
+  }, [noteId])
+
+  const handleSelect = () => {
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed || sel.toString().trim() === '') {
+      setToolbarPos(null)
+      return
+    }
+    const range = sel.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+    const edRect = editorRef.current.getBoundingClientRect()
+    setToolbarPos({
+      top: rect.top - edRect.top - 44,
+      left: Math.max(0, rect.left - edRect.left + rect.width / 2 - 140),
+    })
+  }
+
+  const exec = (cmd, val) => {
+    editorRef.current?.focus()
+    document.execCommand(cmd, false, val)
+    setToolbarPos(null)
+    setDirty(true)
+  }
+
+  const saveContent = async () => {
+    if (!editorRef.current || !dirty) return
+    const newContent = editorRef.current.innerHTML
+    try {
+      await updateDoc(doc(db, 'diseaseNotes2', noteId), { content: newContent, updatedAt: serverTimestamp() })
+      setSaved(true); setDirty(false)
+      setTimeout(() => setSaved(false), 2000)
+    } catch(e) { console.error(e) }
+  }
+
+  const highlights = [
+    { color: '#fef08a', label: 'Y' },
+    { color: '#bbf7d0', label: 'G' },
+    { color: '#fecaca', label: 'R' },
+    { color: '#bfdbfe', label: 'B' },
+    { color: '#e9d5ff', label: 'P' },
+  ]
+
+  return (
+    <div style={{ marginBottom: 14, position: 'relative' }}>
+      {/* 플로팅 툴바 - 텍스트 선택시만 표시 */}
+      {toolbarPos && (
+        <div ref={toolbarRef}
+          style={{ position: 'absolute', top: toolbarPos.top, left: toolbarPos.left, zIndex: 100, background: '#1a1a1a', borderRadius: 9, padding: '5px 8px', display: 'flex', gap: 4, alignItems: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.25)', userSelect: 'none' }}>
+          {[['B','bold','굵게'],['I','italic','기울임'],['U','underline','밑줄'],['S','strikeThrough','취소선']].map(([icon,cmd,title]) => (
+            <button key={cmd} onMouseDown={e => { e.preventDefault(); exec(cmd) }} title={title}
+              style={{ width: 26, height: 26, borderRadius: 5, border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: cmd==='bold'?900:400, fontStyle: cmd==='italic'?'italic':'normal', textDecoration: cmd==='underline'?'underline':cmd==='strikeThrough'?'line-through':'none' }}>
+              {icon}
+            </button>
+          ))}
+          <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.2)', margin: '0 2px' }} />
+          {highlights.map(h => (
+            <button key={h.color} onMouseDown={e => { e.preventDefault(); exec('hiliteColor', h.color) }}
+              style={{ width: 18, height: 18, borderRadius: 3, border: '1px solid rgba(255,255,255,0.3)', background: h.color, cursor: 'pointer', padding: 0, fontSize: 9, color: '#333' }}>
+              {h.label}
+            </button>
+          ))}
+          <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.2)', margin: '0 2px' }} />
+          <button onMouseDown={e => { e.preventDefault(); exec('removeFormat') }}
+            style={{ width: 26, height: 26, borderRadius: 5, border: 'none', background: 'rgba(255,255,255,0.15)', color: '#fff', cursor: 'pointer', fontSize: 10 }}>x</button>
+          {/* 포인터 */}
+          <div style={{ position: 'absolute', bottom: -5, left: 140, width: 10, height: 10, background: '#1a1a1a', transform: 'rotate(45deg)', borderRadius: 1 }} />
+        </div>
+      )}
+
+      {/* 편집 영역 */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onMouseUp={handleSelect}
+        onKeyUp={handleSelect}
+        onInput={() => setDirty(true)}
+        style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.85, background: '#fafaf9', borderRadius: 8, padding: '12px 14px', border: dirty ? '1px solid #6ee7b7' : '1px solid #f0ede8', outline: 'none', whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text', minHeight: 40 }}
+      />
+
+      {/* 저장 버튼 - 변경됐을 때만 표시 */}
+      {(dirty || saved) && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6, gap: 8, alignItems: 'center' }}>
+          {saved && <span style={{ fontSize: 11, color: '#0F6E56' }}>저장됨</span>}
+          {dirty && (
+            <button onClick={saveContent}
+              style={{ fontSize: 11, color: '#fff', background: '#0F6E56', border: 'none', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 700 }}>
+              서식 저장
+            </button>
+          )}
+        </div>
+      )}
+      <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 4 }}>
+        텍스트 선택 시 서식 툴바가 나타납니다
+      </div>
+    </div>
+  )
+}
+
 function NoteCard({ note, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   const dateStr = note.createdAt?.toDate ? note.createdAt.toDate().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }) : ''
@@ -634,12 +750,7 @@ function NoteCard({ note, onEdit, onDelete }) {
       {open && (
         <div style={{ padding: '16px', borderTop: '1px solid #f0ede8', background: '#fff' }}>
           {hasText && (
-            <div style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.85, marginBottom: 14, background: '#fafaf9', borderRadius: 8, padding: '12px 14px', border: '1px solid #f0ede8' }}>
-              {note.content?.startsWith('<') || note.content?.includes('<mark') || note.content?.includes('<strong')
-                ? <div dangerouslySetInnerHTML={{ __html: note.content }} style={{ whiteSpace: 'pre-wrap' }} />
-                : <div style={{ whiteSpace: 'pre-wrap' }}>{note.content}</div>
-              }
-            </div>
+            <InlineRichView content={note.content} noteId={note.id} />
           )}
           {imgCount > 0 && (
             <div style={{ marginBottom: 14 }}>
