@@ -902,8 +902,10 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
 // 케이스 편집 (edit mode) --------------------------------
 function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
   const [form, setForm] = useState(() => ({
-    patient:{}, workup:{}, diagnosis:{diseases:[],drugs:[]}, knowledge:{images:[]}, literature:{}, revenue:{}, aiReview:null,
-    ...data, diagnosis:{diseases:[],drugs:[],...(data.diagnosis||{})}, knowledge:{images:[],...(data.knowledge||{})},
+    patient:{}, workup:{}, literature:{}, revenue:{}, aiReview:null,
+    ...data,
+    diagnosis:{diseases:[],drugs:[],...(data.diagnosis||{})},
+    knowledge:{images:[],...(data.knowledge||{})},
   }))
   const [saving, setSaving] = useState(false)
   const [aiLoad, setAiLoad] = useState({})
