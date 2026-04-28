@@ -54,31 +54,7 @@ function Sparkline({ values, color = '#0F6E56', width = 100, height = 36 }) {
   )
 }
 
-// 이상 항목 감지
-function detectAbnormal(items, gender) {
-  const result = []
-  NUM_ITEMS.forEach(item => {
-    if (!item.warn) return
-    const v = parseFloat(items?.[item.key])
-    if (isNaN(v)) return
-    const ws = item.warn(v, gender)
-    if (ws) result.push({ key: item.key, label: item.label, value: v, unit: item.unit, status: ws })
-  })
-  return result
-}
 
-// 소견 이상 감지 (특정 키워드)
-const FINDING_WARNINGS = ['의심','이상','병변','용종','암','종양','결절','낭종','협착','역류','만성','급성','비정상','비정형','재검','추적','요망']
-function detectFindingAbnormal(items) {
-  const result = []
-  CHECKUP_ITEMS.filter(i => i.type === 'text').forEach(item => {
-    const v = items?.[item.key]
-    if (!v) return
-    const hasWarning = FINDING_WARNINGS.some(w => v.includes(w))
-    if (hasWarning) result.push({ key: item.key, label: item.label, value: v })
-  })
-  return result
-}
 
 
 // ---- AI 검진 분석 컴포넌트 ----
