@@ -292,7 +292,8 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
                   <td style={{ ...S.TD, textAlign:'center' }}><input value={drug.duration||''} onChange={e => upd(i,'duration',e.target.value)} placeholder="일" style={{ ...S.cell, textAlign:'center' }} /></td>
                   <td style={{ ...S.TD, textAlign:'center' }}>
                     {(() => {
-                        const isInj = (drug.name||'').startsWith('[INJ')
+                        const INJ_KEYWORDS = ['주사','[INJ','Inj','injection','프롤리아','포스테오','엔브렐','휴미라','오젬픽','위고비','마운자로','빅토자','트루리시티','란투스','투제오','트레시바','레버미르','노보래피드','휴마로그','아피드라','바이에타','클렉산','이노헵','헤파린','루크린','졸레드론','본비바','콜레칼시페롤','아쿠아디트림','비타민B12주','에포에틴','뉴라스타','데포프로베라','레파타','프라루엔트','조마야','EPO']
+        const isInj = INJ_KEYWORDS.some(kw => (drug.name||'').toLowerCase().includes(kw.toLowerCase()))
                         const opts = isInj
                           ? ['IM(근육주사)','SC(피하주사)','IV(정맥주사)','IA(관절강내)','ID(피내주사)']
                           : ['식후','식전','식간','취침전','필요시']
@@ -490,10 +491,27 @@ function AiResult({ data, type }) {
   )
   if (type==='papers' && data.papers) return (
     <div style={{ marginTop:10 }}>{data.papers.map((p,i) => (
-      <div key={i} style={{ background:'#eff6ff', borderRadius:7, padding:'10px 13px', marginBottom:7, border:'1px solid #bfdbfe' }}>
-        <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:3 }}>{p.title}</div>
-        <div style={{ fontSize:11, color:'#3730a3', marginBottom:4 }}>{p.journal} . {p.year} <span style={{ background:'#ddd6fe', borderRadius:4, padding:'1px 6px' }}>{p.level}</span></div>
-        <div style={{ fontSize:12, color:'#374151', lineHeight:1.6 }}>{p.keyPoints}</div>
+      <div key={i} style={{ background:'#eff6ff', borderRadius:9, padding:'12px 14px', marginBottom:10, border:'1px solid #bfdbfe' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4, gap:8 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'#1d4ed8', lineHeight:1.4, flex:1 }}>{p.title}</div>
+          {p.level && <span style={{ fontSize:10, background:'#ddd6fe', color:'#5b21b6', borderRadius:4, padding:'2px 7px', fontWeight:700, flexShrink:0 }}>{p.level}</span>}
+        </div>
+        <div style={{ fontSize:11, color:'#3730a3', marginBottom:8 }}>{p.journal}{p.year ? '  ' + p.year : ''}</div>
+        {p.keyPoints && (
+          <div style={{ fontSize:12, color:'#1d4ed8', fontWeight:600, marginBottom:6, background:'#dbeafe', borderRadius:5, padding:'5px 9px', lineHeight:1.6 }}>
+            핵심: {p.keyPoints}
+          </div>
+        )}
+        {p.summary && (
+          <div style={{ fontSize:12, color:'#374151', lineHeight:1.75, marginBottom: p.recommendation ? 8 : 0, borderLeft:'3px solid #93c5fd', paddingLeft:9 }}>
+            {p.summary}
+          </div>
+        )}
+        {p.recommendation && (
+          <div style={{ fontSize:12, color:'#0F6E56', background:'#f0faf5', borderRadius:6, padding:'6px 10px', lineHeight:1.7, marginTop:6 }}>
+            <span style={{ fontWeight:700 }}>적용: </span>{p.recommendation}
+          </div>
+        )}
       </div>
     ))}</div>
   )
@@ -534,16 +552,18 @@ function Section({ num, title, children, defaultOpen=true, badge }) {
 }
 
 // 약물 보기 행 (정보조회 모달 포함) ---------------------
+const INJ_KEYWORDS = ['주사','[INJ','Inj','injection','프롤리아','포스테오','엔브렐','휴미라','오젬픽','위고비','마운자로','빅토자','트루리시티','란투스','투제오','트레시바','레버미르','노보래피드','휴마로그','아피드라','바이에타','클렉산','이노헵','헤파린','루크린','졸레드론','본비바','콜레칼시페롤','아쿠아디트림','비타민B12주','에포에틴','뉴라스타','데포프로베라','레파타','프라루엔트','조마야']
+
 function DrugViewRow({ drug: d }) {
   const [showModal, setShowModal] = useState(false)
   return (
     <div style={{ background:'#f8f6f2', borderRadius:8, padding:'9px 12px', marginBottom:7, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        {d.name?.startsWith('[INJ') && (
+        {INJ_KEYWORDS.some(kw => (d.name||'').toLowerCase().includes(kw.toLowerCase())) && (
             <span style={{ fontSize:10, background:'#f5f3ff', color:'#7c3aed', borderRadius:4, padding:'1px 6px', fontWeight:700, flexShrink:0 }}>주사</span>
           )}
-          <span style={{ fontSize:13, fontWeight:700, color: d.name?.startsWith('[INJ') ? '#7c3aed' : '#1a1a1a' }}>
-            {d.name?.startsWith('[INJ') ? d.name.replace(/^\[INJ-\w+\] /, '') : d.name}
+          <span style={{ fontSize:13, fontWeight:700, color: INJ_KEYWORDS.some(kw => (d.name||'').toLowerCase().includes(kw.toLowerCase())) ? '#7c3aed' : '#1a1a1a' }}>
+            {(d.name||'').startsWith('[INJ') ? d.name.replace(/^\[INJ-\w+\] /, '') : d.name}
           </span>
         <button onClick={() => setShowModal(true)}
           style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', fontWeight:600, cursor:'pointer' }}>
