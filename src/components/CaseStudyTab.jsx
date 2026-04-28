@@ -5,6 +5,7 @@ import { Sheet, Spinner, useIsMobile } from './ui'
 import { searchKCD } from '../data/kcdCodes'
 import { COMMON_DRUGS } from '../data/commonDrugs'
 import { PresetSelector } from './PresetRxTab'
+import DrugInteractionChecker from './DrugInteractionChecker'
 
 const compressImage = (file) => new Promise((resolve) => {
   const reader = new FileReader()
@@ -213,20 +214,6 @@ function DiseaseTable({ diseases, onChange }) {
 // 처방 테이블 (단축키 + 약속처방 지원) ------------------
 
 //  약물 상호작용 체커 
-const SEVERITY_CONFIG = {
-  critical: { label: '절대 금기', color: '#fff', bg: '#dc2626', border: '#dc2626' },
-  major:    { label: '주요 주의', color: '#991b1b', bg: '#fee2e2', border: '#fca5a5' },
-  moderate: { label: '중등도 주의', color: '#92400e', bg: '#fef3c7', border: '#fde68a' },
-  minor:    { label: '경미', color: '#065f46', bg: '#d1fae5', border: '#6ee7b7' },
-  none:     { label: '이상 없음', color: '#065f46', bg: '#f0faf5', border: '#6ee7b7' },
-}
-
-const RISK_CONFIG = {
-  safe:    { label: '안전', color: '#065f46', bg: '#f0faf5', icon: '[OK]' },
-  caution: { label: '주의', color: '#92400e', bg: '#fffbeb', icon: '[!]' },
-  warning: { label: '경고', color: '#991b1b', bg: '#fee2e2', icon: '[!!]' },
-  danger:  { label: '위험 - 즉시 확인 필요', color: '#7f1d1d', bg: '#fee2e2', icon: '[!!!]' },
-}
 
 function DrugInteractionChecker({ drugs }) {
   const [result, setResult] = useState(null)
