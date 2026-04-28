@@ -187,6 +187,52 @@ export default async function handler(req, res) {
     }
   }
 
+  // drug_interaction: 약물 상호작용 체크
+  if (type === 'drug_interaction') {
+    const drugs = caseData?.drugs || []
+    if (drugs.length < 2) return res.status(400).json({ error: '2개 이상 약물이 필요합니다.' })
+    const drugList = drugs.map((d, i) => (i+1) + '. ' + d).join('\n')
+
+    const diPrompt = `당신은 대한민국 임상약학 전문가입니다.
+아래 처방 약물들의 상호작용을 분석하고 JSON으로만 응답하세요. 마크다운 없이 순수 JSON만 출력하세요.
+
+처방 약물 목록:
+${drugList}
+
+분석 내용:
+- 약물 간 상호작용 (PK/PD)
+- 심각도: critical(절대 병용금기) / major(주요 주의) / moderate(중등도 주의) / minor(경미) / none(없음)
+- 실제 임상에서 발생 가능한 문제와 대처법
+
+JSON 형식:
+{
+  "overallRisk": "safe | caution | warning | danger",
+  "summary": "전체 처방에 대한 한 줄 평가",
+  "interactions": [
+    {
+      "drugs": ["약물A", "약물B"],
+      "severity": "critical | major | moderate | minor",
+      "mechanism": "상호작용 기전 (짧게)",
+      "effect": "예상되는 임상 효과 또는 부작용",
+      "action": "처방의가 취해야 할 조치"
+    }
+  ],
+  "tips": ["처방 전반에 대한 임상 팁 또는 주의사항 (1-3개)"]
+}`
+
+    try {
+      const data = await callAnthropic(apiKey, diPrompt, { max_tokens: 1500 })
+      if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
+      const text = data.content?.[0]?.text || ''
+      const clean = text.replace(/\`\`\`json/g,'').replace(/\`\`\`/g,'').trim()
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}')
+      if (s === -1) return res.status(500).json({ error: 'JSON 없음' })
+      return res.status(200).json(JSON.parse(clean.slice(s, e+1)))
+    } catch(err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   const prompt = prompts[type]
   if (!prompt) return res.status(400).json({ error: 'Invalid type' })
 
