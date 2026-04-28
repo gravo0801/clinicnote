@@ -22,9 +22,9 @@ const compressImage = (file) => new Promise((resolve) => {
   }; reader.readAsDataURL(file)
 })
 
-// 식약처 의약품안전나라 검색 — 핵심 성분명/약품명으로 직접 검색
+// 식약처 의약품안전나라 검색 - 핵심 성분명/약품명으로 직접 검색
 const drugInfoUrl = (name) => {
-  // 용량(숫자+단위), 괄호 내용 제거 → 핵심 약품명만 추출
+  // 용량(숫자+단위), 괄호 내용 제거  핵심 약품명만 추출
   const clean = name
     .replace(/\(.*?\)/g, '')          // 괄호 내용 제거: (코대원), (화이자) 등
     .replace(/\d+(\.\d+)?(mg|mcg|g|ml|IU|%)/gi, '') // 용량 제거
@@ -34,15 +34,15 @@ const drugInfoUrl = (name) => {
 }
 
 const S = {
-  input: { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#0D1117' },
-  ta: (h=80) => ({ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', resize:'vertical', minHeight:h, lineHeight:1.7, color:'#0D1117' }),
+  input: { width:'100%', padding:'8px 10px', borderRadius:7, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', color:'#1a1a1a' },
+  ta: (h=80) => ({ width:'100%', padding:'9px 11px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:13, outline:'none', boxSizing:'border-box', fontFamily:'inherit', background:'#fff', resize:'vertical', minHeight:h, lineHeight:1.7, color:'#1a1a1a' }),
   label: { display:'block', fontSize:11, color:'#6b7280', marginBottom:4, fontWeight:600 },
-  cell: { border:'none', background:'transparent', fontSize:12, outline:'none', width:'100%', padding:'6px 8px', fontFamily:'inherit', color:'#0D1117', boxSizing:'border-box' },
+  cell: { border:'none', background:'transparent', fontSize:12, outline:'none', width:'100%', padding:'6px 8px', fontFamily:'inherit', color:'#1a1a1a', boxSizing:'border-box' },
   TH: (w) => ({ padding:'7px 8px', fontSize:11, fontWeight:700, color:'#374151', background:'#f3f4f6', borderRight:'1px solid #e5e7eb', borderBottom:'2px solid #d1d5db', whiteSpace:'nowrap', width:w, textAlign:'center' }),
   TD: { borderRight:'1px solid #eee', borderBottom:'1px solid #eee', padding:0, verticalAlign:'middle' },
 }
 
-// ── 약물 자동완성 ─────────────────────────────────────────
+// 약물 자동완성 -----------------------------------------
 function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) {
   const [open, setOpen] = useState(false)
   const [selectedFromList, setSelectedFromList] = useState(false)
@@ -81,13 +81,13 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
         {open && hits.length > 0 && (
           <div style={{
             position:'absolute', top:'100%', left:0, minWidth:260, width:'max-content', maxWidth:360,
-            zIndex:9999, background:'#fff', border:'1px solid #C7F7E8', borderRadius:7,
+            zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
             boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:260, overflowY:'auto',
           }}>
             {hits.map(n => (
               <div key={n} onMouseDown={e => { e.preventDefault(); select(n) }}
-                style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#0D1117', display:'flex', alignItems:'center', gap:8, whiteSpace:'nowrap' }}
-                onMouseEnter={e => e.currentTarget.style.background='#EDFFF8'}
+                style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', borderBottom:'1px solid #f0f0f0', color:'#1a1a1a', display:'flex', alignItems:'center', gap:8, whiteSpace:'nowrap' }}
+                onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
                 onMouseLeave={e => e.currentTarget.style.background='#fff'}>
                 <span>💊</span><span>{n}</span>
               </div>
@@ -114,7 +114,7 @@ function DrugAutoInput({ value, onChange, suggestions = [], showInfo = false }) 
   )
 }
 
-// ── 상병코드 자동완성 셀 ──────────────────────────────────
+// 상병코드 자동완성 셀 ----------------------------------
 function DiseaseAutoInput({ value, onChange }) {
   const [text, setText] = useState(value?.code || '')
   const [open, setOpen] = useState(false)
@@ -145,16 +145,16 @@ function DiseaseAutoInput({ value, onChange }) {
       {open && results.length > 0 && (
         <div style={{
           position:'absolute', top:'100%', left:0, minWidth:300, width:'max-content', maxWidth:380,
-          zIndex:9999, background:'#fff', border:'1px solid #C7F7E8', borderRadius:7,
+          zIndex:9999, background:'#fff', border:'1px solid #d1fae5', borderRadius:7,
           boxShadow:'0 8px 24px rgba(0,0,0,0.15)', maxHeight:240, overflowY:'auto',
         }}>
           {results.map(item => (
             <div key={item.code} onMouseDown={e => { e.preventDefault(); select(item) }}
               style={{ padding:'9px 12px', fontSize:12, cursor:'pointer', display:'flex', gap:10, alignItems:'center', borderBottom:'1px solid #f0f0f0', whiteSpace:'nowrap' }}
-              onMouseEnter={e => e.currentTarget.style.background='#EDFFF8'}
+              onMouseEnter={e => e.currentTarget.style.background='#f0faf5'}
               onMouseLeave={e => e.currentTarget.style.background='#fff'}>
-              <span style={{ fontWeight:700, color:'#00C07F', minWidth:48, flexShrink:0 }}>{item.code}</span>
-              <span style={{ color:'#0D1117', flex:1 }}>{item.name}</span>
+              <span style={{ fontWeight:700, color:'#0F6E56', minWidth:48, flexShrink:0 }}>{item.code}</span>
+              <span style={{ color:'#1a1a1a', flex:1 }}>{item.name}</span>
               <span style={{ fontSize:10, color:'#9ca3af', flexShrink:0 }}>{item.cat}</span>
             </div>
           ))}
@@ -164,7 +164,7 @@ function DiseaseAutoInput({ value, onChange }) {
   )
 }
 
-// ── 상병 테이블 ────────────────────────────────────────────
+// 상병 테이블 --------------------------------------------
 function DiseaseTable({ diseases, onChange }) {
   const add = () => onChange([...diseases, { type:'주상병', kcd:null }])
   const remove = (i) => onChange(diseases.filter((_,idx) => idx !== i))
@@ -172,8 +172,8 @@ function DiseaseTable({ diseases, onChange }) {
   return (
     <div style={{ border:'1px solid #d1d5db', borderRadius:8, overflow:'visible', marginBottom:12 }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'7px 10px', background:'#e8f4f0', borderBottom:'1px solid #d1d5db' }}>
-        <span style={{ fontSize:12, fontWeight:700, color:'#00C07F' }}>상병 (질병)</span>
-        <button onClick={add} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:5, padding:'3px 10px', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ 추가</button>
+        <span style={{ fontSize:12, fontWeight:700, color:'#0F6E56' }}>상병 (질병)</span>
+        <button onClick={add} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:5, padding:'3px 10px', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ 추가</button>
       </div>
       <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
         <thead><tr>
@@ -187,17 +187,17 @@ function DiseaseTable({ diseases, onChange }) {
               <tr key={i} style={{ background: i%2===0?'#fff':'#fafafa' }}>
                 <td style={{ ...S.TD, textAlign:'center' }}>
                   <button onClick={() => remove(i)} style={{ background:'none', border:'none', color:'#d1d5db', cursor:'pointer', fontSize:15, padding:'2px 6px', fontWeight:700, lineHeight:1 }}
-                    onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>×</button>
+                    onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>x</button>
                 </td>
                 <td style={{ ...S.TD, textAlign:'center', padding:'4px 0' }}><span style={{ fontSize:12, color:'#6b7280' }}>{i+1}</span></td>
-                <td style={{ ...S.TD, textAlign:'center', padding:'4px 0' }}><span style={{ fontSize:12, fontWeight:700, color:d.kcd?'#00C07F':'#9ca3af' }}>{d.kcd?.code||'—'}</span></td>
+                <td style={{ ...S.TD, textAlign:'center', padding:'4px 0' }}><span style={{ fontSize:12, fontWeight:700, color:d.kcd?'#0F6E56':'#9ca3af' }}>{d.kcd?.code||'-'}</span></td>
                 <td style={{ ...S.TD, minWidth:200 }}>
                   <DiseaseAutoInput value={d.kcd} onChange={v => upd(i,'kcd',v)} />
                   {d.kcd?.name && <div style={{ padding:'0 8px 5px', fontSize:11, color:'#6b7280' }}>{d.kcd.name}</div>}
                 </td>
                 <td style={{ ...S.TD, textAlign:'center' }}>
                   <select value={d.type||'주상병'} onChange={e => upd(i,'type',e.target.value)}
-                    style={{ border:'none', background:'transparent', fontSize:12, cursor:'pointer', padding:'6px 4px', outline:'none', fontFamily:'inherit', color:d.type==='주상병'?'#00C07F':'#374151', fontWeight:d.type==='주상병'?700:400 }}>
+                    style={{ border:'none', background:'transparent', fontSize:12, cursor:'pointer', padding:'6px 4px', outline:'none', fontFamily:'inherit', color:d.type==='주상병'?'#0F6E56':'#374151', fontWeight:d.type==='주상병'?700:400 }}>
                     <option value="주상병">주상병</option><option value="부상병">부상병</option>
                   </select>
                 </td>
@@ -210,7 +210,7 @@ function DiseaseTable({ diseases, onChange }) {
   )
 }
 
-// ── 처방 테이블 (단축키 + 약속처방 지원) ──────────────────
+// 처방 테이블 (단축키 + 약속처방 지원) ------------------
 function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
   const [showPresets, setShowPresets] = useState(false)
   const add = () => onChange([...drugs, { name:'', dosage:'1T', freq:'3', duration:'', usage:'식후', covered:true, note:'' }])
@@ -252,7 +252,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
       </div>
       {presets.length > 0 && (
         <div style={{ padding:'5px 10px', background:'#f5f3ff', fontSize:11, color:'#6d28d9', borderBottom:'1px solid #e9d5ff' }}>
-          💡 단축키: {presets.filter(p => p.shortcut).slice(0,4).map(p => `#${p.shortcut}(${p.name})`).join(' · ')}
+          💡 단축키: {presets.filter(p => p.shortcut).slice(0,4).map(p => `#${p.shortcut}(${p.name})`).join(' . ')}
           {presets.filter(p => p.shortcut).length > 4 && ' ...'}
         </div>
       )}
@@ -260,7 +260,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12, minWidth:560 }}>
           <thead><tr>
             <th style={S.TH(28)}></th>
-            <th style={{ ...S.TH(), textAlign:'left', minWidth:180 }}>약품명 (목록↓ 선택 → 정보링크 활성)</th>
+            <th style={{ ...S.TH(), textAlign:'left', minWidth:180 }}>약품명 (목록 선택  정보링크 활성)</th>
             <th style={S.TH(60)}>용량</th><th style={S.TH(60)}>횟수</th>
             <th style={S.TH(55)}>일수</th><th style={S.TH(72)}>용법</th><th style={S.TH(44)}>급여</th>
           </tr></thead>
@@ -276,7 +276,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
                 <tr key={i} style={{ background: i%2===0?'#fff':'#fafafa' }}>
                   <td style={{ ...S.TD, textAlign:'center' }}>
                     <button onClick={() => remove(i)} style={{ background:'none', border:'none', color:'#d1d5db', cursor:'pointer', fontSize:15, padding:'2px 6px', fontWeight:700, lineHeight:1 }}
-                      onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>×</button>
+                      onMouseEnter={e => e.currentTarget.style.color='#ef4444'} onMouseLeave={e => e.currentTarget.style.color='#d1d5db'}>x</button>
                   </td>
                   <td style={{ ...S.TD, minWidth:180 }}>
                     <DrugAutoInput value={drug.name||''} onChange={v => handleDrugNameChange(i, v)} suggestions={allSuggestions} showInfo={true} />
@@ -291,11 +291,21 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
                   </td>
                   <td style={{ ...S.TD, textAlign:'center' }}><input value={drug.duration||''} onChange={e => upd(i,'duration',e.target.value)} placeholder="일" style={{ ...S.cell, textAlign:'center' }} /></td>
                   <td style={{ ...S.TD, textAlign:'center' }}>
-                    <select value={drug.usage||'식후'} onChange={e => upd(i,'usage',e.target.value)} style={{ border:'none', background:'transparent', fontSize:12, cursor:'pointer', outline:'none', fontFamily:'inherit', color:'#374151', padding:'6px 2px', width:'100%' }}>
-                      {['식후','식전','식간','취침전','필요시'].map(v => <option key={v} value={v}>{v}</option>)}
-                    </select>
+                    {(() => {
+                        const isInj = (drug.name||'').startsWith('[INJ')
+                        const opts = isInj
+                          ? ['IM(근육주사)','SC(피하주사)','IV(정맥주사)','IA(관절강내)','ID(피내주사)']
+                          : ['식후','식전','식간','취침전','필요시']
+                        const defVal = isInj ? 'IM(근육주사)' : '식후'
+                        return (
+                          <select value={drug.usage||defVal} onChange={e => upd(i,'usage',e.target.value)}
+                            style={{ border:'none', background:'transparent', fontSize:12, cursor:'pointer', outline:'none', fontFamily:'inherit', color: isInj ? '#7c3aed' : '#374151', padding:'6px 2px', width:'100%', fontWeight: isInj ? 600 : 400 }}>
+                            {opts.map(v => <option key={v} value={v}>{v}</option>)}
+                          </select>
+                        )
+                      })()}
                   </td>
-                  <td style={{ ...S.TD, textAlign:'center' }}><input type="checkbox" checked={drug.covered!==false} onChange={e => upd(i,'covered',e.target.checked)} style={{ width:15, height:15, cursor:'pointer', accentColor:'#00C07F' }} /></td>
+                  <td style={{ ...S.TD, textAlign:'center' }}><input type="checkbox" checked={drug.covered!==false} onChange={e => upd(i,'covered',e.target.checked)} style={{ width:15, height:15, cursor:'pointer', accentColor:'#0F6E56' }} /></td>
                 </tr>
               ))
             }
@@ -305,7 +315,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
       {drugs.length > 0 && (
         <div style={{ padding:'6px 12px', background:'#f9fafb', borderTop:'1px solid #eee', display:'flex', gap:14 }}>
           <span style={{ fontSize:11, color:'#6b7280' }}>총 {drugs.length}종</span>
-          <span style={{ fontSize:11, color:'#00C07F', fontWeight:600 }}>급여 {drugs.filter(d => d.covered!==false).length}종</span>
+          <span style={{ fontSize:11, color:'#0F6E56', fontWeight:600 }}>급여 {drugs.filter(d => d.covered!==false).length}종</span>
           <span style={{ fontSize:11, color:'#9ca3af' }}>비급여 {drugs.filter(d => d.covered===false).length}종</span>
         </div>
       )}
@@ -319,7 +329,7 @@ function PrescriptionTable({ drugs, onChange, drugSuggestions, presets = [] }) {
   )
 }
 
-// ── 약물 정보 인라인 모달 ─────────────────────────────────
+// 약물 정보 인라인 모달 ---------------------------------
 function DrugInfoModal({ drugName, onClose }) {
   const [info, setInfo] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -369,37 +379,37 @@ function DrugInfoModal({ drugName, onClose }) {
       <div style={{ background:'#fff', borderRadius:16, width:'100%', maxWidth:540, maxHeight:'88vh', overflow:'hidden', display:'flex', flexDirection:'column', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}
         onClick={e => e.stopPropagation()}>
         {/* 헤더 */}
-        <div style={{ padding:'16px 20px', borderBottom:'1px solid #F0F4F8', display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexShrink:0 }}>
+        <div style={{ padding:'16px 20px', borderBottom:'1px solid #f0ede8', display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexShrink:0 }}>
           <div>
-            <div style={{ fontSize:17, fontWeight:700, color:'#0D1117', marginBottom:3 }}>{drugName}</div>
-            {info && <div style={{ fontSize:12, color:'#6b7280' }}>{info.engName} · {info.category}</div>}
+            <div style={{ fontSize:17, fontWeight:700, color:'#1a1a1a', marginBottom:3 }}>{drugName}</div>
+            {info && <div style={{ fontSize:12, color:'#6b7280' }}>{info.engName} . {info.category}</div>}
           </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'#9ca3af', lineHeight:1, flexShrink:0, marginLeft:10 }}>✕</button>
+          <button onClick={onClose} style={{ background:'none', border:'none', fontSize:20, cursor:'pointer', color:'#9ca3af', lineHeight:1, flexShrink:0, marginLeft:10 }}></button>
         </div>
         {/* 본문 */}
         <div style={{ overflowY:'auto', padding:'16px 20px 24px' }}>
           {loading && (
             <div style={{ textAlign:'center', padding:'40px 0' }}>
-              <div style={{ width:28, height:28, border:'3px solid #e5e7eb', borderTopColor:'#00C07F', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
+              <div style={{ width:28, height:28, border:'3px solid #e5e7eb', borderTopColor:'#0F6E56', borderRadius:'50%', animation:'spin 0.8s linear infinite', margin:'0 auto 12px' }} />
               <div style={{ fontSize:13, color:'#6b7280' }}>약물 정보를 불러오는 중...</div>
               <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
             </div>
           )}
           {error && (
             <div style={{ background:'#fee2e2', borderRadius:8, padding:'12px 14px', fontSize:13, color:'#991b1b' }}>
-              ⚠️ {error}
+               {error}
             </div>
           )}
           {info && rows.map(([label, value]) => (
             <div key={label} style={{ marginBottom:12, paddingBottom:12, borderBottom:'1px solid #f5f5f5' }}>
               <div style={{ fontSize:11, fontWeight:700, color:'#9ca3af', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.4px' }}>{label}</div>
-              <div style={{ fontSize:13, color:'#0D1117', lineHeight:1.7 }}>{value}</div>
+              <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.7 }}>{value}</div>
             </div>
           ))}
           {/* 면책 고지 */}
           {info && (
-            <div style={{ fontSize:11, color:'#9ca3af', background:'#F8F9FB', borderRadius:7, padding:'8px 10px', marginTop:8, lineHeight:1.6 }}>
-              ⚠️ 본 정보는 AI 생성 참고 자료이며 실제 처방은 최신 허가사항을 확인하세요.
+            <div style={{ fontSize:11, color:'#9ca3af', background:'#f8f6f2', borderRadius:7, padding:'8px 10px', marginTop:8, lineHeight:1.6 }}>
+               본 정보는 AI 생성 참고 자료이며 실제 처방은 최신 허가사항을 확인하세요.
             </div>
           )}
         </div>
@@ -410,12 +420,12 @@ function DrugInfoModal({ drugName, onClose }) {
 function AiResult({ data, type }) {
   if (!data) return null
   if (type === 'review') {
-    const OC = { '적절':'#00C07F','주의필요':'#d97706','검토필요':'#dc2626' }
-    const ST = { ok:{bg:'#EAF3DE',color:'#27500A',icon:'✅'}, warning:{bg:'#FAEEDA',color:'#633806',icon:'⚠️'}, error:{bg:'#FCEBEB',color:'#791F1F',icon:'❌'} }
+    const OC = { '적절':'#0F6E56','주의필요':'#d97706','검토필요':'#dc2626' }
+    const ST = { ok:{bg:'#EAF3DE',color:'#27500A',icon:'[OK]'}, warning:{bg:'#FAEEDA',color:'#633806',icon:''}, error:{bg:'#FCEBEB',color:'#791F1F',icon:''} }
     return (
       <div style={{ marginTop:10 }}>
         {/* 종합 결과 */}
-        <div style={{ background:OC[data.overall]||'#00C07F', borderRadius:9, padding:'10px 14px', marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <div style={{ background:OC[data.overall]||'#0F6E56', borderRadius:9, padding:'10px 14px', marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>{data.overall}</span>
           <span style={{ fontSize:12, color:'rgba(255,255,255,0.9)', maxWidth:'65%', textAlign:'right' }}>{data.summary}</span>
         </div>
@@ -424,15 +434,15 @@ function AiResult({ data, type }) {
         {data.items?.map((item,i) => { const s=ST[item.status]||ST.ok; return (
           <div key={i} style={{ background:s.bg, borderRadius:7, padding:'8px 12px', marginBottom:5 }}>
             <div style={{ fontSize:11, fontWeight:700, color:s.color, marginBottom:3 }}>{s.icon} {item.category}</div>
-            <div style={{ fontSize:12, color:'#0D1117', lineHeight:1.5 }}>{item.comment}</div>
+            <div style={{ fontSize:12, color:'#1a1a1a', lineHeight:1.5 }}>{item.comment}</div>
           </div>
         )})}
 
         {/* 제안사항 */}
         {data.suggestions?.length > 0 && (
-          <div style={{ background:'#EDFFF8', borderRadius:7, padding:'9px 12px', marginBottom:8 }}>
-            <div style={{ fontSize:11, fontWeight:700, color:'#00C07F', marginBottom:5 }}>💡 개선 제안</div>
-            {data.suggestions.map((s,i) => <div key={i} style={{ fontSize:12, color:'#0D1117', paddingLeft:10, position:'relative', marginBottom:2 }}><span style={{ position:'absolute', left:0, color:'#00C07F' }}>·</span>{s}</div>)}
+          <div style={{ background:'#f0faf5', borderRadius:7, padding:'9px 12px', marginBottom:8 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:'#0F6E56', marginBottom:5 }}>💡 개선 제안</div>
+            {data.suggestions.map((s,i) => <div key={i} style={{ fontSize:12, color:'#1a1a1a', paddingLeft:10, position:'relative', marginBottom:2 }}><span style={{ position:'absolute', left:0, color:'#0F6E56' }}>.</span>{s}</div>)}
           </div>
         )}
 
@@ -449,7 +459,7 @@ function AiResult({ data, type }) {
               {data.recommendedRegimen.map((r,i) => (
                 <div key={i} style={{ background:'#fff', borderRadius:8, padding:'10px 12px', border:'1px solid #ede9fe', borderLeft:'3px solid #7c3aed' }}>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:5 }}>
-                    <span style={{ fontSize:13, fontWeight:700, color:'#0D1117' }}>{r.drugName}</span>
+                    <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{r.drugName}</span>
                     <span style={{ fontSize:11, borderRadius:5, padding:'2px 7px', background:r.covered!==false?'#EAF3DE':'#fee2e2', color:r.covered!==false?'#27500A':'#991b1b', fontWeight:600, flexShrink:0, marginLeft:6 }}>
                       {r.covered!==false?'급여':'비급여'}
                     </span>
@@ -472,8 +482,8 @@ function AiResult({ data, type }) {
   }
   if (type==='knowledge' && data.sections) return (
     <div style={{ marginTop:10 }}>{data.sections.map((s,i) => (
-      <div key={i} style={{ background:'#F8F9FB', borderRadius:7, padding:'10px 13px', marginBottom:7 }}>
-        <div style={{ fontSize:12, fontWeight:700, color:'#00C07F', marginBottom:4 }}>{s.title}</div>
+      <div key={i} style={{ background:'#f8f6f2', borderRadius:7, padding:'10px 13px', marginBottom:7 }}>
+        <div style={{ fontSize:12, fontWeight:700, color:'#0F6E56', marginBottom:4 }}>{s.title}</div>
         <div style={{ fontSize:13, color:'#374151', lineHeight:1.75, whiteSpace:'pre-wrap' }}>{s.content}</div>
       </div>
     ))}</div>
@@ -482,7 +492,7 @@ function AiResult({ data, type }) {
     <div style={{ marginTop:10 }}>{data.papers.map((p,i) => (
       <div key={i} style={{ background:'#eff6ff', borderRadius:7, padding:'10px 13px', marginBottom:7, border:'1px solid #bfdbfe' }}>
         <div style={{ fontSize:12, fontWeight:700, color:'#1d4ed8', marginBottom:3 }}>{p.title}</div>
-        <div style={{ fontSize:11, color:'#3730a3', marginBottom:4 }}>{p.journal} · {p.year} <span style={{ background:'#ddd6fe', borderRadius:4, padding:'1px 6px' }}>{p.level}</span></div>
+        <div style={{ fontSize:11, color:'#3730a3', marginBottom:4 }}>{p.journal} . {p.year} <span style={{ background:'#ddd6fe', borderRadius:4, padding:'1px 6px' }}>{p.level}</span></div>
         <div style={{ fontSize:12, color:'#374151', lineHeight:1.6 }}>{p.keyPoints}</div>
       </div>
     ))}</div>
@@ -502,9 +512,9 @@ function AiResult({ data, type }) {
   return null
 }
 
-// ── 섹션 래퍼 ─────────────────────────────────────────────
-const SCOL = ['','#00C07F','#2563eb','#7c3aed','#0891b2','#1d4ed8','#d97706']
-const SBGMAP = { '#00C07F':'#EDFFF8','#2563eb':'#eff6ff','#7c3aed':'#f5f3ff','#0891b2':'#ecfeff','#1d4ed8':'#eff6ff','#d97706':'#fffbeb' }
+// 섹션 래퍼 ---------------------------------------------
+const SCOL = ['','#0F6E56','#2563eb','#7c3aed','#0891b2','#1d4ed8','#d97706']
+const SBGMAP = { '#0F6E56':'#f0faf5','#2563eb':'#eff6ff','#7c3aed':'#f5f3ff','#0891b2':'#ecfeff','#1d4ed8':'#eff6ff','#d97706':'#fffbeb' }
 
 function Section({ num, title, children, defaultOpen=true, badge }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -514,22 +524,27 @@ function Section({ num, title, children, defaultOpen=true, badge }) {
       <button onClick={() => setOpen(p => !p)}
         style={{ width:'100%', display:'flex', alignItems:'center', gap:10, padding:'11px 16px', background:open?bg:'#fff', border:'none', cursor:'pointer', textAlign:'left' }}>
         <div style={{ width:24, height:24, borderRadius:'50%', background:c, color:'#fff', fontSize:11, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>{num}</div>
-        <span style={{ fontSize:13, fontWeight:700, color:'#0D1117', flex:1 }}>{title}</span>
+        <span style={{ fontSize:13, fontWeight:700, color:'#1a1a1a', flex:1 }}>{title}</span>
         {badge && <span style={{ fontSize:11, background:c, color:'#fff', borderRadius:20, padding:'1px 8px', fontWeight:600 }}>{badge}</span>}
-        <span style={{ fontSize:11, color:'#9ca3af', display:'inline-block', transition:'transform 0.2s', transform:open?'rotate(180deg)':'none' }}>▼</span>
+        <span style={{ fontSize:11, color:'#9ca3af', display:'inline-block', transition:'transform 0.2s', transform:open?'rotate(180deg)':'none' }}>v</span>
       </button>
-      {open && <div style={{ padding:'16px', background:'#fff', borderTop:'1px solid #F0F4F8' }}>{children}</div>}
+      {open && <div style={{ padding:'16px', background:'#fff', borderTop:'1px solid #f0ede8' }}>{children}</div>}
     </div>
   )
 }
 
-// ── 약물 보기 행 (정보조회 모달 포함) ─────────────────────
+// 약물 보기 행 (정보조회 모달 포함) ---------------------
 function DrugViewRow({ drug: d }) {
   const [showModal, setShowModal] = useState(false)
   return (
-    <div style={{ background:'#F8F9FB', borderRadius:8, padding:'9px 12px', marginBottom:7, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
+    <div style={{ background:'#f8f6f2', borderRadius:8, padding:'9px 12px', marginBottom:7, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <span style={{ fontSize:13, fontWeight:700, color:'#0D1117' }}>{d.name}</span>
+        {d.name?.startsWith('[INJ') && (
+            <span style={{ fontSize:10, background:'#f5f3ff', color:'#7c3aed', borderRadius:4, padding:'1px 6px', fontWeight:700, flexShrink:0 }}>주사</span>
+          )}
+          <span style={{ fontSize:13, fontWeight:700, color: d.name?.startsWith('[INJ') ? '#7c3aed' : '#1a1a1a' }}>
+            {d.name?.startsWith('[INJ') ? d.name.replace(/^\[INJ-\w+\] /, '') : d.name}
+          </span>
         <button onClick={() => setShowModal(true)}
           style={{ fontSize:11, color:'#2563eb', background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', fontWeight:600, cursor:'pointer' }}>
           정보조회
@@ -546,7 +561,7 @@ function DrugViewRow({ drug: d }) {
   )
 }
 
-// ── 케이스 보기 (view mode) ────────────────────────────────
+// 케이스 보기 (view mode) --------------------------------
 function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
   const [reviewLoading, setReviewLoading] = useState(false)
   const [reviewData, setReviewData] = useState(data.aiReview || null)
@@ -558,7 +573,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
   const Row = ({ label, value }) => value ? (
     <div style={{ display:'flex', gap:10, padding:'5px 0', borderBottom:'1px solid #f5f5f5' }}>
       <span style={{ fontSize:12, color:'#9ca3af', flexShrink:0, minWidth:90 }}>{label}</span>
-      <span style={{ fontSize:13, color:'#0D1117', lineHeight:1.6, flex:1, whiteSpace:'pre-wrap' }}>{value}</span>
+      <span style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.6, flex:1, whiteSpace:'pre-wrap' }}>{value}</span>
     </div>
   ) : null
 
@@ -603,13 +618,13 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
 
   return (
     <div style={{ padding:'20px 24px 100px', maxWidth:820 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #F0F4F8' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #f0ede8' }}>
         <div>
-          <div style={{ fontSize:20, fontWeight:700, color:'#0D1117', marginBottom:6 }}>{data.title||'케이스 스터디'}</div>
+          <div style={{ fontSize:20, fontWeight:700, color:'#1a1a1a', marginBottom:6 }}>{data.title||'케이스 스터디'}</div>
           <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
-            {p.chiefComplaint && <span style={{ fontSize:12, background:'#EDFFF8', color:'#00C07F', borderRadius:20, padding:'2px 10px', fontWeight:600 }}>{p.chiefComplaint}</span>}
+            {p.chiefComplaint && <span style={{ fontSize:12, background:'#f0faf5', color:'#0F6E56', borderRadius:20, padding:'2px 10px', fontWeight:600 }}>{p.chiefComplaint}</span>}
             {dx.impression && <span style={{ fontSize:12, background:'#f5f3ff', color:'#7c3aed', borderRadius:20, padding:'2px 10px', fontWeight:600 }}>{dx.impression}</span>}
-            {diseases[0]?.kcd && <span style={{ fontSize:12, background:'#e6f4ef', color:'#00C07F', borderRadius:20, padding:'2px 10px', fontWeight:700 }}>{diseases[0].kcd.code} {diseases[0].kcd.name}</span>}
+            {diseases[0]?.kcd && <span style={{ fontSize:12, background:'#e6f4ef', color:'#0F6E56', borderRadius:20, padding:'2px 10px', fontWeight:700 }}>{diseases[0].kcd.code} {diseases[0].kcd.name}</span>}
           </div>
         </div>
         <div style={{ display:'flex', gap:8, flexShrink:0 }}>
@@ -618,8 +633,8 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
             🗑 삭제
           </button>
           <button onClick={onEdit}
-            style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>
-            ✏️ 수정
+            style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:13, fontWeight:700, cursor:'pointer' }}>
+             수정
           </button>
         </div>
       </div>
@@ -627,15 +642,15 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
         <Section num={1} title="환자 정보 및 증상" defaultOpen={true}>
           <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginBottom:10 }}>
             {[['나이', p.age&&p.age+'세'],['성별',p.gender],['신장',p.height&&p.height+'cm'],['체중',p.weight&&p.weight+'kg']].filter(([,v])=>v).map(([l,v]) => (
-              <div key={l} style={{ background:'#F8F9FB', borderRadius:8, padding:'7px 12px', minWidth:70, textAlign:'center' }}>
+              <div key={l} style={{ background:'#f8f6f2', borderRadius:8, padding:'7px 12px', minWidth:70, textAlign:'center' }}>
                 <div style={{ fontSize:10, color:'#9ca3af', marginBottom:2 }}>{l}</div>
-                <div style={{ fontSize:14, fontWeight:700, color:'#0D1117' }}>{v}</div>
+                <div style={{ fontSize:14, fontWeight:700, color:'#1a1a1a' }}>{v}</div>
               </div>
             ))}
             {p.vitals && Object.entries(p.vitals).filter(([,v])=>v).map(([k,v]) => (
-              <div key={k} style={{ background:'#F8F9FB', borderRadius:8, padding:'7px 12px', minWidth:60, textAlign:'center' }}>
+              <div key={k} style={{ background:'#f8f6f2', borderRadius:8, padding:'7px 12px', minWidth:60, textAlign:'center' }}>
                 <div style={{ fontSize:10, color:'#9ca3af', marginBottom:2 }}>{k.toUpperCase()}</div>
-                <div style={{ fontSize:13, fontWeight:700, color:'#0D1117' }}>{v}</div>
+                <div style={{ fontSize:13, fontWeight:700, color:'#1a1a1a' }}>{v}</div>
               </div>
             ))}
           </div>
@@ -653,14 +668,14 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
       )}
       {(dx.impression||diseases.length>0||drugs.filter(d=>d.name).length>0) && (
         <Section num={3} title="진단 및 처방" defaultOpen={true} badge={diseases[0]?.kcd?.code}>
-          {dx.impression && <div style={{ fontSize:15, fontWeight:700, color:'#0D1117', marginBottom:10 }}>{dx.impression}</div>}
+          {dx.impression && <div style={{ fontSize:15, fontWeight:700, color:'#1a1a1a', marginBottom:10 }}>{dx.impression}</div>}
           {diseases.length > 0 && (
             <div style={{ marginBottom:12 }}>
               <div style={{ fontSize:11, color:'#9ca3af', fontWeight:600, marginBottom:6 }}>상병</div>
               {diseases.map((d,i) => d.kcd && (
                 <div key={i} style={{ display:'flex', gap:8, alignItems:'center', marginBottom:4 }}>
-                  <span style={{ fontSize:12, fontWeight:700, background:'#e6f4ef', color:'#00C07F', borderRadius:5, padding:'2px 8px' }}>{d.kcd.code}</span>
-                  <span style={{ fontSize:13, color:'#0D1117' }}>{d.kcd.name}</span>
+                  <span style={{ fontSize:12, fontWeight:700, background:'#e6f4ef', color:'#0F6E56', borderRadius:5, padding:'2px 8px' }}>{d.kcd.code}</span>
+                  <span style={{ fontSize:13, color:'#1a1a1a' }}>{d.kcd.name}</span>
                   <span style={{ fontSize:11, color:'#9ca3af' }}>{d.type}</span>
                 </div>
               ))}
@@ -680,7 +695,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: (reviewData || reviewError) ? 10 : 0 }}>
               <div>
                 <div style={{ fontSize:13, fontWeight:700, color:'#991b1b' }}>🏥 심평원 급여기준 검토</div>
-                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드·처방 기준으로 AI가 검토합니다</div>
+                <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드.처방 기준으로 AI가 검토합니다</div>
               </div>
               <button onClick={callReview} disabled={reviewLoading}
                 style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:7, border:'none', background: reviewLoading ? '#d1d5db' : '#dc2626', color:'#fff', fontSize:12, fontWeight:700, cursor: reviewLoading ? 'not-allowed' : 'pointer', flexShrink:0 }}>
@@ -696,7 +711,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
                 <strong>오류:</strong> {reviewError}
                 {reviewError.includes('API key') && (
                   <div style={{ marginTop:6, fontSize:11, color:'#7f1d1d' }}>
-                    → Vercel 환경변수에 <code style={{ background:'#fecaca', padding:'1px 4px', borderRadius:3 }}>ANTHROPIC_API_KEY</code>가 설정되어 있는지 확인하세요.
+                     Vercel 환경변수에 <code style={{ background:'#fecaca', padding:'1px 4px', borderRadius:3 }}>ANTHROPIC_API_KEY</code>가 설정되어 있는지 확인하세요.
                   </div>
                 )}
               </div>
@@ -707,7 +722,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
       )}
       {(k.text||k.aiContent||(k.images||[]).length>0) && (
         <Section num={4} title="관련 의학 지식" defaultOpen={false}>
-          {k.text && <div style={{ fontSize:13, color:'#0D1117', lineHeight:1.75, whiteSpace:'pre-wrap', marginBottom:k.aiContent?12:0 }}>{k.text}</div>}
+          {k.text && <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.75, whiteSpace:'pre-wrap', marginBottom:k.aiContent?12:0 }}>{k.text}</div>}
           {(k.images||[]).length > 0 && <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:k.aiContent?12:0 }}>{k.images.map((img,i) => <img key={i} src={img} alt="" style={{ width:120, height:120, objectFit:'cover', borderRadius:8, border:'1px solid #e5e7eb' }} />)}</div>}
           {k.aiContent && <AiResult data={k.aiContent} type="knowledge" />}
         </Section>
@@ -718,7 +733,7 @@ function CaseView({ data, onEdit, onDelete, onUpdateReview }) {
   )
 }
 
-// ── 케이스 편집 (edit mode) ────────────────────────────────
+// 케이스 편집 (edit mode) --------------------------------
 function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
   const [form, setForm] = useState(() => ({
     patient:{}, workup:{}, diagnosis:{diseases:[],drugs:[]}, knowledge:{images:[]}, literature:{}, revenue:{}, aiReview:null,
@@ -786,12 +801,12 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
 
   return (
     <div style={{ padding:'20px 24px 100px', maxWidth:820 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #F0F4F8' }}>
-        <div style={{ fontSize:16, fontWeight:700, color:'#0D1117' }}>✏️ {form.title||'케이스 편집'}</div>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, paddingBottom:14, borderBottom:'1px solid #f0ede8' }}>
+        <div style={{ fontSize:16, fontWeight:700, color:'#1a1a1a' }}> {form.title||'케이스 편집'}</div>
         <div style={{ display:'flex', gap:8 }}>
           <button onClick={onCancel} style={{ padding:'8px 16px', background:'none', border:'1px solid #e5e7eb', borderRadius:8, fontSize:13, color:'#6b7280', cursor:'pointer' }}>취소</button>
           <button onClick={handleSave} disabled={saving}
-            style={{ padding:'8px 20px', background:'#00C07F', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
+            style={{ padding:'8px 20px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
             {saving?'저장 중...':'💾 저장 완료'}
           </button>
         </div>
@@ -808,10 +823,10 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
           <div><label style={S.label}>과거력 / 기저질환</label><textarea value={p.pmhx||''} onChange={e => setP('pmhx',e.target.value)} placeholder="HTN, DM, 수술력 등" style={S.ta(56)} /></div>
           <div><label style={S.label}>복용 약물 / 알레르기</label><textarea value={p.meds||''} onChange={e => setP('meds',e.target.value)} placeholder="현재 복용 약, 알레르기" style={S.ta(56)} /></div>
         </div>
-        <div style={{ background:'#F8F9FB', borderRadius:10, padding:'10px 12px' }}>
+        <div style={{ background:'#f8f6f2', borderRadius:10, padding:'10px 12px' }}>
           <label style={{ ...S.label, marginBottom:8 }}>활력징후 (Vital Signs)</label>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:6 }}>
-            {[['BP','bp','mmHg'],['HR','hr','/min'],['RR','rr','/min'],['BT','bt','℃'],['SpO2','spo2','%']].map(([l,key,u]) => (
+            {[['BP','bp','mmHg'],['HR','hr','/min'],['RR','rr','/min'],['BT','bt','C'],['SpO2','spo2','%']].map(([l,key,u]) => (
               <div key={key} style={{ textAlign:'center' }}>
                 <label style={{ ...S.label, fontSize:10, textAlign:'center' }}>{l}({u})</label>
                 <input value={p.vitals?.[key]||''} onChange={e => setV(key,e.target.value)} placeholder="-" style={{ ...S.input, textAlign:'center', padding:'7px 4px' }} />
@@ -837,7 +852,7 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:form.aiReview?10:0 }}>
             <div>
               <div style={{ fontSize:13, fontWeight:700, color:'#991b1b' }}>🏥 심평원 급여기준 검토</div>
-              <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드·처방 입력 후 검토하세요</div>
+              <div style={{ fontSize:11, color:'#9ca3af', marginTop:2 }}>상병코드.처방 입력 후 검토하세요</div>
             </div>
             <AiBtn type="review" label="AI 검토" emoji="🔍" color="#dc2626" />
           </div>
@@ -857,7 +872,7 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
                 <div key={i} style={{ position:'relative' }}>
                   <img src={img} alt="" style={{ width:80, height:80, objectFit:'cover', borderRadius:8, border:'1px solid #e5e7eb' }} />
                   <button onClick={() => setK('images', k.images.filter((_,idx) => idx!==i))}
-                    style={{ position:'absolute', top:-5, right:-5, width:18, height:18, borderRadius:'50%', background:'#ef4444', color:'#fff', border:'none', fontSize:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}>✕</button>
+                    style={{ position:'absolute', top:-5, right:-5, width:18, height:18, borderRadius:'50%', background:'#ef4444', color:'#fff', border:'none', fontSize:10, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700 }}></button>
                 </div>
               ))}
             </div>
@@ -867,7 +882,7 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
         {form.knowledge?.aiContent && <AiResult data={form.knowledge.aiContent} type="knowledge" />}
       </Section>
       <Section num={5} title="관련 논문 및 가이드라인" defaultOpen={false}>
-        <p style={{ fontSize:13, color:'#6b7280', marginBottom:12 }}>진단·케이스 정보를 바탕으로 관련 가이드라인 및 근거 논문을 정리합니다.</p>
+        <p style={{ fontSize:13, color:'#6b7280', marginBottom:12 }}>진단.케이스 정보를 바탕으로 관련 가이드라인 및 근거 논문을 정리합니다.</p>
         <AiBtn type="papers" label="AI 논문 검색" emoji="📚" color="#2563eb" />
         {form.literature?.aiContent && <AiResult data={form.literature.aiContent} type="papers" />}
       </Section>
@@ -876,10 +891,10 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
         <AiBtn type="revenue" label="AI 전략 생성" emoji="📈" color="#d97706" />
         {form.revenue?.aiContent && <AiResult data={form.revenue.aiContent} type="revenue" />}
       </Section>
-      <div style={{ display:'flex', justifyContent:'flex-end', gap:8, paddingTop:16, borderTop:'1px solid #F0F4F8', marginTop:8 }}>
+      <div style={{ display:'flex', justifyContent:'flex-end', gap:8, paddingTop:16, borderTop:'1px solid #f0ede8', marginTop:8 }}>
         <button onClick={onCancel} style={{ padding:'10px 20px', background:'none', border:'1px solid #e5e7eb', borderRadius:8, fontSize:13, color:'#6b7280', cursor:'pointer' }}>취소</button>
         <button onClick={handleSave} disabled={saving}
-          style={{ padding:'10px 28px', background:'#00C07F', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
+          style={{ padding:'10px 28px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:8, fontSize:14, fontWeight:700, cursor:saving?'not-allowed':'pointer', opacity:saving?0.7:1 }}>
           {saving?'저장 중...':'💾 저장 완료'}
         </button>
       </div>
@@ -887,7 +902,7 @@ function CaseEdit({ data, drugSuggestions, presets, onSave, onCancel }) {
   )
 }
 
-// ── 메인 ─────────────────────────────────────────────────────
+// 메인 -----------------------------------------------------
 export default function CaseStudyTab({ drugSuggestions = [] }) {
   const isMobile = useIsMobile()
   const [cases, setCases]       = useState([])
@@ -950,8 +965,8 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
         <input value={newCC} onChange={e => setNewCC(e.target.value)} placeholder="예: 발열, 인후통 3일째" style={S.input} onKeyDown={e => e.key==='Enter'&&createCase()} />
       </div>
       <button onClick={createCase} disabled={!newCC.trim()||creating}
-        style={{ width:'100%', padding:'12px', background:'#00C07F', color:'#fff', border:'none', borderRadius:9, fontSize:14, fontWeight:700, cursor:!newCC.trim()?'not-allowed':'pointer', opacity:!newCC.trim()?0.5:1 }}>
-        {creating?'생성 중...':'케이스 생성 →'}
+        style={{ width:'100%', padding:'12px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:9, fontSize:14, fontWeight:700, cursor:!newCC.trim()?'not-allowed':'pointer', opacity:!newCC.trim()?0.5:1 }}>
+        {creating?'생성 중...':'케이스 생성 '}
       </button>
     </Sheet>
   ) : null
@@ -960,13 +975,13 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
     const active = selId===c.id; const kcd = c.diagnosis?.diseases?.[0]?.kcd
     return (
       <div key={c.id} onClick={() => { setSelId(c.id); setEditMode(false) }}
-        style={{ padding:'11px 12px', borderRadius:10, cursor:'pointer', marginBottom:4, background:active?'#EDFFF8':'transparent', border:active?'1px solid #90EDD4':'1px solid transparent', transition:'all 0.12s' }}>
-        <div style={{ fontSize:13, fontWeight:active?700:500, color:active?'#00C07F':'#0D1117', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginBottom:3 }}>
+        style={{ padding:'11px 12px', borderRadius:10, cursor:'pointer', marginBottom:4, background:active?'#f0faf5':'transparent', border:active?'1px solid #a7f3d0':'1px solid transparent', transition:'all 0.12s' }}>
+        <div style={{ fontSize:13, fontWeight:active?700:500, color:active?'#0F6E56':'#1a1a1a', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginBottom:3 }}>
           {c.title||c.patient?.chiefComplaint||'새 케이스'}
         </div>
         <div style={{ display:'flex', gap:5, alignItems:'center' }}>
           {c.patient?.chiefComplaint && <span style={{ fontSize:11, color:'#9ca3af', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{c.patient.chiefComplaint}</span>}
-          {kcd && <span style={{ fontSize:10, background:'#e6f4ef', color:'#00C07F', borderRadius:4, padding:'1px 5px', fontWeight:700, flexShrink:0 }}>{kcd.code}</span>}
+          {kcd && <span style={{ fontSize:10, background:'#e6f4ef', color:'#0F6E56', borderRadius:4, padding:'1px 5px', fontWeight:700, flexShrink:0 }}>{kcd.code}</span>}
         </div>
       </div>
     )
@@ -983,14 +998,14 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
         </div>
         <div style={{ padding:'0 16px 12px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
           <span style={{ fontSize:12, color:'#9ca3af' }}>{filtered.length}건</span>
-          <button onClick={() => setShowNew(true)} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:20, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer' }}>✏️ 새 케이스</button>
+          <button onClick={() => setShowNew(true)} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:20, padding:'7px 16px', fontSize:13, fontWeight:700, cursor:'pointer' }}> 새 케이스</button>
         </div>
         <div style={{ padding:'0 16px' }}>
           {filtered.length===0
             ? <div style={{ textAlign:'center', padding:'60px 0', color:'#9ca3af' }}>
                 <div style={{ fontSize:36, marginBottom:10 }}>🏥</div>
                 <div style={{ fontSize:14, fontWeight:500, marginBottom:10 }}>케이스가 없습니다</div>
-                <button onClick={() => setShowNew(true)} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:20, padding:'8px 20px', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 케이스 추가하기</button>
+                <button onClick={() => setShowNew(true)} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:20, padding:'8px 20px', fontSize:13, fontWeight:700, cursor:'pointer' }}>첫 케이스 추가하기</button>
               </div>
             : filtered.map(c => renderListItem(c))
           }
@@ -1011,8 +1026,8 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
 
   return (
     <div style={{ display:'flex', height:'100vh', overflow:'hidden' }}>
-      <div style={{ width:265, background:'#fff', borderRight:'1px solid #EDF0F4', display:'flex', flexDirection:'column', flexShrink:0 }}>
-        <div style={{ padding:'14px 12px 10px', borderBottom:'1px solid #F0F4F8' }}>
+      <div style={{ width:265, background:'#fff', borderRight:'1px solid #ece9e3', display:'flex', flexDirection:'column', flexShrink:0 }}>
+        <div style={{ padding:'14px 12px 10px', borderBottom:'1px solid #f0ede8' }}>
           <div style={{ position:'relative' }}>
             <span style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', fontSize:12, color:'#9ca3af' }}>🔍</span>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="케이스 검색..." style={{ ...S.input, paddingLeft:28, fontSize:12 }} />
@@ -1022,17 +1037,17 @@ export default function CaseStudyTab({ drugSuggestions = [] }) {
           {filtered.length===0 ? <div style={{ textAlign:'center', padding:'40px 0', color:'#9ca3af', fontSize:13 }}><div style={{ fontSize:28, marginBottom:8 }}>🏥</div>케이스가 없습니다</div>
             : filtered.map(c => renderListItem(c))}
         </div>
-        <div style={{ padding:'12px', borderTop:'1px solid #F0F4F8' }}>
-          <button onClick={() => setShowNew(true)} style={{ width:'100%', padding:'10px', background:'#00C07F', color:'#fff', border:'none', borderRadius:10, fontSize:13, fontWeight:700, cursor:'pointer' }}>✏️ 새 케이스 추가</button>
+        <div style={{ padding:'12px', borderTop:'1px solid #f0ede8' }}>
+          <button onClick={() => setShowNew(true)} style={{ width:'100%', padding:'10px', background:'#0F6E56', color:'#fff', border:'none', borderRadius:10, fontSize:13, fontWeight:700, cursor:'pointer' }}> 새 케이스 추가</button>
         </div>
       </div>
-      <div style={{ flex:1, overflowY:'auto', background:'#F4F6F9' }}>
+      <div style={{ flex:1, overflowY:'auto', background:'#f5f3ef' }}>
         {!selCase
           ? <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100%', color:'#9ca3af', textAlign:'center' }}>
               <div style={{ fontSize:52, marginBottom:16 }}>🏥</div>
               <div style={{ fontSize:17, fontWeight:700, color:'#374151', marginBottom:8 }}>케이스 스터디</div>
-              <div style={{ fontSize:13, marginBottom:24, lineHeight:1.6 }}>환자 정보 → 진료 → 진단·처방 → 의학 지식<br />한 곳에서 정리하고 저장하세요</div>
-              <button onClick={() => setShowNew(true)} style={{ background:'#00C07F', color:'#fff', border:'none', borderRadius:20, padding:'10px 24px', fontSize:14, fontWeight:700, cursor:'pointer' }}>✏️ 첫 케이스 만들기</button>
+              <div style={{ fontSize:13, marginBottom:24, lineHeight:1.6 }}>환자 정보  진료  진단.처방  의학 지식<br />한 곳에서 정리하고 저장하세요</div>
+              <button onClick={() => setShowNew(true)} style={{ background:'#0F6E56', color:'#fff', border:'none', borderRadius:20, padding:'10px 24px', fontSize:14, fontWeight:700, cursor:'pointer' }}> 첫 케이스 만들기</button>
             </div>
           : editMode
             ? <CaseEdit key={selCase.id+'_edit'} data={selCase} drugSuggestions={drugSuggestions} presets={presets} onSave={handleSaved} onCancel={() => setEditMode(false)} />
