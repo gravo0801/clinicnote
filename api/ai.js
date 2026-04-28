@@ -72,9 +72,9 @@ export default async function handler(req, res) {
 케이스: ${base}
 형식: {"sections":[{"title":"병태생리","content":"설명"},{"title":"진단 기준","content":"설명"},{"title":"감별 진단","content":"설명"},{"title":"치료 원칙","content":"설명"},{"title":"예후 및 추적","content":"설명"}]}`,
 
-    papers: `의학문헌 전문가로서 아래 케이스 관련 논문/가이드라인을 JSON으로 정리하세요. 마크다운 금지, 순수 JSON만 출력.
+    papers: `당신은 의학문헌 전문가입니다. 아래 케이스에 관련된 핵심 논문 및 가이드라인을 JSON으로 정리하세요. 마크다운 없이 순수 JSON만 출력하세요.
 케이스: ${base}
-형식: {"papers":[{"title":"논문 제목","journal":"저널명","year":"연도","keyPoints":"핵심 내용 한 줄","level":"근거수준"}]}
+형식: {"papers":[{"title":"논문 또는 가이드라인 제목","journal":"저널명 또는 학회명","year":"연도","keyPoints":"임상에서 활용할 핵심 내용 1-2줄","summary":"이 논문/가이드라인이 임상에 미친 영향 및 실제 처방에서 어떻게 적용하는지 3-4문장으로 요약","level":"근거수준 (1a/1b/2a/2b/3/4/가이드라인)","recommendation":"실제 처방 또는 치료 결정 시 적용 방법"}]}
 5개 이내.`,
 
     revenue: `1차의료기관 경영 컨설턴트로서 아래 진단 관련 적법한 매출 증대 방안을 JSON으로 정리하세요. 마크다운 금지, 순수 JSON만 출력.
