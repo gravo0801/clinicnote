@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   collection, onSnapshot, addDoc, deleteDoc, updateDoc,
   doc, serverTimestamp, query, orderBy
@@ -115,11 +115,11 @@ const LINK_META = {
 }
 
 const S = {
-  row: { display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: '#F8F9FB', borderRadius: 8, border: '1px solid #F0F4F8', marginBottom: 8 },
+  row: { display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: '#f8f6f2', borderRadius: 8, border: '1px solid #f0ede8', marginBottom: 8 },
   badge: function(color, bg) { return { fontSize: 10, color: color, background: bg, borderRadius: 4, padding: '1px 6px', fontWeight: 700, flexShrink: 0 } },
-  btn: function(active) { return { fontSize: 11, color: active ? '#00C07F' : '#6b7280', background: active ? '#EDFFF8' : '#fff', border: '1px solid #e5e7eb', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 } },
+  btn: function(active) { return { fontSize: 11, color: active ? '#0F6E56' : '#6b7280', background: active ? '#f0faf5' : '#fff', border: '1px solid #e5e7eb', borderRadius: 5, padding: '2px 8px', cursor: 'pointer', fontWeight: 600 } },
   linkBtn: { fontSize: 11, color: '#2563eb', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 5, padding: '2px 8px', textDecoration: 'none', fontWeight: 600 },
-  input: { width: '100%', padding: '9px 11px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff', color: '#0D1117' },
+  input: { width: '100%', padding: '9px 11px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff', color: '#1a1a1a' },
   label: { display: 'block', fontSize: 11, color: '#6b7280', marginBottom: 4, fontWeight: 600 },
 }
 
@@ -165,7 +165,7 @@ function CloudinaryFilePreview({ file }) {
     <div style={{ marginBottom: 8 }}>
       <div style={S.row}>
         <span style={S.badge(color, bg)}>{icon}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#0D1117', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{file.name}</span>
         {file.size && <span style={{ fontSize: 10, color: '#9ca3af', flexShrink: 0 }}>{(file.size / 1024 / 1024).toFixed(1) + 'MB'}</span>}
         {canPreview && <button style={S.btn(show)} onClick={handlePreview}>{show ? '접기' : '미리보기'}</button>}
         <a href={file.url} target="_blank" rel="noopener noreferrer" style={S.linkBtn}>다운로드</a>
@@ -217,7 +217,7 @@ function LinkPreview({ link }) {
       <div style={S.row}>
         <span style={S.badge(meta.color, meta.bg)}>{meta.icon}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#0D1117', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.title || link.url}</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1a1a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.title || link.url}</div>
           <div style={{ fontSize: 10, color: '#9ca3af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.url}</div>
         </div>
         <span style={S.badge(meta.color, meta.bg)}>{meta.label}</span>
@@ -278,14 +278,14 @@ function LinkInput({ links, onChange }) {
           placeholder="Google Drive / Slides / Docs / PDF URL"
           style={{ ...S.input, flex: 1, fontSize: 12 }} />
         <button onClick={add} disabled={!url.trim()}
-          style={{ padding: '8px 14px', background: url.trim() ? '#00C07F' : '#d1d5db', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: url.trim() ? 'pointer' : 'not-allowed', flexShrink: 0 }}>추가</button>
+          style={{ padding: '8px 14px', background: url.trim() ? '#0F6E56' : '#d1d5db', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: url.trim() ? 'pointer' : 'not-allowed', flexShrink: 0 }}>추가</button>
       </div>
       {url && <div style={{ marginBottom: 8 }}><span style={{ fontSize: 11, color: meta.color, fontWeight: 700 }}>{meta.label} 감지됨</span></div>}
       <div style={{ fontSize: 11, color: '#9ca3af' }}>지원: Google Drive / Slides / Docs / Sheets / PDF URL</div>
       {links.length > 0 && (
         <div style={{ marginTop: 10 }}>
           {links.map((l, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 10px', background: '#F8F9FB', borderRadius: 7, marginBottom: 5, border: '1px solid #F0F4F8' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 10px', background: '#f8f6f2', borderRadius: 7, marginBottom: 5, border: '1px solid #f0ede8' }}>
               <span style={{ fontSize: 11, color: LINK_META[getLinkType(l.url)]?.color || '#6b7280', fontWeight: 700 }}>{LINK_META[getLinkType(l.url)]?.icon || '?'}</span>
               <span style={{ fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.title || l.url}</span>
               <button onClick={() => onChange(links.filter((_, idx) => idx !== i))} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14, lineHeight: 1 }}>x</button>
@@ -322,14 +322,14 @@ function AiSearch({ title, content, category }) {
   const getRoleStyle = (role) => { if (!role) return roleColors['기본']; for (const k of Object.keys(roleColors)) { if (role.includes(k)) return roleColors[k] } return roleColors['기본'] }
 
   return (
-    <div style={{ background: '#EDFFF8', borderRadius: 10, padding: '14px', border: '1px solid #90EDD4', marginTop: 14 }}>
+    <div style={{ background: '#f0faf5', borderRadius: 10, padding: '14px', border: '1px solid #a7f3d0', marginTop: 14 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: result || error ? 14 : 0 }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#00C07F' }}>AI 완성 처방 세트</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0F6E56' }}>AI 완성 처방 세트</div>
           <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>상병코드 + 주처방 + 대증치료 + 위장보호 포함</div>
         </div>
         <button onClick={search} disabled={loading}
-          style={{ padding: '8px 16px', borderRadius: 7, border: 'none', background: loading ? '#d1d5db' : '#00C07F', color: '#fff', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+          style={{ padding: '8px 16px', borderRadius: 7, border: 'none', background: loading ? '#d1d5db' : '#0F6E56', color: '#fff', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
           {loading ? '생성 중...' : 'AI 처방 생성'}
         </button>
       </div>
@@ -338,30 +338,30 @@ function AiSearch({ title, content, category }) {
         <div>
           {result.kcdCodes && result.kcdCodes.length > 0 && (
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#00C07F', marginBottom: 6 }}>KCD 상병코드</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#0F6E56', marginBottom: 6 }}>KCD 상병코드</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {result.kcdCodes.map((k, i) => <span key={i} style={{ fontSize: 12, background: '#e6f4ef', color: '#00C07F', borderRadius: 6, padding: '3px 10px', fontWeight: 700, border: '1px solid #90EDD4' }}>{k.code}  {k.name}</span>)}
+                {result.kcdCodes.map((k, i) => <span key={i} style={{ fontSize: 12, background: '#e6f4ef', color: '#0F6E56', borderRadius: 6, padding: '3px 10px', fontWeight: 700, border: '1px solid #a7f3d0' }}>{k.code}  {k.name}</span>)}
               </div>
             </div>
           )}
           {result.regimen && result.regimen.length > 0 && (
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#0D1117' }}>{result.prescriptionTitle || '완성 처방 세트'}</div>
-                <span style={{ fontSize: 10, background: '#00C07F', color: '#fff', borderRadius: 10, padding: '1px 8px', fontWeight: 700 }}>{'전체 ' + result.regimen.length + '종 함께 처방'}</span>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a' }}>{result.prescriptionTitle || '완성 처방 세트'}</div>
+                <span style={{ fontSize: 10, background: '#0F6E56', color: '#fff', borderRadius: 10, padding: '1px 8px', fontWeight: 700 }}>{'전체 ' + result.regimen.length + '종 함께 처방'}</span>
               </div>
               <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-                <div style={{ background: '#F8F9FB', padding: '7px 12px', fontSize: 11, color: '#6b7280', borderBottom: '1px solid #e5e7eb' }}>아래 약물 전체가 하나의 완성된 처방 세트입니다.</div>
+                <div style={{ background: '#f8f6f2', padding: '7px 12px', fontSize: 11, color: '#6b7280', borderBottom: '1px solid #e5e7eb' }}>아래 약물 전체가 하나의 완성된 처방 세트입니다.</div>
                 {result.regimen.map((r, i) => {
                   const rs = getRoleStyle(r.role)
                   return (
-                    <div key={i} style={{ padding: '10px 14px', borderBottom: i < result.regimen.length - 1 ? '1px solid #F0F4F8' : 'none', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div key={i} style={{ padding: '10px 14px', borderBottom: i < result.regimen.length - 1 ? '1px solid #f0ede8' : 'none', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                       <div style={{ width: 3, flexShrink: 0, alignSelf: 'stretch', background: rs.border, borderRadius: 2, marginTop: 2 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: '#0D1117' }}>{r.drug}</span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>{r.drug}</span>
                           {r.role && <span style={{ fontSize: 10, background: rs.bg, color: rs.color, borderRadius: 4, padding: '1px 7px', fontWeight: 700, flexShrink: 0 }}>{r.role}</span>}
-                          <span style={{ fontSize: 11, color: r.covered !== false ? '#00C07F' : '#dc2626', background: r.covered !== false ? '#EDFFF8' : '#fee2e2', borderRadius: 4, padding: '1px 6px', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>{r.covered !== false ? '급여' : '비급여'}</span>
+                          <span style={{ fontSize: 11, color: r.covered !== false ? '#0F6E56' : '#dc2626', background: r.covered !== false ? '#f0faf5' : '#fee2e2', borderRadius: 4, padding: '1px 6px', fontWeight: 600, marginLeft: 'auto', flexShrink: 0 }}>{r.covered !== false ? '급여' : '비급여'}</span>
                         </div>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: r.reason ? 4 : 0 }}>
                           {[r.dosage, r.freq, r.duration, r.usage].filter(Boolean).map((v, j) => <span key={j} style={{ fontSize: 11, background: '#f3f4f6', color: '#374151', borderRadius: 5, padding: '2px 8px' }}>{v}</span>)}
@@ -379,6 +379,89 @@ function AiSearch({ title, content, category }) {
           {result.followUp && <div style={{ background: '#f5f3ff', borderRadius: 8, padding: '9px 13px', fontSize: 12, color: '#5b21b6', lineHeight: 1.6, border: '1px solid #ddd6fe' }}><span style={{ fontWeight: 700 }}>추적 계획: </span>{result.followUp}</div>}
         </div>
       )}
+    </div>
+  )
+}
+
+
+// ---- 리치 텍스트 에디터 ----
+function RichTextEditor({ value, onChange }) {
+  const editorRef = useRef(null)
+  const [initialized, setInitialized] = useState(false)
+
+  // Initialize contentEditable with existing content
+  useEffect(() => {
+    if (editorRef.current && !initialized) {
+      if (value && (value.includes('<mark') || value.includes('<strong') || value.includes('<em') || value.includes('<u>'))) {
+        editorRef.current.innerHTML = value
+      } else if (value) {
+        editorRef.current.innerText = value
+      }
+      setInitialized(true)
+    }
+  }, [])
+
+  const exec = (cmd, val) => {
+    editorRef.current?.focus()
+    document.execCommand(cmd, false, val)
+    syncContent()
+  }
+
+  const syncContent = () => {
+    if (editorRef.current) onChange(editorRef.current.innerHTML)
+  }
+
+  const tools = [
+    { icon: 'B', cmd: 'bold',      title: '굵게 (Ctrl+B)',      style: { fontWeight: 900 } },
+    { icon: 'I', cmd: 'italic',    title: '기울임 (Ctrl+I)',     style: { fontStyle: 'italic' } },
+    { icon: 'U', cmd: 'underline', title: '밑줄 (Ctrl+U)',      style: { textDecoration: 'underline' } },
+    { icon: 'S', cmd: 'strikeThrough', title: '취소선',          style: { textDecoration: 'line-through' } },
+  ]
+  const highlights = [
+    { color: '#fef08a', label: '노랑' },
+    { color: '#bbf7d0', label: '초록' },
+    { color: '#fecaca', label: '빨강' },
+    { color: '#bfdbfe', label: '파랑' },
+    { color: '#e9d5ff', label: '보라' },
+  ]
+
+  return (
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden' }}>
+      {/* 툴바 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '6px 10px', background: '#f8f6f2', borderBottom: '1px solid #e5e7eb', flexWrap: 'wrap' }}>
+        {tools.map(t => (
+          <button key={t.cmd} onMouseDown={e => { e.preventDefault(); exec(t.cmd) }} title={t.title}
+            style={{ width: 28, height: 26, borderRadius: 5, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 13, ...t.style, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {t.icon}
+          </button>
+        ))}
+        <div style={{ width: 1, height: 20, background: '#e5e7eb', margin: '0 4px' }} />
+        {/* 형광펜 */}
+        <span style={{ fontSize: 11, color: '#9ca3af', marginRight: 3 }}>형광펜:</span>
+        {highlights.map(h => (
+          <button key={h.color} onMouseDown={e => { e.preventDefault(); exec('hiliteColor', h.color) }} title={h.label + ' 형광펜'}
+            style={{ width: 20, height: 20, borderRadius: 4, border: '1px solid #e5e7eb', background: h.color, cursor: 'pointer', padding: 0 }} />
+        ))}
+        <div style={{ width: 1, height: 20, background: '#e5e7eb', margin: '0 4px' }} />
+        {/* 서식 지우기 */}
+        <button onMouseDown={e => { e.preventDefault(); exec('removeFormat') }} title="서식 지우기"
+          style={{ padding: '2px 8px', borderRadius: 5, border: '1px solid #e5e7eb', background: '#fff', cursor: 'pointer', fontSize: 11, color: '#6b7280' }}>
+          지우기
+        </button>
+        {/* 텍스트 붙여넣기 안내 */}
+        <span style={{ fontSize: 10, color: '#9ca3af', marginLeft: 'auto' }}>선택 후 버튼 클릭</span>
+      </div>
+      {/* 편집 영역 */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={syncContent}
+        onPaste={e => { setTimeout(syncContent, 10) }}
+        style={{ minHeight: 300, padding: '12px 14px', fontSize: 13, lineHeight: 1.85, outline: 'none', background: '#fff', whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: '#1a1a1a' }}
+        data-placeholder="교재, 가이드라인, 논문 요약, 처방 팁 등을 자유롭게 작성하거나 붙여넣은 후 선택하여 형광펜/굵기/밑줄을 적용하세요..."
+      />
+      <style>{'.rich-editor [data-placeholder]:empty:before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }'}</style>
     </div>
   )
 }
@@ -444,7 +527,7 @@ function NoteForm({ initial, onSave }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
           {CATEGORIES.filter(c => c !== '전체').map(c => (
             <button key={c} onClick={() => setCat(c)}
-              style={{ padding: '4px 10px', borderRadius: 20, border: category === c ? 'none' : '1px solid #e5e7eb', background: category === c ? '#00C07F' : '#fff', color: category === c ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', fontWeight: category === c ? 700 : 400 }}>
+              style={{ padding: '4px 10px', borderRadius: 20, border: category === c ? 'none' : '1px solid #e5e7eb', background: category === c ? '#0F6E56' : '#fff', color: category === c ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', fontWeight: category === c ? 700 : 400 }}>
               {c}
             </button>
           ))}
@@ -462,7 +545,7 @@ function NoteForm({ initial, onSave }) {
       </div>
       <div style={{ marginBottom: 14 }}>
         <label style={S.label}>이미지 첨부</label>
-        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: '#EDFFF8', color: '#00C07F', border: '1px dashed #5DE8BC', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 13px', background: '#f0faf5', color: '#0F6E56', border: '1px dashed #6ee7b7', borderRadius: 8, fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
           {imgLoading ? '압축중...' : '이미지 선택'}
           <input type="file" multiple accept="image/*" onChange={handleImages} style={{ display: 'none' }} />
         </label>
@@ -506,12 +589,12 @@ function NoteForm({ initial, onSave }) {
           </div>
         )}
       </div>
-      <div style={{ marginBottom: 16, background: '#F8F9FB', borderRadius: 10, padding: '12px 14px', border: '1px solid #F0F4F8' }}>
+      <div style={{ marginBottom: 16, background: '#f8f6f2', borderRadius: 10, padding: '12px 14px', border: '1px solid #f0ede8' }}>
         <label style={{ ...S.label, marginBottom: 8, fontSize: 12, color: '#374151' }}>링크 첨부 (Google Drive / Slides / Docs / PDF URL)</label>
         <LinkInput links={links} onChange={setLinks} />
       </div>
       <button onClick={handleSave} disabled={disabled}
-        style={{ width: '100%', padding: '12px', background: disabled ? '#d1d5db' : '#00C07F', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer' }}>
+        style={{ width: '100%', padding: '12px', background: disabled ? '#d1d5db' : '#0F6E56', color: '#fff', border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer' }}>
         {saving ? '저장 중...' : uploadingFiles.length > 0 ? '파일 업로드 중...' : (initial ? '수정 완료' : '노트 저장')}
       </button>
     </div>
@@ -527,19 +610,19 @@ function NoteCard({ note, onEdit, onDelete }) {
   const hasText = !!(note.content?.trim())
 
   return (
-    <div style={{ border: `1px solid ${open ? '#E2E8F0' : '#EDF0F4'}`, borderRadius: 14, overflow: 'hidden', marginBottom: 10, boxShadow: open ? '0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' : '0 1px 3px rgba(0,0,0,0.04)' }}>
-      <div onClick={() => setOpen(p => !p)} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '13px 16px', background: open ? '#EDFFF8' : '#fff', cursor: 'pointer', userSelect: 'none' }}>
-        <div style={{ width: 34, height: 34, borderRadius: 9, background: '#00C07F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, marginTop: 1, color: '#fff', fontWeight: 700 }}>N</div>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden', marginBottom: 10, boxShadow: open ? '0 2px 12px rgba(0,0,0,0.06)' : 'none' }}>
+      <div onClick={() => setOpen(p => !p)} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '13px 16px', background: open ? '#f0faf5' : '#fff', cursor: 'pointer', userSelect: 'none' }}>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: '#0F6E56', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, flexShrink: 0, marginTop: 1, color: '#fff', fontWeight: 700 }}>N</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#0D1117', marginBottom: 5, letterSpacing: '-0.2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{note.title || '제목 없음'}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{note.title || '제목 없음'}</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: '#9ca3af' }}>{dateStr}</span>
-            {note.category && <span style={{ fontSize: 10, color: '#00C07F', background: '#EDFFF8', border: '1px solid #C7F7E8', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>{note.category}</span>}
+            {note.category && <span style={{ fontSize: 10, color: '#0F6E56', background: '#f0faf5', border: '1px solid #d1fae5', borderRadius: 10, padding: '1px 7px', fontWeight: 600 }}>{note.category}</span>}
             {imgCount > 0 && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>{'사진 ' + imgCount}</span>}
             {fileCount > 0 && <span style={{ fontSize: 10, color: '#2563eb', background: '#eff6ff', borderRadius: 4, padding: '1px 6px' }}>{'파일 ' + fileCount}</span>}
             {linkCount > 0 && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>{'링크 ' + linkCount}</span>}
             {hasText && <span style={{ fontSize: 10, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, padding: '1px 6px' }}>텍스트</span>}
-            {(note.tags || []).map(t => <span key={t} style={{ fontSize: 10, color: '#00C07F', background: '#EDFFF8', border: '1px solid #C7F7E8', borderRadius: 10, padding: '1px 6px' }}>{t}</span>)}
+            {(note.tags || []).map(t => <span key={t} style={{ fontSize: 10, color: '#0F6E56', background: '#f0faf5', border: '1px solid #d1fae5', borderRadius: 10, padding: '1px 6px' }}>{t}</span>)}
           </div>
         </div>
         <div style={{ display: 'flex', gap: 5, flexShrink: 0, alignItems: 'center' }}>
@@ -549,8 +632,15 @@ function NoteCard({ note, onEdit, onDelete }) {
         </div>
       </div>
       {open && (
-        <div style={{ padding: '16px', borderTop: '1px solid #F0F4F8', background: '#fff' }}>
-          {hasText && <div style={{ fontSize: 13, color: '#0D1117', lineHeight: 1.85, whiteSpace: 'pre-wrap', marginBottom: 14, background: '#FAFBFC', borderRadius: 8, padding: '12px 14px', border: '1px solid #F0F4F8' }}>{note.content}</div>}
+        <div style={{ padding: '16px', borderTop: '1px solid #f0ede8', background: '#fff' }}>
+          {hasText && (
+            <div style={{ fontSize: 13, color: '#1a1a1a', lineHeight: 1.85, marginBottom: 14, background: '#fafaf9', borderRadius: 8, padding: '12px 14px', border: '1px solid #f0ede8' }}>
+              {note.content?.startsWith('<') || note.content?.includes('<mark') || note.content?.includes('<strong')
+                ? <div dangerouslySetInnerHTML={{ __html: note.content }} style={{ whiteSpace: 'pre-wrap' }} />
+                : <div style={{ whiteSpace: 'pre-wrap' }}>{note.content}</div>
+              }
+            </div>
+          )}
           {imgCount > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, marginBottom: 8 }}>{'사진 (' + imgCount + ')'}</div>
@@ -589,7 +679,7 @@ function Pagination({ total, page, perPage, onChange }) {
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, paddingTop: 20, paddingBottom: 12 }}>
       <button onClick={() => onChange(1)} disabled={page === 1} style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === 1 ? '#d1d5db' : '#374151', cursor: page === 1 ? 'not-allowed' : 'pointer', fontSize: 12 }}>처음</button>
       <button onClick={() => onChange(page - 1)} disabled={page === 1} style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === 1 ? '#d1d5db' : '#374151', cursor: page === 1 ? 'not-allowed' : 'pointer', fontSize: 12 }}>이전</button>
-      {pages.map(p => <button key={p} onClick={() => onChange(p)} style={{ padding: '6px 11px', borderRadius: 7, border: page === p ? 'none' : '1px solid #e5e7eb', background: page === p ? '#00C07F' : '#fff', color: page === p ? '#fff' : '#374151', cursor: 'pointer', fontSize: 13, fontWeight: page === p ? 700 : 400 }}>{p}</button>)}
+      {pages.map(p => <button key={p} onClick={() => onChange(p)} style={{ padding: '6px 11px', borderRadius: 7, border: page === p ? 'none' : '1px solid #e5e7eb', background: page === p ? '#0F6E56' : '#fff', color: page === p ? '#fff' : '#374151', cursor: 'pointer', fontSize: 13, fontWeight: page === p ? 700 : 400 }}>{p}</button>)}
       <button onClick={() => onChange(page + 1)} disabled={page === Math.ceil(total / perPage)} style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === Math.ceil(total / perPage) ? '#d1d5db' : '#374151', cursor: page === Math.ceil(total / perPage) ? 'not-allowed' : 'pointer', fontSize: 12 }}>다음</button>
       <button onClick={() => onChange(Math.ceil(total / perPage))} disabled={page === Math.ceil(total / perPage)} style={{ padding: '6px 10px', borderRadius: 7, border: '1px solid #e5e7eb', background: '#fff', color: page === Math.ceil(total / perPage) ? '#d1d5db' : '#374151', cursor: page === Math.ceil(total / perPage) ? 'not-allowed' : 'pointer', fontSize: 12 }}>마지막</button>
       <span style={{ fontSize: 11, color: '#9ca3af', marginLeft: 4 }}>{page + ' / ' + Math.ceil(total / perPage) + ' 페이지'}</span>
@@ -602,7 +692,7 @@ function EmptyState({ onAdd, search }) {
     <div style={{ textAlign: 'center', padding: '60px 20px', color: '#9ca3af' }}>
       <div style={{ fontSize: 16, fontWeight: 700, color: '#374151', marginBottom: 8 }}>{search ? ('"' + search + '" 검색 결과 없음') : '질환 노트가 없습니다'}</div>
       <div style={{ fontSize: 13, marginBottom: 20, lineHeight: 1.7 }}>{search ? '다른 키워드로 검색해보세요.' : '교재, 가이드라인, PDF/PPTX 파일을 첨부하세요.'}</div>
-      {!search && <button onClick={onAdd} style={{ background: '#00C07F', color: '#fff', border: 'none', borderRadius: 20, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>첫 노트 작성하기</button>}
+      {!search && <button onClick={onAdd} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>첫 노트 작성하기</button>}
     </div>
   )
 }
@@ -646,8 +736,8 @@ export default function DiseaseNoteTab() {
   const formSheet = (showForm || editTarget) ? (
     <div style={{ position: 'fixed', inset: 0, zIndex: 8000, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', overflowY: 'auto', padding: '16px 12px' }}>
       <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 960, padding: '28px 36px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', marginTop: 16, marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid #F0F4F8' }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: '#0D1117' }}>{editTarget ? '노트 수정' : '새 질환 노트'}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 14, borderBottom: '1px solid #f0ede8' }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a' }}>{editTarget ? '노트 수정' : '새 질환 노트'}</div>
           <button onClick={() => { setShowForm(false); setEditTarget(null) }} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af' }}>x</button>
         </div>
         <NoteForm initial={editTarget} onSave={saveNote} />
@@ -666,11 +756,11 @@ export default function DiseaseNoteTab() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="제목, 내용, 태그 검색..." style={{ ...S.input, fontSize: 14 }} />
         </div>
         <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 4, marginBottom: 10 }}>
-          {CATEGORIES.map(c => <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '4px 11px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#00C07F' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontWeight: catFilter === c ? 700 : 400 }}>{catCounts[c] > 0 ? (c + ' (' + catCounts[c] + ')') : c}</button>)}
+          {CATEGORIES.map(c => <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '4px 11px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#0F6E56' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontWeight: catFilter === c ? 700 : 400 }}>{catCounts[c] > 0 ? (c + ' (' + catCounts[c] + ')') : c}</button>)}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length + '개 노트'}</span>
-          <button onClick={() => setShowForm(true)} style={{ background: '#00C07F', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          <button onClick={() => setShowForm(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
         </div>
         {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n2 => setEditTarget(n2)} onDelete={deleteNote} />)}
         <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
@@ -681,27 +771,27 @@ export default function DiseaseNoteTab() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <div style={{ width: 240, background: '#fff', borderRight: '1px solid #EDF0F4', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div style={{ padding: '14px 12px 10px', borderBottom: '1px solid #F0F4F8' }}>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="노트 검색..." style={{ ...S.input, fontSize: 12, padding: '7px 9px', background: '#F4F6F9', border: '1.5px solid #EDF0F4' }} />
+      <div style={{ width: 240, background: '#fff', borderRight: '1px solid #ece9e3', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+        <div style={{ padding: '14px 12px 10px', borderBottom: '1px solid #f0ede8' }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="노트 검색..." style={{ ...S.input, fontSize: 12, padding: '7px 9px' }} />
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
-          {CATEGORIES.map(c => <button key={c} onClick={() => setCatFilter(c)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderRadius: 8, border: 'none', background: catFilter === c ? '#EDFFF8' : 'transparent', color: catFilter === c ? '#00C07F' : '#374151', fontSize: 13, fontWeight: catFilter === c ? 700 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
+          {CATEGORIES.map(c => <button key={c} onClick={() => setCatFilter(c)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderRadius: 8, border: 'none', background: catFilter === c ? '#f0faf5' : 'transparent', color: catFilter === c ? '#0F6E56' : '#374151', fontSize: 13, fontWeight: catFilter === c ? 700 : 400, cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}>
             <span>{c}</span>
-            {catCounts[c] > 0 && <span style={{ fontSize: 11, background: catFilter === c ? '#D0F7EC' : '#f3f4f6', color: catFilter === c ? '#00C07F' : '#9ca3af', borderRadius: 10, padding: '1px 7px' }}>{catCounts[c]}</span>}
+            {catCounts[c] > 0 && <span style={{ fontSize: 11, background: catFilter === c ? '#dcfce7' : '#f3f4f6', color: catFilter === c ? '#0F6E56' : '#9ca3af', borderRadius: 10, padding: '1px 7px' }}>{catCounts[c]}</span>}
           </button>)}
         </div>
-        <div style={{ padding: '12px', borderTop: '1px solid #F0F4F8' }}>
-          <button onClick={() => setShowForm(true)} style={{ width: '100%', padding: '11px', background: '#00C07F', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,192,127,0.3)', letterSpacing: '-0.2px' }}>+ 새 질환 노트</button>
+        <div style={{ padding: '12px', borderTop: '1px solid #f0ede8' }}>
+          <button onClick={() => setShowForm(true)} style={{ width: '100%', padding: '10px', background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 질환 노트</button>
         </div>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', background: '#F4F6F9', padding: '24px 28px 40px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', background: '#f5f3ef', padding: '24px 28px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{catFilter === '전체' ? '전체 노트' : (catFilter + ' 노트')}</h2>
             <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{filtered.length + '개'}</div>
           </div>
-          <button onClick={() => setShowForm(true)} style={{ background: '#00C07F', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          <button onClick={() => setShowForm(true)} style={{ background: '#0F6E56', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
         </div>
         {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n2 => setEditTarget(n2)} onDelete={deleteNote} />)}
         <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
