@@ -4,6 +4,7 @@ import FamilyTab from './components/FamilyTab'
 import RxTab from './components/RxTab'
 import DiseaseNoteTab from './components/DiseaseNoteTab'
 import BackupTab from './components/BackupTab'
+import GlobalSearch from './components/GlobalSearch'
 import { useIsMobile } from './components/ui'
 
 export default function App() {
@@ -22,6 +23,8 @@ export default function App() {
 
   if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />
 
+  const handleNavigate = (tabKey) => setTab(tabKey)
+
   const renderTab = () => {
     if (tab === 'family') return <FamilyTab />
     if (tab === 'notes') return <DiseaseNoteTab />
@@ -35,22 +38,24 @@ export default function App() {
       <div style={{ maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: '#f5f3ef' }}>
         <div className="bg-white sticky top-0 z-40 px-4 pt-4 pb-3"
           style={{ borderBottom: '1px solid #ece9e3' }}>
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg"
-                style={{ background: '#0F6E56' }}>CN</div>
-              <span style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a' }}>ClinicNote</span>
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-2">
+              <div style={{ width: 30, height: 30, background: '#0F6E56', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 800 }}>CN</div>
+              <span style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a' }}>ClinicNote</span>
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ display: 'flex', gap: 5 }}>
               <button onClick={() => setTab('backup')}
-                style={{ border: '1px solid #e5e7eb', background: tab === 'backup' ? '#f0faf5' : 'none', color: tab === 'backup' ? '#0F6E56' : '#9ca3af', borderRadius: 8, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontWeight: tab === 'backup' ? 700 : 400 }}>
+                style={{ border: '1px solid #e5e7eb', background: tab === 'backup' ? '#f0faf5' : 'none', color: tab === 'backup' ? '#0F6E56' : '#9ca3af', borderRadius: 7, padding: '3px 9px', fontSize: 11, cursor: 'pointer', fontWeight: tab === 'backup' ? 700 : 400 }}>
                 백업
               </button>
               <button onClick={logout}
-                style={{ border: '1px solid #e5e7eb', background: 'none', color: '#9ca3af', borderRadius: 8, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}>
+                style={{ border: '1px solid #e5e7eb', background: 'none', color: '#9ca3af', borderRadius: 7, padding: '3px 9px', fontSize: 11, cursor: 'pointer' }}>
                 로그아웃
               </button>
             </div>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <GlobalSearch onNavigate={handleNavigate} />
           </div>
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#f0ede8' }}>
             {[['rx', '처방'], ['notes', '노트'], ['family', '가족']].map(([k, l]) => (
@@ -97,7 +102,11 @@ export default function App() {
           </div>
         </div>
 
-        <nav style={{ flex: 1, padding: '16px 12px' }}>
+        <div style={{ padding: '10px 12px 4px' }}>
+          <GlobalSearch onNavigate={handleNavigate} />
+        </div>
+
+        <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
           {NAV_ITEMS.map(({ key, icon, label }) => {
             const active = tab === key
             return (
