@@ -4,6 +4,7 @@ import FamilyTab from './components/FamilyTab'
 import RxTab from './components/RxTab'
 import DiseaseNoteTab from './components/DiseaseNoteTab'
 import BackupTab from './components/BackupTab'
+import UltrasoundTab from './components/UltrasoundTab'
 import GlobalSearch from './components/GlobalSearch'
 import { useIsMobile } from './components/ui'
 
@@ -28,6 +29,7 @@ export default function App() {
   const renderTab = () => {
     if (tab === 'family') return <FamilyTab />
     if (tab === 'notes') return <DiseaseNoteTab />
+    if (tab === 'us') return <UltrasoundTab />
     if (tab === 'backup') return <BackupTab />
     return <RxTab />
   }
@@ -58,7 +60,7 @@ export default function App() {
             <GlobalSearch onNavigate={handleNavigate} />
           </div>
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: '#f0ede8' }}>
-            {[['rx', '처방'], ['notes', '노트'], ['family', '가족']].map(([k, l]) => (
+            {[['rx', '처방'], ['notes', '노트'], ['family', '가족'], ['us', 'US']].map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)}
                 className="flex-1 py-2 rounded-lg text-sm transition-all"
                 style={{
@@ -83,6 +85,7 @@ export default function App() {
     { key: 'rx',     icon: 'Rx',  label: '처방 노하우' },
     { key: 'notes',  icon: 'N',   label: '질환 노트' },
     { key: 'family', icon: 'F',   label: '가족 건강' },
+    { key: 'us',     icon: 'US',  label: '초음파' },
   ]
 
   return (
