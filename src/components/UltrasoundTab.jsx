@@ -105,6 +105,86 @@ function MediaViewer({ file, onClose }) {
 }
 
 //  아틀라스 케이스 카드 
+
+//  인라인 리치 에디터 (초음파 탭용) 
+// collectionName: Firestore 컬렉션, docId: 문서ID, fieldName: 저장할 필드명
+function UsRichView({ text, collectionName, docId, fieldName, bgColor }) {
+  const editorRef = useRef(null)
+  const [toolbarPos, setToolbarPos] = useState(null)
+  const [saved, setSaved] = useState(false)
+  const [dirty, setDirty] = useState(false)
+
+  useEffect(() => {
+    if (!editorRef.current) return
+    const isHtml = text?.includes('<mark') || text?.includes('<strong') || text?.includes('<em') || text?.includes('<u>')
+    if (isHtml) editorRef.current.innerHTML = text || ''
+    else editorRef.current.innerText = text || ''
+  }, [docId, fieldName])
+
+  const handleSelect = () => {
+    const sel = window.getSelection()
+    if (!sel || sel.isCollapsed || sel.toString().trim() === '') { setToolbarPos(null); return }
+    const range = sel.getRangeAt(0)
+    const rect = range.getBoundingClientRect()
+    const edRect = editorRef.current.getBoundingClientRect()
+    setToolbarPos({ top: rect.top - edRect.top - 46, left: Math.max(0, rect.left - edRect.left + rect.width/2 - 145) })
+  }
+
+  const exec = (cmd, val) => { editorRef.current?.focus(); document.execCommand(cmd, false, val); setToolbarPos(null); setDirty(true) }
+
+  const saveContent = async () => {
+    if (!editorRef.current || !dirty) return
+    try {
+      await updateDoc(doc(db, collectionName, docId), { [fieldName]: editorRef.current.innerHTML, updatedAt: serverTimestamp() })
+      setSaved(true); setDirty(false)
+      setTimeout(() => setSaved(false), 2000)
+    } catch(e) { console.error(e) }
+  }
+
+  const highlights = [
+    { color: '#fef08a', label: 'Y' }, { color: '#bbf7d0', label: 'G' },
+    { color: '#fecaca', label: 'R' }, { color: '#bfdbfe', label: 'B' },
+    { color: '#e9d5ff', label: 'P' },
+  ]
+
+  return (
+    <div style={{ position: 'relative' }}>
+      {toolbarPos && (
+        <div style={{ position:'absolute', top: toolbarPos.top, left: toolbarPos.left, zIndex:200, background:'#1a1a1a', borderRadius:9, padding:'5px 8px', display:'flex', gap:4, alignItems:'center', boxShadow:'0 4px 16px rgba(0,0,0,0.3)', userSelect:'none' }}>
+          {[['B','bold'],['I','italic'],['U','underline'],['S','strikeThrough']].map(([icon,cmd]) => (
+            <button key={cmd} onMouseDown={e => { e.preventDefault(); exec(cmd) }}
+              style={{ width:26, height:26, borderRadius:5, border:'none', background:'rgba(255,255,255,0.15)', color:'#fff', cursor:'pointer', fontSize:13,
+                fontWeight: cmd==='bold'?900:400, fontStyle: cmd==='italic'?'italic':'normal',
+                textDecoration: cmd==='underline'?'underline':cmd==='strikeThrough'?'line-through':'none' }}>{icon}</button>
+          ))}
+          <div style={{ width:1, height:16, background:'rgba(255,255,255,0.2)', margin:'0 2px' }} />
+          {highlights.map(h => (
+            <button key={h.color} onMouseDown={e => { e.preventDefault(); exec('hiliteColor', h.color) }}
+              style={{ width:18, height:18, borderRadius:3, border:'1px solid rgba(255,255,255,0.3)', background:h.color, cursor:'pointer', padding:0, fontSize:9, color:'#333' }}>{h.label}</button>
+          ))}
+          <div style={{ width:1, height:16, background:'rgba(255,255,255,0.2)', margin:'0 2px' }} />
+          <button onMouseDown={e => { e.preventDefault(); exec('removeFormat') }}
+            style={{ width:26, height:26, borderRadius:5, border:'none', background:'rgba(255,255,255,0.15)', color:'#fff', cursor:'pointer', fontSize:10 }}>x</button>
+          <div style={{ position:'absolute', bottom:-5, left:140, width:10, height:10, background:'#1a1a1a', transform:'rotate(45deg)', borderRadius:1 }} />
+        </div>
+      )}
+      <div ref={editorRef} contentEditable suppressContentEditableWarning
+        onMouseUp={handleSelect} onKeyUp={handleSelect} onInput={() => setDirty(true)}
+        style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.85, background: bgColor || '#f8f6f2', borderRadius:8, padding:'10px 12px', border: dirty ? '1px solid #6ee7b7' : '1px solid #f0ede8', outline:'none', whiteSpace:'pre-wrap', wordBreak:'break-word', cursor:'text', minHeight:36 }}
+      />
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:4 }}>
+        <span style={{ fontSize:10, color:'#9ca3af' }}>선택 후 서식 적용</span>
+        {(dirty || saved) && (
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+            {saved && <span style={{ fontSize:11, color:'#0F6E56' }}>저장됨</span>}
+            {dirty && <button onClick={saveContent} style={{ fontSize:11, color:'#fff', background:'#0891b2', border:'none', borderRadius:6, padding:'3px 10px', cursor:'pointer', fontWeight:700 }}>서식 저장</button>}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function AtlasCard({ item, onEdit, onDelete }) {
   const [open, setOpen] = useState(false)
   const [viewFile, setViewFile] = useState(null)
@@ -159,7 +239,7 @@ function AtlasCard({ item, onEdit, onDelete }) {
             {item.findings && (
               <div style={{ marginBottom:10 }}>
                 <div style={{ fontSize:11, fontWeight:700, color:'#0891b2', marginBottom:4 }}>초음파 소견</div>
-                <div style={{ fontSize:13, color:'#1a1a1a', lineHeight:1.8, whiteSpace:'pre-wrap', background:'#f0f9ff', borderRadius:7, padding:'9px 12px' }}>{item.findings}</div>
+                <UsRichView text={item.findings} collectionName="usAtlas" docId={item.id} fieldName="findings" bgColor="#f0f9ff" />
               </div>
             )}
             {/* 감별 진단 */}
@@ -184,7 +264,7 @@ function AtlasCard({ item, onEdit, onDelete }) {
             {item.keyPoints && (
               <div style={{ marginBottom:10 }}>
                 <div style={{ fontSize:11, fontWeight:700, color:'#d97706', marginBottom:4 }}>핵심 포인트</div>
-                <div style={{ fontSize:13, color:'#92400e', lineHeight:1.8, whiteSpace:'pre-wrap', background:'#fffbeb', borderRadius:7, padding:'9px 12px', border:'1px solid #fde68a' }}>{item.keyPoints}</div>
+                <UsRichView text={item.keyPoints} collectionName="usAtlas" docId={item.id} fieldName="keyPoints" bgColor="#fffbeb" />
               </div>
             )}
             {/* 의뢰 기준 */}
@@ -701,7 +781,11 @@ function StudyNoteTab() {
                 <button onClick={() => del(n.id)} style={{ fontSize:11, color:'#ef4444', background:'none', border:'1px solid #fca5a5', borderRadius:5, padding:'3px 7px', cursor:'pointer' }}>삭제</button>
               </div>
             </div>
-            {n.content && <div style={{ fontSize:13, color:'#374151', lineHeight:1.8, whiteSpace:'pre-wrap', background:'#f8f6f2', borderRadius:7, padding:'10px 12px', marginBottom: n.cloudFiles?.length?10:0 }}>{n.content}</div>}
+            {n.content && (
+              <div style={{ marginBottom: n.cloudFiles?.length?10:0 }}>
+                <UsRichView text={n.content} collectionName="usNotes" docId={n.id} fieldName="content" bgColor="#f8f6f2" />
+              </div>
+            )}
             {n.cloudFiles?.length > 0 && (
               <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
                 {n.cloudFiles.map((f,i) => (
