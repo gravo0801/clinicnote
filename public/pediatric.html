@@ -2,12 +2,15 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>소아과 클리닉노트 v4</title>
 <style>
 :root{--bg:#f1f5f9;--sw:260px;--sidebar:#1e293b;--sidebar2:#0f172a;--accent:#0ea5e9;--accent2:#0369a1;--card:#fff;--border:#e2e8f0;--text:#1e293b;--muted:#64748b}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+html{height:100%;height:-webkit-fill-available}
+body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;height:-webkit-fill-available;height:100dvh;overflow:hidden}
 #sb{width:var(--sw);min-width:var(--sw);background:var(--sidebar2);color:#cbd5e1;height:100vh;overflow-y:auto;display:flex;flex-direction:column;z-index:100}
 #sb::-webkit-scrollbar{width:4px}#sb::-webkit-scrollbar-thumb{background:#334155;border-radius:4px}
 .sb-logo{padding:16px 14px 10px;border-bottom:1px solid #1e293b}
@@ -141,7 +144,37 @@ table.ot-pat tr:last-child td{border-bottom:none}
 /* search — patbox should hide as a unit */
 .patbox.hidden{display:none!important}
 
-@media(max-width:768px){:root{--sw:0px}#sb{display:none}#main{width:100vw}#content{padding:12px}}
+/* === Mobile === */
+@media(max-width:768px){
+  :root{--sw:0px}
+  body{padding-top:env(safe-area-inset-top);padding-bottom:0}
+  #main{width:100vw;min-width:0}
+  #content{padding:12px;padding-bottom:calc(20px + env(safe-area-inset-bottom)) !important}
+  #topbar{padding:0 8px;height:46px;gap:0}
+  #topbar h2{font-size:13px;margin-right:6px;flex-shrink:0}
+  .tabs{flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{padding:0 9px;font-size:11px;flex-shrink:0}
+  /* Drawer-style sidebar */
+  #sb{position:fixed;top:0;left:0;width:280px;max-width:85vw;height:100vh;height:100dvh;transform:translateX(-100%);transition:transform .25s ease;z-index:1000;box-shadow:2px 0 12px rgba(0,0,0,.25);padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);display:flex !important}
+  #sb.open{transform:translateX(0)}
+  #sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;opacity:0;pointer-events:none;transition:opacity .2s}
+  #sb-overlay.open{opacity:1;pointer-events:auto}
+  #hamburger{display:flex !important}
+  /* patbox tighter on mobile */
+  .patbox{padding:11px 12px;margin-bottom:11px}
+  .patbox-dx{font-size:13px}
+  .patbox-grid{gap:9px}
+  .patbox-body,.patbox-warn,.patbox-refer,.patbox-edu{font-size:11.5px;line-height:1.6;padding:8px 10px}
+  table.ot-pat{font-size:10.5px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.ot-pat td.dn{min-width:100px}
+  /* Refer cards tighter */
+  .ref-card{padding:10px 12px}
+  .ref-list{font-size:11.5px;line-height:1.65}
+  .ref-template{font-size:10.5px;max-height:240px}
+}
+#hamburger{display:none;align-items:center;justify-content:center;width:36px;height:36px;border:none;background:transparent;color:var(--text);font-size:22px;cursor:pointer;flex-shrink:0;margin-right:6px;padding:0}
+#hamburger:active{background:#f1f5f9;border-radius:6px}
 @media print{#sb,#topbar .tabs{display:none}body{display:block}#content{overflow:visible}.card{break-inside:avoid}}
 </style>
 </head>
@@ -213,8 +246,10 @@ table.ot-pat tr:last-child td{border-bottom:none}
     </ul>
   </div>
 </nav>
+<div id="sb-overlay" onclick="closeSidebar()"></div>
 <div id="main">
   <div id="topbar">
+    <button id="hamburger" onclick="openSidebar()" aria-label="메뉴">☰</button>
     <h2 id="ptitle">📋 처방 패턴 Top 10</h2>
     <div class="tabs">
       <button class="tab active" onclick="activatePanel('pat')">📋 패턴 Top10</button>
@@ -2931,6 +2966,15 @@ function activatePanel(name){
   });
   document.getElementById('ptitle').textContent=TITLES[name]||name;
   document.getElementById('q').value=''; search('');
+  closeSidebar(); /* mobile: auto-close drawer when tapping a panel link */
+}
+function openSidebar(){
+  document.getElementById('sb').classList.add('open');
+  document.getElementById('sb-overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('sb-overlay').classList.remove('open');
 }
 function activateByPrefix(prefix){
   const m={'exam_':'exam','rx_':'rx','drug_':'drug'};
