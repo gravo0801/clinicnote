@@ -92,13 +92,62 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 /* patient edu */
 .edu-list{padding-left:16px;font-size:13px;color:#374151;line-height:1.9}
 .edu-list li{margin-bottom:4px}
+
+/* === Top 10 patterns (patbox) === */
+.patbox{background:#fff;border:1px solid #d1fae5;border-left:4px solid #10b981;border-radius:10px;padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.patbox-hdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:9px;margin-bottom:10px;border-bottom:1px dashed #d1fae5}
+.patbox-dx{font-size:14px;font-weight:800;color:#14532d}
+.kcd-pill{font-size:10px;font-weight:700;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px;letter-spacing:.02em}
+.kcd-pill-alt{background:#6ee7b7;color:#064e3b}
+.patbox-grid{display:grid;grid-template-columns:1fr;gap:11px}
+.patbox-col{}
+.patbox-lbl{font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.patbox-body{font-size:12px;line-height:1.7;color:#374151;background:#f0fdf4;border-radius:8px;padding:9px 12px}
+.patbox-tip{font-size:11px;line-height:1.6;color:#92400e;background:#fffbeb;border-left:3px solid #fbbf24;padding:7px 10px;margin-top:6px;border-radius:0 6px 6px 0}
+.patbox-warn{font-size:11px;line-height:1.65;color:#7f1d1d;background:#fef2f2;border-left:4px solid #ef4444;border-radius:0 8px 8px 0;padding:9px 12px}
+.patbox-warn br{display:block;margin-bottom:4px;content:""}
+.patbox-refer{font-size:11px;line-height:1.65;color:#1e3a8a;background:#eff6ff;border-left:4px solid #3b82f6;border-radius:0 8px 8px 0;padding:9px 12px}
+.patbox-refer br{display:block;margin-bottom:4px;content:""}
+.patbox-edu{font-size:12px;line-height:1.7;color:#374151;background:#fdf4ff;border-left:4px solid #a855f7;border-radius:0 8px 8px 0;padding:10px 13px}
+.patbox-edu em{font-style:normal;color:#3b0764}
+table.ot-pat{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px;background:#fff;border-radius:6px;overflow:hidden}
+table.ot-pat th{background:#f0fdf4;color:#065f46;font-weight:700;font-size:10px;padding:6px 9px;text-align:left;border-bottom:1px solid #d1fae5}
+table.ot-pat td{padding:6px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+table.ot-pat td.dn{font-weight:700;color:#14532d;min-width:120px}
+table.ot-pat td.d{color:#0c4a6e;font-weight:500}
+table.ot-pat tr:last-child td{border-bottom:none}
+
+/* Layout switch — desktop side-by-side, mobile stack */
+@media(min-width:1024px){
+  .patbox-grid{grid-template-columns:repeat(6,1fr)}
+  .patbox-col:nth-child(1){grid-column:span 6}
+  .patbox-col:nth-child(2){grid-column:span 6}
+  .patbox-col:nth-child(3){grid-column:span 3}
+  .patbox-col:nth-child(4){grid-column:span 3}
+  .patbox-col:nth-child(5){grid-column:span 6}
+}
+
+/* === Refer panel === */
+.ref-card{background:#fff;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:8px;padding:11px 14px;margin-bottom:10px}
+.ref-card-hdr{font-size:13px;font-weight:700;color:#7f1d1d;margin-bottom:7px}
+.ref-list{padding-left:18px;font-size:12px;line-height:1.75;color:#374151;margin:0}
+.ref-list li{margin-bottom:3px}
+.ref-list li strong{color:#991b1b}
+.ref-template{font-family:'D2Coding','SF Mono','Consolas',monospace;font-size:11px;line-height:1.6;color:#1e293b;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:10px 12px;white-space:pre-wrap;margin-top:4px;max-height:300px;overflow-y:auto}
+.ref-copy-btn{margin-top:6px;padding:5px 12px;font-size:11px;font-weight:600;background:#1e293b;color:#fff;border:none;border-radius:5px;cursor:pointer;transition:background .15s}
+.ref-copy-btn:hover{background:#0f172a}
+.ref-copy-btn.copied{background:#16a34a}
+
+/* search — patbox should hide as a unit */
+.patbox.hidden{display:none!important}
+
 @media(max-width:768px){:root{--sw:0px}#sb{display:none}#main{width:100vw}#content{padding:12px}}
 @media print{#sb,#topbar .tabs{display:none}body{display:block}#content{overflow:visible}.card{break-inside:avoid}}
 </style>
 </head>
 <body>
 <nav id="sb">
-  <div class="sb-logo"><h1>🏥 소아과 클리닉노트</h1><p>개원 진료 참고용 · v4</p><p style="font-size:9px;color:#38bdf8;margin-top:3px">🔄 2025년 최신 가이드라인 반영</p></div>
+  <div class="sb-logo"><h1>🏥 소아과 클리닉노트</h1><p>개원 진료 참고용 · v5</p><p style="font-size:9px;color:#38bdf8;margin-top:3px">🔄 v5: 처방 패턴 Top 10 + Refer 가이드 신설</p></div>
   <div class="sb-search"><input id="q" type="text" placeholder="🔍 전체 검색..." oninput="search(this.value)"></div>
   <div class="sb-section">
     <div class="sb-section-title">패널 메뉴</div>
@@ -158,7 +207,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
     <span> 기타</span><span class="arrow">▼</span>
   </button><ul class="toc-sub"><li><a href="#rx_Headache" onclick="activateByPrefix('rx_')">Headache</a></li><li><a href="#rx_enuresis" onclick="activateByPrefix('rx_')">enuresis</a></li><li><a href="#rx_vaccination" onclick="activateByPrefix('rx_')">vaccination</a></li><li><a href="#rx_vaccination_2" onclick="activateByPrefix('rx_')">vaccination 2</a></li><li><a href="#rx_구내염" onclick="activateByPrefix('rx_')">구내염</a></li><li><a href="#rx_아구창__herpangina_약" onclick="activateByPrefix('rx_')">아구창, herpangina 약</a></li></ul></li></ul></li>
       <li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('drug')"><span>💊 소아약 DB</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#drug_항히스타민제___비충혈제거제" onclick="activatePanel('drug')">항히스타민제 / 비충혈제거제</a></li><li><a href="#drug_진해제" onclick="activatePanel('drug')">진해제</a></li><li><a href="#drug_거담제___점액용해제" onclick="activatePanel('drug')">거담제 / 점액용해제</a></li><li><a href="#drug_기관지확장제___스테로이드" onclick="activatePanel('drug')">기관지확장제 / 스테로이드</a></li><li><a href="#drug_해열제" onclick="activatePanel('drug')">해열제</a></li><li><a href="#drug_항생제" onclick="activatePanel('drug')">항생제</a></li><li><a href="#drug_항바이러스제" onclick="activatePanel('drug')">항바이러스제</a></li><li><a href="#drug_소화기약___구역_구토" onclick="activatePanel('drug')">소화기약 — 구역/구토</a></li><li><a href="#drug_소화기약___설사_장관" onclick="activatePanel('drug')">소화기약 — 설사/장관</a></li><li><a href="#drug_소화기약___변비" onclick="activatePanel('drug')">소화기약 — 변비</a></li><li><a href="#drug_소화기약___속쓰림_GERD" onclick="activatePanel('drug')">소화기약 — 속쓰림/GERD</a></li><li><a href="#drug_스테로이드_외용제" onclick="activatePanel('drug')">스테로이드 외용제</a></li><li><a href="#drug_안약___이약" onclick="activatePanel('drug')">안약 / 이약</a></li></ul></li>
-      <li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('pat')"><span>📋 처방 패턴</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#pat_uri" onclick="activatePanel('pat')">호흡기 URI</a></li><li><a href="#pat_ge" onclick="activatePanel('pat')">소화기 GE</a></li><li><a href="#pat_fever" onclick="activatePanel('pat')">해열제 원칙</a></li></ul></li>
+      <li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('pat')"><span>📋 처방 패턴 Top 10</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#pat_aom" onclick="activatePanel('pat')">① 급성 중이염 (AOM)</a></li><li><a href="#pat_pharyngitis" onclick="activatePanel('pat')">② 인두편도염 (GAS/Viral)</a></li><li><a href="#pat_croup" onclick="activatePanel('pat')">③ 크룹 (Croup)</a></li><li><a href="#pat_bronchiolitis" onclick="activatePanel('pat')">④ 모세기관지염</a></li><li><a href="#pat_age" onclick="activatePanel('pat')">⑤ 급성 위장관염 (AGE)</a></li><li><a href="#pat_hfmd" onclick="activatePanel('pat')">⑥ 수족구·헤르팡지나</a></li><li><a href="#pat_constipation" onclick="activatePanel('pat')">⑦ 변비 (Constipation)</a></li><li><a href="#pat_atopic" onclick="activatePanel('pat')">⑧ 아토피 피부염</a></li><li><a href="#pat_urticaria" onclick="activatePanel('pat')">⑨ 두드러기 (Urticaria)</a></li><li><a href="#pat_conjunctivitis" onclick="activatePanel('pat')">⑩ 결막염 (Conjunctivitis)</a></li><li><a href="#pat_fever" onclick="activatePanel('pat')">📎 부록 — 해열제·체중표</a></li></ul></li><li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('refer')"><span>🚑 Refer 가이드</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#ref_immediate" onclick="activatePanel('refer')">🚨 A. 즉시 119/ER</a></li><li><a href="#ref_today" onclick="activatePanel('refer')">🟠 B. 당일/24h 이내</a></li><li><a href="#ref_outpatient" onclick="activatePanel('refer')">🟢 C. 외래 의뢰 (전문과)</a></li><li><a href="#ref_template" onclick="activatePanel('refer')">📝 D. 의뢰서 템플릿</a></li><li><a href="#ref_hira" onclick="activatePanel('refer')">⚖️ E. 심평·법규 팁</a></li></ul></li>
       <li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('vacc')"><span>💉 예방접종</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#vacc_catchup" onclick="activatePanel('vacc')">국가필수 백신 목록</a></li><li><a href="#vacc_catchup" onclick="activatePanel('vacc')">접종 간격 핵심 원칙</a></li></ul></li>
       <li class="toc-grp"><button class="toc-grp-btn" onclick="toggleGrp(this);activatePanel('edu')"><span>📢 환자 안내</span><span class="arrow">▼</span></button><ul class="toc-sub"><li><a href="#edu_fever" onclick="activatePanel('edu')">발열 안내</a></li><li><a href="#edu_hfmd" onclick="activatePanel('edu')">수족구병 안내</a></li><li><a href="#edu_ge" onclick="activatePanel('edu')">장염 안내</a></li><li><a href="#edu_vitd" onclick="activatePanel('edu')">비타민 D</a></li></ul></li>
     </ul>
@@ -166,13 +215,14 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 </nav>
 <div id="main">
   <div id="topbar">
-    <h2 id="ptitle">🚨 Red Flag 증상</h2>
+    <h2 id="ptitle">📋 처방 패턴 Top 10</h2>
     <div class="tabs">
-      <button class="tab" onclick="activatePanel('exam')">🔬 검사</button>
-      <button class="tab" onclick="activatePanel('rx')">💊 처방</button>
-      <button class="tab active" onclick="activatePanel('rf')">🚨 Red Flag</button>
+      <button class="tab active" onclick="activatePanel('pat')">📋 패턴 Top10</button>
+      <button class="tab" onclick="activatePanel('refer')">🚑 Refer</button>
+      <button class="tab" onclick="activatePanel('rf')">🚨 Red Flag</button>
       <button class="tab" onclick="activatePanel('drug')">💊 약 DB</button>
-      <button class="tab" onclick="activatePanel('pat')">📋 패턴</button>
+      <button class="tab" onclick="activatePanel('rx')">💊 처방</button>
+      <button class="tab" onclick="activatePanel('exam')">🔬 검사</button>
       <button class="tab" onclick="activatePanel('vacc')">💉 접종</button>
       <button class="tab" onclick="activatePanel('edu')">📢 안내문</button>
     </div>
@@ -1864,7 +1914,7 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
 <tr><td><span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #16a34a30">경구약</span></td><td class="nc">Antibio granule 300mg/1g</td><td></td><td class="dose">1 × 1회/1일</td><td class="note"></td></tr>
 <tr><td><span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #16a34a30">경구약</span></td><td class="nc">2% Argyrol 1ml</td><td><span class="route">P</span></td><td class="dose">10 × 1회/1일</td><td class="note"></td></tr>
 <tr><td><span class="badge" style="background:#f0fdf4;color:#16a34a;border:1px solid #16a34a30">경구약</span></td><td class="nc">Bioflor 250 powder 282.5mg/PKG</td><td></td><td class="dose">1 × 1회/1일</td><td class="note"></td></tr></tbody></table></div></div>
-    <div class="panel active" id="panel-rf"><div class="rf-intro"><h2>🚨 소아과 Red Flag 증상 가이드</h2><p>초진 시 놓치면 안 되는 위험 증상과 감별 진단을 빠르게 확인하세요.</p></div><div class="rf-cat" id="rf____발열"><h3 class="rf-cat-title">🌡️ 발열</h3><div class="rf-card">
+    <div class="panel" id="panel-rf"><div class="rf-intro"><h2>🚨 소아과 Red Flag 증상 가이드</h2><p>초진 시 놓치면 안 되는 위험 증상과 감별 진단을 빠르게 확인하세요.</p></div><div class="rf-cat" id="rf____발열"><h3 class="rf-cat-title">🌡️ 발열</h3><div class="rf-card">
   <div class="rf-symptom"><span class="rf-icon">⚠️</span>생후 3개월 미만 발열 (≥38°C)</div>
   <div class="rf-diags"><strong>감별 진단:</strong><div class="diag-list"><span class="diag-badge">Sepsis</span><span class="diag-badge">세균성 뇌수막염</span><span class="diag-badge">요로감염(UTI)</span><span class="diag-badge">Occult bacteremia</span></div></div>
   <div class="rf-action"><span class="action-icon">📋</span>즉시 응급 평가 — CBC/BC/UA/CSF 고려, 입원</div>
@@ -1978,7 +2028,782 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
   <div class="rf-action"><span class="action-icon">📋</span>즉시 혈당, BC/CBC, 신생아중환자 협진</div>
 </div></div></div>
     <div class="panel" id="panel-drug"><div class="rf-intro" style="background:linear-gradient(135deg,#1e3a5f,#1e5f74)"><h2>💊 소아약 데이터베이스</h2><p>소아과 주요 처방약을 카테고리별로 정리한 빠른 참고 자료입니다. (217개 약물)</p></div><div class="rf-cat" id="drug_항히스타민제___비충혈제거제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🤧 항히스타민제 / 비충혈제거제 <span style="font-size:12px;font-weight:400;color:#64748b">(22개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="코벤시럽(클로르페니라민) phenylephrine1mg/ml + chlorpheniramine 0.4mg/ml 코막힘 + 콧물 , 비염 1세대"><td class="drug-name">코벤시럽(클로르페니라민)</td><td class="drug-ingr">phenylephrine1mg/ml + chlorpheniramine 0.4mg/ml</td><td class="drug-dose">1ml/kg#3 , 2-5세 2.5ml, 6-11세 5ml, 12세이상 10ml 4시간마다</td><td class="drug-sym">코막힘 + 콧물 , 비염 1세대</td></tr><tr data-s="나잘렌시럽(케토티펜) 대원케토티펜써도됨 ketotifen fumarate 276μg/ml(200μg as ketotifen) 2세대 두드러기, 알러지비염"><td class="drug-name">나잘렌시럽(케토티펜) 대원케토티펜써도됨</td><td class="drug-ingr">ketotifen fumarate 276μg/ml(200μg as ketotifen)</td><td class="drug-dose">6개월-3세미만 0.5mg(2ml), 3세이상-성인1mg(5ml) bid</td><td class="drug-sym">2세대 두드러기, 알러지비염</td></tr><tr data-s="렙티진액(레보세트리진) levocetirizine dihydrochloride 0.5mg/ml 2세대 두드러기, 알러지비염"><td class="drug-name">렙티진액(레보세트리진)<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">levocetirizine dihydrochloride 0.5mg/ml</td><td class="drug-dose">1세미만 금기!!! 1세-2세미만 2.5ml qd, 2세-6세미만 2.5ml bid, 6세이상 10ml qd</td><td class="drug-sym">2세대 두드러기, 알러지비염</td></tr><tr data-s="이치리진시럽(하이드록시진) hydroxyzine hydrochloride 2mg/ml 1세대 두드러기(o) 비염(x)"><td class="drug-name">이치리진시럽(하이드록시진)</td><td class="drug-ingr">hydroxyzine hydrochloride 2mg/ml</td><td class="drug-dose">몸무게당 0.6mg/kg qid 성인 10mg(5ml) tid</td><td class="drug-sym">1세대 두드러기(o) 비염(x)</td></tr><tr data-s="액티피드 pseudoephedrine 6mg + Triprolidine 250μg/ml 코막힘 + 콧물 , 비염"><td class="drug-name">액티피드</td><td class="drug-ingr">pseudoephedrine 6mg + Triprolidine 250μg/ml</td><td class="drug-dose">2세미만은 웬만함 쓰지 말기!(헛소리 불안 흥분 경련 주의) 1T/10kg/d#3-4 10kg당 3ml tid(12-14세 0.5T tid, 성인 1T (10ml)tid)</td><td class="drug-sym">코막힘 + 콧물 , 비염</td></tr><tr data-s="페니라민정2mg chlorpheniramine maleate 2mg 콧물 , 비염 1세대"><td class="drug-name">페니라민정2mg</td><td class="drug-ingr">chlorpheniramine maleate 2mg</td><td class="drug-dose">qid(tid로 줘도 됨 안들으면 더블링)</td><td class="drug-sym">콧물 , 비염 1세대</td></tr><tr data-s="나잘렌정 (케토티펜) 1mg Ketotifen fumarate (as ketotifen) 1 mg 2세대 두드러기, 알러지비염"><td class="drug-name">나잘렌정 (케토티펜) 1mg</td><td class="drug-ingr">Ketotifen fumarate (as ketotifen) 1 mg</td><td class="drug-dose">3세이상-성인1mg bid</td><td class="drug-sym">2세대 두드러기, 알러지비염</td></tr><tr data-s="렙티진정 (레보세티리진) Levocetirizine Hydrochloride 5mg 2세대 두드러기, 알러지비염"><td class="drug-name">렙티진정 (레보세티리진)</td><td class="drug-ingr">Levocetirizine Hydrochloride 5mg</td><td class="drug-dose">qd 식사상관없음</td><td class="drug-sym">2세대 두드러기, 알러지비염</td></tr><tr data-s="베스티온정(내복) Bepotastine besilate 10mg 2세대 두드러기, 알러지비염"><td class="drug-name">베스티온정(내복)</td><td class="drug-ingr">Bepotastine besilate 10mg</td><td class="drug-dose">성인 bid</td><td class="drug-sym">2세대 두드러기, 알러지비염</td></tr><tr data-s="신일슈도에페드린 pseudoephedrine hydrochloride 60 mg 코막힘"><td class="drug-name">신일슈도에페드린</td><td class="drug-ingr">pseudoephedrine hydrochloride 60 mg</td><td class="drug-dose">6-11세 30mg tid, 12세이상 30-60mg tid</td><td class="drug-sym">코막힘</td></tr><tr data-s="액티피드정 pseudoephedrine hydrochloride 60 mg, triprolidine hydrochloride 2.5 mg 코막힘 + 콧물 , 비염"><td class="drug-name">액티피드정</td><td class="drug-ingr">pseudoephedrine hydrochloride 60 mg, triprolidine hydrochloride 2.5 mg</td><td class="drug-dose"></td><td class="drug-sym">코막힘 + 콧물 , 비염</td></tr><tr data-s="리노에바스텔 pseudoephedrine hydrochloride 120mg, ebastine 10mg 코막힘 + 콧물 , 비염"><td class="drug-name">리노에바스텔</td><td class="drug-ingr">pseudoephedrine hydrochloride 120mg, ebastine 10mg</td><td class="drug-dose">12세이상 1T qd 10일가능 감기와 관련된 비염에서는 3일만 급여인정!</td><td class="drug-sym">코막힘 + 콧물 , 비염</td></tr><tr data-s="알레그라정30mg/180mg fexofenadine hydrochloride 30mg/180mg 3세대 두드러기 알러지비염"><td class="drug-name">알레그라정30mg/180mg</td><td class="drug-ingr">fexofenadine hydrochloride 30mg/180mg</td><td class="drug-dose">6-11세 30mg bid 식전, 12세이상 180mg qd 감기와 관련된 비염에서는 3일만 급여인정!</td><td class="drug-sym">3세대 두드러기 알러지비염</td></tr><tr data-s="싱귤다운세립4mg(품절) Montelukast sodium 4.16mg (4mg as montelukast) 류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염"><td class="drug-name">싱귤다운세립4mg(품절)<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응·자살충동 보고됨 — 알레르기비염에는 대체치료 우선 고려</div></td><td class="drug-ingr">Montelukast sodium 4.16mg (4mg as montelukast)</td><td class="drug-dose">6개월-2세 granule 4mg, 2-5세 4mg 츄 qd, 6-14세 5mg qd, 15세이상 10mg qd 저녁에</td><td class="drug-sym">류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염</td></tr><tr data-s="몬텐세립 4mg (몬테루카스트) 싱귤다운츄5mg, 싱귤다운정 10mg Montelukast sodium 4.16mg (4mg as montelukast) 류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염"><td class="drug-name">몬텐세립 4mg (몬테루카스트) 싱귤다운츄5mg, 싱귤다운정 10mg<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응·자살충동 보고됨 — 알레르기비염에는 대체치료 우선 고려</div></td><td class="drug-ingr">Montelukast sodium 4.16mg (4mg as montelukast)</td><td class="drug-dose">6개월-2세 granule 4mg, 2-5세 4mg 츄 qd, 6-14세 5mg qd, 15세이상 10mg qd 저녁에</td><td class="drug-sym">류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염</td></tr><tr data-s="루키오세립 4mg/ 루키오츄 5mg Montelukast sodium 4.16mg (4mg as montelukast) "><td class="drug-name">루키오세립 4mg/ 루키오츄 5mg<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응 보고됨 (montelukast)</div></td><td class="drug-ingr">Montelukast sodium 4.16mg (4mg as montelukast)</td><td class="drug-dose">6개월-2세 granule 4mg, 2-5세 4mg 츄 qd, 6-14세 5mg qd, 15세이상 10mg qd 저녁에</td><td class="drug-sym"></td></tr><tr data-s="씨투스건조시럽100g/병 pranlukast hydrate 10g "><td class="drug-name">씨투스건조시럽100g/병</td><td class="drug-ingr">pranlukast hydrate 10g</td><td class="drug-dose">7mg/kg/d#2 ,성인은 씨투스정 50mg bid 식후</td><td class="drug-sym"></td></tr><tr data-s="렙티진은 콧물 재채기, 싱귤다운은  주로 코막힘에 효과  "><td class="drug-name">렙티진은 콧물 재채기, 싱귤다운은  주로 코막힘에 효과<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응·자살충동 보고됨 — 알레르기비염에는 대체치료 우선 고려</div></td><td class="drug-ingr"></td><td class="drug-dose"></td><td class="drug-sym"></td></tr><tr data-s="아바미스 micronized fluticasone furoate 콧물,코막힘, 가려움, 재채기"><td class="drug-name">아바미스</td><td class="drug-ingr">micronized fluticasone furoate</td><td class="drug-dose">2세이상 AR에서 사용 1일 1회 각 비강에 1번씩, 심하면 2번씩까지 증량가능</td><td class="drug-sym">콧물,코막힘, 가려움, 재채기</td></tr><tr data-s="몬테롤츄정 5mg/10mg 싱귤레어 Montelukast sodium 5.2mg/10.4mg 류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염"><td class="drug-name">몬테롤츄정 5mg/10mg 싱귤레어<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응·자살충동 보고됨 — 알레르기비염에는 대체치료 우선 고려</div></td><td class="drug-ingr">Montelukast sodium 5.2mg/10.4mg</td><td class="drug-dose">2-5세 4mg 츄 qd, 6-14세 5mg qd, 15세이상 10mg qd 저녁에</td><td class="drug-sym">류코트리엔조절제, 천식부비동염, 만성기침, 알러지비염</td></tr><tr data-s="씨펜정이나 베스티온은 콧물 재채기,몬테롤츄는 코막힘에 효과  "><td class="drug-name">씨펜정이나 베스티온은 콧물 재채기,몬테롤츄는 코막힘에 효과<div class="drug-warn-bb">⚠️ FDA Black Box (2020): 신경정신과 이상반응 보고됨 (montelukast)</div></td><td class="drug-ingr"></td><td class="drug-dose"></td><td class="drug-sym"></td></tr><tr data-s="성광칼라민로오숀(메시지로 넣기) calamine80mg/ Zinc Oxide 80mg 피부가려움증, 항히스타민"><td class="drug-name">성광칼라민로오숀(메시지로 넣기)</td><td class="drug-ingr">calamine80mg/ Zinc Oxide 80mg</td><td class="drug-dose">1일 수회 환부에 적당량</td><td class="drug-sym">피부가려움증, 항히스타민</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_진해제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">😮‍💨 진해제 <span style="font-size:12px;font-weight:400;color:#64748b">(6개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="아나레보시럽 (레보드로프로피진) 건일레보드로프로피진먼저 Levodropropizine 6mg/ml 기침 말초성 비마약성 진해제"><td class="drug-name">아나레보시럽 (레보드로프로피진) 건일레보드로프로피진먼저</td><td class="drug-ingr">Levodropropizine 6mg/ml</td><td class="drug-dose">2세 미만 신중투여(국외 2세이상-11세 0.25ml/kg tid) 10-19kg 18mg(3ml) tid, 20-29kg 30mg(5ml) tid, 30-39kg 8ml tid 딸기맛 마른기침에 사용 rash주의</td><td class="drug-sym">기침 말초성 비마약성 진해제</td></tr><tr data-s="프리비투스시럽 Levocloperastine fendizoate 7.08mg/ml (4mg/ml as cloperastine) 기침(PND,목 간질간질 발작성) 중추성 비마약성 +말초성 진해제"><td class="drug-name">프리비투스시럽</td><td class="drug-ingr">Levocloperastine fendizoate 7.08mg/ml (4mg/ml as cloperastine)</td><td class="drug-dose">2-4세 2ml bid, 4-7세 3ml bid, 7-15세 5ml bid, 성인 5ml tid 바나나맛 가래 안삭음</td><td class="drug-sym">기침(PND,목 간질간질 발작성) 중추성 비마약성 +말초성 진해제</td></tr><tr data-s="레보카민정 (레보드로프로피진) Levodropropizine 60mg 기침 말초성 비마약성 진해제"><td class="drug-name">레보카민정 (레보드로프로피진)</td><td class="drug-ingr">Levodropropizine 60mg</td><td class="drug-dose">tid, 6시간간격두고 경구투여</td><td class="drug-sym">기침 말초성 비마약성 진해제</td></tr><tr data-s="코대원 Guaifenesin 50mg / Chlorpheniramine 1.5mg / DL-methylephedrine 17.5mg / Dihydrocodeine 5mg 기침 중추성 마약성 진해제"><td class="drug-name">코대원<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">Guaifenesin 50mg / Chlorpheniramine 1.5mg / DL-methylephedrine 17.5mg / Dihydrocodeine 5mg</td><td class="drug-dose">12세미만 금기!!! 12-15세 1T, 15세-성인 2T tid 식후</td><td class="drug-sym">기침 중추성 마약성 진해제</td></tr><tr data-s="암브로콜시럽(암브록솔+b-agonist) Ambroxol hydrochloride 1.5mg / Clenbuterol hydrochloride 1μg)/mL 크란톨 품절일때 암브로콜"><td class="drug-name">암브로콜시럽(암브록솔+b-agonist)</td><td class="drug-ingr">Ambroxol hydrochloride 1.5mg / Clenbuterol hydrochloride 1μg)/mL</td><td class="drug-dose">8개월 미만 4-8kg 2.5ml bid, 8-12kg 5ml, 12-16kg 7.5ml, 16-22kg 10ml, 22-35kg 15ml bid 달고 특이한 맛 투명</td><td class="drug-sym">크란톨 품절일때 암브로콜</td></tr><tr data-s="크란톨시럽(암브록솔+b-agonist) Ambroxol hydrochloride 1.5mg / Clenbuterol hydrochloride 1μg)/mL 기관지경련 점액과다(끈적한가래)"><td class="drug-name">크란톨시럽(암브록솔+b-agonist)</td><td class="drug-ingr">Ambroxol hydrochloride 1.5mg / Clenbuterol hydrochloride 1μg)/mL</td><td class="drug-dose">8개월 미만 4-8kg 2.5ml bid, 8-12kg 5ml, 12-16kg 7.5ml, 16-22kg 10ml, 22-35kg 15ml bid 달고 특이한 맛 투명</td><td class="drug-sym">기관지경련 점액과다(끈적한가래)</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_거담제___점액용해제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🫁 거담제 / 점액용해제 <span style="font-size:12px;font-weight:400;color:#64748b">(10개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="리나치올시럽 2% S-carboxymethylcysteine 20mg/ml(50짜리 따로 있음) 가래 배농,점액조절제"><td class="drug-name">리나치올시럽 2%<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">S-carboxymethylcysteine 20mg/ml(50짜리 따로 있음)</td><td class="drug-dose">2세미만 금기!!!  2세-5세 250-500mg#4(300기준 5ml tid), 6세-12세 250mg tid(12.5ml tid)</td><td class="drug-sym">가래 배농,점액조절제</td></tr><tr data-s="뮤테란과립/뮤테란 캡슐 Acetylcysteine 200mg 가래 배농 점액용해제"><td class="drug-name">뮤테란과립/뮤테란 캡슐</td><td class="drug-ingr">Acetylcysteine 200mg</td><td class="drug-dose">2-5세 100mg tid, 6-14세 200mg bid, 성인 200mg tid, 1g에 200mg 들어있음</td><td class="drug-sym">가래 배농 점액용해제</td></tr><tr data-s="에르덱스캡슐(내복)(엘도스) Erdosteine 300mg 점액용해제 거담"><td class="drug-name">에르덱스캡슐(내복)(엘도스)</td><td class="drug-ingr">Erdosteine 300mg</td><td class="drug-dose">15세이상 성인 bid or tid</td><td class="drug-sym">점액용해제 거담</td></tr><tr data-s="뮤테란 시럽이 없음  "><td class="drug-name">뮤테란 시럽이 없음</td><td class="drug-ingr"></td><td class="drug-dose">4-6ml/10kg/d#3-4, 2-5세 3ml tid(3~6ml qid), 6-12세 5cc tid</td><td class="drug-sym"></td></tr><tr data-s="시네츄라(황엽 아이비엽) Ivy leaf 30% ethanol dried ext.(5~7.5→1) 262.5mg/100mL 외 1종 기침 가래 염증조절"><td class="drug-name">시네츄라(황엽 아이비엽)</td><td class="drug-ingr">Ivy leaf 30% ethanol dried ext.(5~7.5→1) 262.5mg/100mL 외 1종</td><td class="drug-dose">(2세미만 2.5-3ml, 줄거없음 줄수도 있음) 2-6세 5ml tid, 7-14세 10ml tid, 15세 이상 15ml tid 독특한향 쓴맛 갈색</td><td class="drug-sym">기침 가래 염증조절</td></tr><tr data-s="움카민시럽(펠라고니움 시도이데스 추출액) Pelargonium sidoides Extract Sol. 171.6mg/mL 기침 가래 염증조절"><td class="drug-name">움카민시럽(펠라고니움 시도이데스 추출액)</td><td class="drug-ingr">Pelargonium sidoides Extract Sol. 171.6mg/mL</td><td class="drug-dose">1-5세 3ml tid, 6-11세 6ml tid, 12세 이상 성인 9ml tid 식전 30분 경구복용 호박쓴맛</td><td class="drug-sym">기침 가래 염증조절</td></tr><tr data-s="록솔정(암브록솔염산염) Ambroxol hydrochloride 30mg 점액분비장애"><td class="drug-name">록솔정(암브록솔염산염)</td><td class="drug-ingr">Ambroxol hydrochloride 30mg</td><td class="drug-dose">2-4세 0.25T(7.5mg) tid, 5세이상 0.5T(15mg) bid-tid성인 tid</td><td class="drug-sym">점액분비장애</td></tr><tr data-s="이텍스암브록솔시럽 Ambroxol hydrochloride 3mg/ml 점액분비장애"><td class="drug-name">이텍스암브록솔시럽</td><td class="drug-ingr">Ambroxol hydrochloride 3mg/ml</td><td class="drug-dose">만 2세미만 사용은 가능, 2-4세 2.5ml(7.5mg) tid, 5세이상 5ml(15mg) bid-tid</td><td class="drug-sym">점액분비장애</td></tr><tr data-s="스키나제 Streptokinase 10000IU / Streptodornase 2500IU 스키나제 쓰자 APT부기뺴기"><td class="drug-name">스키나제</td><td class="drug-ingr">Streptokinase 10000IU / Streptodornase 2500IU</td><td class="drug-dose">1-2T qid</td><td class="drug-sym">스키나제 쓰자 APT부기뺴기</td></tr><tr data-s="스키나제 Streptokinase 10000IU / Streptodornase 2500IU 목염증완화"><td class="drug-name">스키나제</td><td class="drug-ingr">Streptokinase 10000IU / Streptodornase 2500IU</td><td class="drug-dose">성인 1-2T qid</td><td class="drug-sym">목염증완화</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_기관지확장제___스테로이드"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">💨 기관지확장제 / 스테로이드 <span style="font-size:12px;font-weight:400;color:#64748b">(4개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="소르텔건조시럽 (포르모테롤)아토크 Formoterol fumarate hydrate 40μg/g 천명(기관지 확장제)"><td class="drug-name">소르텔건조시럽 (포르모테롤)아토크</td><td class="drug-ingr">Formoterol fumarate hydrate 40μg/g</td><td class="drug-dose">1kg당 4μg #2-3(건조시럽으로 1g) 손떨림 심계항진 불면 부작용 주의!6개월~1세미만 0.5~1g/d#2~3, 1세-3세 1-1.5g,4-6세 1.5-2g,7-9세 2-3g,10-11세 3-4g)</td><td class="drug-sym">천명(기관지 확장제)</td></tr><tr data-s="호쿠날린패취0.5mg/1mg/2mg, 1mg 품절-&gt; 호쿠나 패취 Tulobuterol hydrochloride 0.5mg/1mg/2mg 천명(기관지 확장제)"><td class="drug-name">호쿠날린패취0.5mg/1mg/2mg, 1mg 품절-&gt; 호쿠나 패취</td><td class="drug-ingr">Tulobuterol hydrochloride 0.5mg/1mg/2mg</td><td class="drug-dose">6개월-3세미만 0.5mg, 3세-9세미만 1mg, 9세이상 2mg 손떨림 심계항진 불면 부작용 주의!</td><td class="drug-sym">천명(기관지 확장제)</td></tr><tr data-s="소론도정5mg prednisolone 5 mg 천명,목 염증 심하면 추가"><td class="drug-name">소론도정5mg</td><td class="drug-ingr">prednisolone 5 mg</td><td class="drug-dose">1mg/kg #3 powder ,성인 1일 5mg-60mg #1-4</td><td class="drug-sym">천명,목 염증 심하면 추가</td></tr><tr data-s="피알디현탁시럽0.1% prednisolone 0.5g/500ml(1mg/mL) "><td class="drug-name">피알디현탁시럽0.1%</td><td class="drug-ingr">prednisolone 0.5g/500ml(1mg/mL)</td><td class="drug-dose">주황색 오렌지향 10kg 3ml tid,15kg 5ml tid, 20kg 7ml tid</td><td class="drug-sym"></td></tr></tbody></table></div></div><div class="rf-cat" id="drug_해열제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🌡️ 해열제 <span style="font-size:12px;font-weight:400;color:#64748b">(7개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="세토펜정 160/325mg Acetaminophen 160/325mg "><td class="drug-name">세토펜정 160/325mg</td><td class="drug-ingr">Acetaminophen 160/325mg</td><td class="drug-dose">10-15mg/kg q4-6hr(1일 5회 75mg/kg초과하지 않게 복용)</td><td class="drug-sym"></td></tr><tr data-s="세토펜현탁액 500ml acetaminophen 16g(32mg/mL) kg/2"><td class="drug-name">세토펜현탁액 500ml</td><td class="drug-ingr">acetaminophen 16g(32mg/mL)</td><td class="drug-dose">아침점심저녁약에 APP처방후 2시간 후에도 열 떨어지지 않으면 엑스펜 복용, 자기전 한번더 복용가능</td><td class="drug-sym">kg/2</td></tr><tr data-s="맥시부펜 500ml Dexibuprofen 12mg/mL kg/2(이부프로펜은 체중x0.4)"><td class="drug-name">맥시부펜 500ml<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">Dexibuprofen 12mg/mL</td><td class="drug-dose">6개월 미만 금기!!! 0.4-0.6ml(5-7mg)/kg  q4-6hr(1일 4회 28mg/kg초과하지 않게 복용)</td><td class="drug-sym">kg/2(이부프로펜은 체중x0.4)</td></tr><tr data-s="복합써스펜좌약 125mg Acetaminophen 125mg + Methionine 12.5mg "><td class="drug-name">복합써스펜좌약 125mg</td><td class="drug-ingr">Acetaminophen 125mg + Methionine 12.5mg</td><td class="drug-dose">3-12개월 1개, 1-2세 1-2개, 3-6세 2개, 40mg/kg 초회-&gt;20mg/kg 유지</td><td class="drug-sym"></td></tr><tr data-s="세토펜정325mg acetaminophen 325mg "><td class="drug-name">세토펜정325mg</td><td class="drug-ingr">acetaminophen 325mg</td><td class="drug-dose">10-15mg/kg q4-6hr(1일 5회 75mg/kg초과하지 않게 복용)</td><td class="drug-sym"></td></tr><tr data-s="디부루펜정400mg Dexibuprofen 400mg "><td class="drug-name">디부루펜정400mg</td><td class="drug-ingr">Dexibuprofen 400mg</td><td class="drug-dose">tid 디부루펜 (dexibuprofen)</td><td class="drug-sym"></td></tr><tr data-s="타이레놀8시간이알서방정(아세트아미노펜)_(650mg/1정) acetaminophen 650mg "><td class="drug-name">타이레놀8시간이알서방정(아세트아미노펜)_(650mg/1정)</td><td class="drug-ingr">acetaminophen 650mg</td><td class="drug-dose">12세 이상 성인,8시간마다 2정씩 복용 하루 6정 넘기지말것</td><td class="drug-sym"></td></tr></tbody></table></div></div><div class="rf-cat" id="drug_항생제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🦠 항생제 <span style="font-size:12px;font-weight:400;color:#64748b">(24개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="에이목스캡슐500mg(내복) Amoxicillin hydrate 500mg "><td class="drug-name">에이목스캡슐500mg(내복)</td><td class="drug-ingr">Amoxicillin hydrate 500mg</td><td class="drug-dose">Amoxicillin45mg/kg/d#3 중이염-&gt;고용량 90mg/kg/d#3(39도이상, 이통, 매우아파보일때)</td><td class="drug-sym"></td></tr><tr data-s="크라맥스듀오시럽 500ml (7:1) Amoxicillin 20 g(40mg/mL), clavulanate potassium 2.85 g(5.7mg/mL) "><td class="drug-name">크라맥스듀오시럽 500ml (7:1)</td><td class="drug-ingr">Amoxicillin 20 g(40mg/mL), clavulanate potassium 2.85 g(5.7mg/mL)</td><td class="drug-dose">냉장 체중당 45mg/3.6mg#2 쉽게 몸무게 /2 , 2세미만은 네오로 주로씀 클라불라네이트때문에 설사주의</td><td class="drug-sym"></td></tr><tr data-s="프론클러건조시럽 25mg/ml Cefaclor hydrate 25mg/ml 2세대 세파"><td class="drug-name">프론클러건조시럽 25mg/ml</td><td class="drug-ingr">Cefaclor hydrate 25mg/ml</td><td class="drug-dose">냉장 일반20 중이염40mg/kg/d#2-3, 10kg기준 일반 3ml/ AOM 5ml tid</td><td class="drug-sym">2세대 세파</td></tr><tr data-s="쎄클래신건조시럽 125mg/5mL (클래리트로마이신) Clarithromycin 25mg/mL atypical pneumonia"><td class="drug-name">쎄클래신건조시럽 125mg/5mL (클래리트로마이신)</td><td class="drug-ingr">Clarithromycin 25mg/mL</td><td class="drug-dose">15mg/kg/d#2 5-10일 입안에 잘 붙고 끈끈해요 미리 물을 먹이거나 물을 충분히 타서 먹이기</td><td class="drug-sym">atypical pneumonia</td></tr><tr data-s="클래미신건조시럽 125mg/5mL Clarithromycin 25mg/mL "><td class="drug-name">클래미신건조시럽 125mg/5mL</td><td class="drug-ingr">Clarithromycin 25mg/mL</td><td class="drug-dose">아지탑스 쓰면 삭감인가? GI에 있음 급성 중이염시 30mg/kg 단회투여요법도 사용! 식사 1시간전 이나 식후 2시간, 10mg/kg qd 1d+5mg/kg qd 4d 총 5일</td><td class="drug-sym"></td></tr><tr data-s="아미클란듀오정 500mg Amoxicillin 437.5mg / Clavulanate potassium 62.5mg "><td class="drug-name">아미클란듀오정 500mg</td><td class="drug-ingr">Amoxicillin 437.5mg / Clavulanate potassium 62.5mg</td><td class="drug-dose">성인 2T bid</td><td class="drug-sym"></td></tr><tr data-s="씨트클러캡슐 (세파클러수화물) Cefaclor hydrate 250mg "><td class="drug-name">씨트클러캡슐 (세파클러수화물)</td><td class="drug-ingr">Cefaclor hydrate 250mg</td><td class="drug-dose">일반20mg/kg#3 중이염40mg/kg#3  최대용량 1일 1g</td><td class="drug-sym"></td></tr><tr data-s="클래리드정 250mg /500mg Clarithromycin 250mg "><td class="drug-name">클래리드정 250mg /500mg</td><td class="drug-ingr">Clarithromycin 250mg</td><td class="drug-dose">1T(250mg) bid  7-14d, 중증은 2T(500mg) bid 14d</td><td class="drug-sym"></td></tr><tr data-s="크라맥스네오시럽 (14:1), 품절시 아목살린네오(14:1)시럽 (Amoxicillin hydrate 54.545g(120mg/ml)+Potassium clavulanate 7.8g(8.58mg/ml))/100g "><td class="drug-name">크라맥스네오시럽 (14:1), 품절시 아목살린네오(14:1)시럽</td><td class="drug-ingr">(Amoxicillin hydrate 54.545g(120mg/ml)+Potassium clavulanate 7.8g(8.58mg/ml))/100g</td><td class="drug-dose">냉장 재발, 2세이하, 어린이집/// 중이염 90mg/kg/d#2 중이염 10일 부비동염 7일, 6개월 미만은 바로 항생제, 6개월-2세는 39도이상 이통심하거나 아파보이면 항생제, 만 2세이상은 심한중이염만 anti쓰고 심하지 않으면 바로 시작안함</td><td class="drug-sym"></td></tr><tr data-s="바난건조시럽10mg/ml(바난) Cefpodoxime proxetil 10mg/ml 3세대"><td class="drug-name">바난건조시럽10mg/ml(바난)</td><td class="drug-ingr">Cefpodoxime proxetil 10mg/ml</td><td class="drug-dose">냉장 3mg/kg tid(or bid), 초진부터 중이염 상병으로 3세대 세파처방 비율이 높은 1인의원 삭감사례있음, 재진부터 2차 항생제로의 사용은 급여대상</td><td class="drug-sym">3세대</td></tr><tr data-s="프론독심건조시럽 (세프포독심프록세틸) Cefpodoxime proxetil 2g/200ml 10mg/ml 3세대"><td class="drug-name">프론독심건조시럽 (세프포독심프록세틸)</td><td class="drug-ingr">Cefpodoxime proxetil 2g/200ml 10mg/ml</td><td class="drug-dose">냉장 3mg/kg tid(or bid), 초진부터 중이염 상병으로 3세대 세파처방 비율이 높은 1인의원 삭감사례있음, 재진부터 2차 항생제로의 사용은 급여대상</td><td class="drug-sym">3세대</td></tr><tr data-s="동아슈프락스산50mg/g cefixime hydrate 5g(50mg/g) 3세대 세균성장염,UTI"><td class="drug-name">동아슈프락스산50mg/g</td><td class="drug-ingr">cefixime hydrate 5g(50mg/g)</td><td class="drug-dose">UTI 때 8mg/kg#2(4mg/kg bid) 다른경우 3-6mg/kg bid</td><td class="drug-sym">3세대 세균성장염,UTI</td></tr><tr data-s="보령메이액트세립100mg/g cefditoren pivoxil 10g 3세대 폐렴 부비동염"><td class="drug-name">보령메이액트세립100mg/g</td><td class="drug-ingr">cefditoren pivoxil 10g</td><td class="drug-dose">3mg/kg tid 식후 필요시 6mg/kg tid(중증),가능,,, 1회 200mg 넘지 않도록 함</td><td class="drug-sym">3세대 폐렴 부비동염</td></tr><tr data-s="바난정100mg Cefpodoxime proxetil 100mg 3세대"><td class="drug-name">바난정100mg</td><td class="drug-ingr">Cefpodoxime proxetil 100mg</td><td class="drug-dose">1T bid, 효과불충분시 2T bid</td><td class="drug-sym">3세대</td></tr><tr data-s="프로세틸정 (세프포독심프록세틸) Cefpodoxime proxetil 100mg 3세대"><td class="drug-name">프로세틸정 (세프포독심프록세틸)</td><td class="drug-ingr">Cefpodoxime proxetil 100mg</td><td class="drug-dose">1T bid, 효과불충분시 2T bid</td><td class="drug-sym">3세대</td></tr><tr data-s="동아슈프락스캡슐 100mg(세픽심수화물) Cefixime hydrate 100mg 슈프락스 3세대 세균성장염 UTI"><td class="drug-name">동아슈프락스캡슐 100mg(세픽심수화물)</td><td class="drug-ingr">Cefixime hydrate 100mg 슈프락스</td><td class="drug-dose">1.5mg-3mg/kg bid 중증 6mg/kg bid(30kg 이상 소아및 성인 50-100mg bid, 중증 200mg bid)</td><td class="drug-sym">3세대 세균성장염 UTI</td></tr><tr data-s="보령메이액트정100mg cefditoren pivoxil 100mg 호흡기 감염"><td class="drug-name">보령메이액트정100mg</td><td class="drug-ingr">cefditoren pivoxil 100mg</td><td class="drug-dose">1T tid(중증 2T tid)</td><td class="drug-sym">호흡기 감염</td></tr><tr data-s="보령듀리세프건조시럽250mg/5ml(50ml/ml) cefadroxil 7.5g 1세대"><td class="drug-name">보령듀리세프건조시럽250mg/5ml(50ml/ml)</td><td class="drug-ingr">cefadroxil 7.5g</td><td class="drug-dose">30mg/kg#2 10일사용! PSAGN예방위해서는 3세대 세파 5일 사용</td><td class="drug-sym">1세대</td></tr><tr data-s="한올세프라딘캡슐 500mg Cefradine hydrate 500mg 1세대"><td class="drug-name">한올세프라딘캡슐 500mg</td><td class="drug-ingr">Cefradine hydrate 500mg</td><td class="drug-dose">9개월 이하 사용금지 25-50mg/kg/d#2-4 중이염 75-100mg/kg/d#2-4, 성인 250-500mg qid or 500mg-1g bid</td><td class="drug-sym">1세대</td></tr><tr data-s="에스로반연고(외용) Mupirocin 20mg/g "><td class="drug-name">에스로반연고(외용)</td><td class="drug-ingr">Mupirocin 20mg/g</td><td class="drug-dose">감염부위에 1일 2-3회 10일간 소량 바른다</td><td class="drug-sym"></td></tr><tr data-s="아지탑스건조시럽22.5ml Azithromycin Hydrate (40mg/Ml) macrolide"><td class="drug-name">아지탑스건조시럽22.5ml</td><td class="drug-ingr">Azithromycin Hydrate (40mg/Ml)</td><td class="drug-dose">딸기향  10mg/kg qd 3일간, or 10mg/kg qd 1d+5mg/kg qd 4d 총 5일</td><td class="drug-sym">macrolide</td></tr><tr data-s="옴니세프 세립 Cefdinir 100mg 3세대 바난쓰면 됨"><td class="drug-name">옴니세프 세립</td><td class="drug-ingr">Cefdinir 100mg</td><td class="drug-dose">9-18mg/kg/d #3 주황색 혈변같은똥 나올 수 있다 설명</td><td class="drug-sym">3세대 바난쓰면 됨</td></tr><tr data-s="아지로맥스정250mg Azithromycin Hydrate 262mg macrolide"><td class="drug-name">아지로맥스정250mg</td><td class="drug-ingr">Azithromycin Hydrate 262mg</td><td class="drug-dose">2T qd 3일, or 2T qd 1d+ 1T qd 4d 총 5일</td><td class="drug-sym">macrolide</td></tr><tr data-s="에스로반연고(외용) Mupirocin 20mg/g S.aureus 농가진, 모낭염 종기증 외상 세균성 피부감염"><td class="drug-name">에스로반연고(외용)</td><td class="drug-ingr">Mupirocin 20mg/g</td><td class="drug-dose">1일 2-3회 10일간 소량 바른다</td><td class="drug-sym">S.aureus 농가진, 모낭염 종기증 외상 세균성 피부감염</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_항바이러스제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🔬 항바이러스제 <span style="font-size:12px;font-weight:400;color:#64748b">(9개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="한미플루현탁용분말6mg/ml (50ml) Oseltamivir 4.74g/100g "><td class="drug-name">한미플루현탁용분말6mg/ml (50ml)<div class="drug-warn-info">ℹ️ AAP 영아 용량: 0~8개월 3 mg/kg bid, 9~11개월 3.5 mg/kg bid | CDC: <12개월 전체 3 mg/kg bid</div></td><td class="drug-ingr">Oseltamivir 4.74g/100g</td><td class="drug-dose">1세미만은 3mg/kg bid권장, 3kg 1.5ml, 4kg 2ml, 5kg 2.5ml,6kg 3ml, 10kg 5ml, 15-23kg 7.5ml, 24-40kg 10ml, 40kg초과 12.5ml bid</td><td class="drug-sym"></td></tr><tr data-s="타미플루캡슐75mg Oseltamivir Phosphate 98.5mg "><td class="drug-name">타미플루캡슐75mg<div class="drug-warn-info">ℹ️ AAP 영아 용량: 0~8개월 3 mg/kg bid, 9~11개월 3.5 mg/kg bid | CDC: <12개월 전체 3 mg/kg bid</div></td><td class="drug-ingr">Oseltamivir Phosphate 98.5mg</td><td class="drug-dose">13세이상의 청소년 1T bid 5d</td><td class="drug-sym"></td></tr><tr data-s="푸리노신시럽50mg/ml Inosiplex 50mg/mL lymphocyte자극, DNA, RNA genetic code차단"><td class="drug-name">푸리노신시럽50mg/ml</td><td class="drug-ingr">Inosiplex 50mg/mL</td><td class="drug-dose">50-100mg/kg/d#4-6 증상 소실 후 1~2일동안 하루최대 6g까지, 성인 2T(1T에 500mg) qid</td><td class="drug-sym">lymphocyte자극, DNA, RNA genetic code차단</td></tr><tr data-s="탄툼베르데네뷸라이저 benzydamine hydrochloride 150mg 비급여 인후 구강 잇몸 염증치료 진통"><td class="drug-name">탄툼베르데네뷸라이저</td><td class="drug-ingr">benzydamine hydrochloride 150mg 비급여</td><td class="drug-dose">1일 2회-6회까지 몸무게 4kg당 한번씩 최대한도 4번까지 분무</td><td class="drug-sym">인후 구강 잇몸 염증치료 진통</td></tr><tr data-s="지나시드건조시럽(80mg/ml)(품절) Acyclovir 80mg/mL 보건소 신고, 보호자에게도 연락오는일 가끔 있다고 설명"><td class="drug-name">지나시드건조시럽(80mg/ml)(품절)</td><td class="drug-ingr">Acyclovir 80mg/mL</td><td class="drug-dose">2세이상소아수두치료시 20mg/kg qid (5시간마다 먹고 잘때 한번 거르면됨)5일간 최대 800mg/1회, 발진 24시간 이내 투여만 효과있다고 설명(1ml/kg#4 5일, 1회용량이 10ml초과해서는 안된다!), 헤르페스 바이러스일때는 1회 200mg (2.5ml)씩 하루 6번 5일간 투여 2세 미만은 1회 100mg(1.5ml)</td><td class="drug-sym">보건소 신고, 보호자에게도 연락오는일 가끔 있다고 설명</td></tr><tr data-s="바이버크림 Acyclovir 50mg/g "><td class="drug-name">바이버크림</td><td class="drug-ingr">Acyclovir 50mg/g</td><td class="drug-dose">소아에게는 쓰지 말것 4시간 간격 or 5회 5일만</td><td class="drug-sym"></td></tr><tr data-s="바이버정 200mg Acyclovir 200mg "><td class="drug-name">바이버정 200mg</td><td class="drug-ingr">Acyclovir 200mg</td><td class="drug-dose">10kg 1T qid, 20kg 2T qid(2세이상소아수두치료시 20mg/kg qid 5일간 최대 800mg/1회, 발진 24시간 이내 투여만 효과있다고 설명), 헤르페스 바이러스일때는 1회 200mg (2.5ml)씩 하루 6번 5일간 투여 2세 미만은 1회 100mg(1.5ml), 성인 대상포진시 4T(800mg) 4시간 간격으로 5회 총 7일투여</td><td class="drug-sym"></td></tr><tr data-s="디푸루칸건조시럽 Fluconazole 1.64g(10mg/ml) "><td class="drug-name">디푸루칸건조시럽</td><td class="drug-ingr">Fluconazole 1.64g(10mg/ml)</td><td class="drug-dose">첫날 6mg/kg 다음날 3mg/kg 2주사용! 끊지마세요 재발합니다.(최대 5ml)</td><td class="drug-sym"></td></tr><tr data-s="디푸루칸캡슐50mg Fluconazole 50mg "><td class="drug-name">디푸루칸캡슐50mg</td><td class="drug-ingr">Fluconazole 50mg</td><td class="drug-dose">1T qd 7-14일 질염일때는 150mg single dose</td><td class="drug-sym"></td></tr></tbody></table></div></div><div class="rf-cat" id="drug_소화기약___구역_구토"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🤢 소화기약 — 구역/구토 <span style="font-size:12px;font-weight:400;color:#64748b">(10개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="포리부틴드라이시럽 Trimebutine 7.87mg/g(4.8mg/mL) 구토(습관성구토,변비,설사)"><td class="drug-name">포리부틴드라이시럽</td><td class="drug-ingr">Trimebutine 7.87mg/g(4.8mg/mL)</td><td class="drug-dose">kg/3, 6개월 미만 2.5ml bid or tid, 6개월-1세 5ml bid,1-5세 5ml tid, 5세이상 10ml tid, 만능약 위장관운동 항진시 저하, 저하시 촉진)</td><td class="drug-sym">구토(습관성구토,변비,설사)</td></tr><tr data-s="모사피아정(가스모틴) Mosapride Citrate Hydrate 5.29mg(5mg) prokinetics"><td class="drug-name">모사피아정(가스모틴)</td><td class="drug-ingr">Mosapride Citrate Hydrate 5.29mg(5mg)</td><td class="drug-dose">0.3mg-0.5mg/kg/d#3 도파민 수용체 건드리지 않는 장점 단맛</td><td class="drug-sym">prokinetics</td></tr><tr data-s="하미돈현탁액500ml(1mg/mL) Domperidone 1mg/mL 오심 구토"><td class="drug-name">하미돈현탁액500ml(1mg/mL)<div class="drug-warn-ci">🚫 EMA: 12세 미만 / 35 kg 미만 소아 금기 — 심장 QT 연장 위험 (domperidone)</div></td><td class="drug-ingr">Domperidone 1mg/mL</td><td class="drug-dose">0.25mg/kg tid 식전에 경구투여 1일최대 0.75mg/kg 일수제한! BBB통과는 적긴하지만 영아에서는 주의! 1일 최대 복용량은 30mg</td><td class="drug-sym">오심 구토</td></tr><tr data-s="온세란정4mg/8mg ondanstron 4mg/8mg "><td class="drug-name">온세란정4mg/8mg</td><td class="drug-ingr">ondanstron 4mg/8mg</td><td class="drug-dose">6개월이상부터 사용가능,IV도 0.15-0.3mg/kg/dose 혀 위에 놓고 수초내로 분산되면 삼킨다. 8-15kg 2mg(0.5T), 16-30kg 4mg, 31kg~ 8mg</td><td class="drug-sym"></td></tr><tr data-s="한올트리메부틴말레산염정 100mg (트리메부틴) Trimebutine Maleate 100mg 구토(습관성구토,변비,설사)"><td class="drug-name">한올트리메부틴말레산염정 100mg (트리메부틴)</td><td class="drug-ingr">Trimebutine Maleate 100mg</td><td class="drug-dose">1T tid 식전</td><td class="drug-sym">구토(습관성구토,변비,설사)</td></tr><tr data-s="모사피아정(가스모틴) Mosapride Citrate Hydrate 5.29mg(5mg) prokinetics"><td class="drug-name">모사피아정(가스모틴)</td><td class="drug-ingr">Mosapride Citrate Hydrate 5.29mg(5mg)</td><td class="drug-dose">1T tid 식전 또는 식후</td><td class="drug-sym">prokinetics</td></tr><tr data-s="하미돈엠정 Domperidone malaeate 12.72mg(10mg as domperidone) 오심 구토"><td class="drug-name">하미돈엠정<div class="drug-warn-ci">🚫 EMA: 12세 미만 / 35 kg 미만 소아 금기 — 심장 QT 연장 위험 (domperidone)</div></td><td class="drug-ingr">Domperidone malaeate 12.72mg(10mg as domperidone)</td><td class="drug-dose">12세이상 35kg이상 1T tid 식전</td><td class="drug-sym">오심 구토</td></tr><tr data-s="후로스판액 Phloroglucinol Hydrate 8mg/mL antispasmodic ileus로 인한 통증"><td class="drug-name">후로스판액</td><td class="drug-ingr">Phloroglucinol Hydrate 8mg/mL</td><td class="drug-dose">30kg기준(?)소아 10ml bid(성인 20ml 160mg을 증상발현시 경구투여) 평활근 이완</td><td class="drug-sym">antispasmodic ileus로 인한 통증</td></tr><tr data-s="로스판정 Phloroglucinol Hydrate 80mg 진경제 ileus로 인한 통증"><td class="drug-name">로스판정</td><td class="drug-ingr">Phloroglucinol Hydrate 80mg</td><td class="drug-dose">소아 80mg을 물한컵에 녹여 bid, 성인 160mg(2T) 물한컵에 녹여 증상발현시 복용</td><td class="drug-sym">진경제 ileus로 인한 통증</td></tr><tr data-s="부스코판당의정(내복) Scopolamine Butylbromide 10mg antispasmodic ileus로 인한 통증 부교감신경항진 눈안보인다 할때 있음"><td class="drug-name">부스코판당의정(내복)</td><td class="drug-ingr">Scopolamine Butylbromide 10mg</td><td class="drug-dose">0.15mg/kg/d#4 ,1T tid, 그래서 어른 메녹틸준다break</td><td class="drug-sym">antispasmodic ileus로 인한 통증 부교감신경항진 눈안보인다 할때 있음</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_소화기약___설사_장관"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">💊 소화기약 — 설사/장관 <span style="font-size:12px;font-weight:400;color:#64748b">(12개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="갈타제산 β-Galactosidase(Aspergillus) 5000ONPG단위/1g 유당불내증, 영아들 소화제"><td class="drug-name">갈타제산</td><td class="drug-ingr">β-Galactosidase(Aspergillus) 5000ONPG단위/1g</td><td class="drug-dose">1회 0.25~0.5g 모유나 분유에 타서 먹이세요 qid정도로 처방</td><td class="drug-sym">유당불내증, 영아들 소화제</td></tr><tr data-s="람노스산 Freeze-Dried Lactobacillus casei var. Rhamnosus Culture 정장제 항생제 쓸때 줌, 만 6세부터는 전액환자본인부담"><td class="drug-name">람노스산</td><td class="drug-ingr">Freeze-Dried Lactobacillus casei var. Rhamnosus Culture</td><td class="drug-dose">2세이상 1g tid 1세미만은 0.5g만 줘도 됨</td><td class="drug-sym">정장제 항생제 쓸때 줌, 만 6세부터는 전액환자본인부담</td></tr><tr data-s="메디락에스산 bacillus subtilis·streptococcus faecium(streptococcus faecium 2.25억마리,bacillus subtilis 0.25억마리) 31.25 g(62.5mg/g) ) "><td class="drug-name">메디락에스산</td><td class="drug-ingr">bacillus subtilis·streptococcus faecium(streptococcus faecium 2.25억마리,bacillus subtilis 0.25억마리) 31.25 g(62.5mg/g) )</td><td class="drug-dose">3세미만 1g bid, 3이상 1g tid</td><td class="drug-sym"></td></tr><tr data-s="비오플250산 saccharomyces boulardii 0.2825g 효모라서 항생제 영향받지 않음"><td class="drug-name">비오플250산</td><td class="drug-ingr">saccharomyces boulardii 0.2825g</td><td class="drug-dose">3세미만 1포 bid, 3-12세 1포 tid</td><td class="drug-sym">효모라서 항생제 영향받지 않음</td></tr><tr data-s="람노스캡슐500mg Freeze-Dried Lactobacillus casei var. Rhamnosus Culture "><td class="drug-name">람노스캡슐500mg</td><td class="drug-ingr">Freeze-Dried Lactobacillus casei var. Rhamnosus Culture</td><td class="drug-dose">tid</td><td class="drug-sym"></td></tr><tr data-s="메디락디에스장용캡슐 bacillus subtilis·streptococcus faecium(streptococcus faecium 2.25억마리,bacillus subtilis 0.25억마리) 31.25 g(62.5mg/g) ) "><td class="drug-name">메디락디에스장용캡슐</td><td class="drug-ingr">bacillus subtilis·streptococcus faecium(streptococcus faecium 2.25억마리,bacillus subtilis 0.25억마리) 31.25 g(62.5mg/g) )</td><td class="drug-dose">tid</td><td class="drug-sym"></td></tr><tr data-s="하이드라섹산10mg/30mg Racecadotril 10mg/30mg 설사, 물 전해질의 위장관 분비 억제기전"><td class="drug-name">하이드라섹산10mg/30mg</td><td class="drug-ingr">Racecadotril 10mg/30mg</td><td class="drug-dose">3개월 이상에서 사용가능, 1.5mg/kg tid(하루 6mg/kg초과해서는 안됨) 1회투여량 100mg까지, 두번 정상변 보면 끊으세요!!</td><td class="drug-sym">설사, 물 전해질의 위장관 분비 억제기전</td></tr><tr data-s="하이드라섹캡슐 100mg Racecadotril 100mg 설사, 물 전해질의 위장관 분비 억제기전"><td class="drug-name">하이드라섹캡슐 100mg</td><td class="drug-ingr">Racecadotril 100mg</td><td class="drug-dose"></td><td class="drug-sym">설사, 물 전해질의 위장관 분비 억제기전</td></tr><tr data-s="포타겔현탁액500ml(스멕타)/20ml/포 Dioctahedral Smectite 150mg/mL 설사 항생제 설사와 연관성이 연구되지는 않았으나 항상제 설사에서 C. difficile과 toxin중화기능은 있음"><td class="drug-name">포타겔현탁액500ml(스멕타)/20ml/포<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">Dioctahedral Smectite 150mg/mL</td><td class="drug-dose">2세 미만금기!, 2g(13ml) tid 7d (13ml-20ml tid 3d-&gt;13ml tid 4d) 음식과 2시간 간격,  다른 약과도 2시간 간격</td><td class="drug-sym">설사 항생제 설사와 연관성이 연구되지는 않았으나 항상제 설사에서 C. difficile과 toxin중화기능은 있음</td></tr><tr data-s="로프민캡슐(로페라미드염산염) loperamide hydrochloride 2mg 설사, 포타겔써도 안들을때 위장관 운동 억제"><td class="drug-name">로프민캡슐(로페라미드염산염)<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">loperamide hydrochloride 2mg</td><td class="drug-dose">2세 미만 금기!!, 0.02mg/kg prn 웬만함 9세이상에서 사용(1일 최대용량 6mg, 증상시 2mg)</td><td class="drug-sym">설사, 포타겔써도 안들을때 위장관 운동 억제</td></tr><tr data-s="에세푸릴캡슐(니푸록사자이드) nifuroxaside 200mg 세균성 설사"><td class="drug-name">에세푸릴캡슐(니푸록사자이드)<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">nifuroxaside 200mg</td><td class="drug-dose">소아 1개월미만 금기!! 18세미만 소아청소년?? 성인 1T qid 3d이상 복용금지, (44mg)1ml/kg/d#2-4</td><td class="drug-sym">세균성 설사</td></tr><tr data-s="ORS발란스라이트에프액 500ml glucose 2.5g, potassium citrate hydrate 216mg, sodium chloride 205mg, sodium citrate hydrate 98mg/500ml 탈수"><td class="drug-name">ORS발란스라이트에프액 500ml</td><td class="drug-ingr">glucose 2.5g, potassium citrate hydrate 216mg, sodium chloride 205mg, sodium citrate hydrate 98mg/500ml</td><td class="drug-dose">100-150ml/kg/d 나누어 섭취 첫날은 150ml/kg(초기 4시간동안은 10ml/kg/h로 4시간 먹이고, 나머지 110ml/kg는 20시간에 걸쳐 먹인다) 2일째 120ml/kg, 3일째 90ml/kg, 4일째 60mg/kg, 5일째 30ml/kg로 먹임</td><td class="drug-sym">탈수</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_소화기약___변비"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">💊 소화기약 — 변비 <span style="font-size:12px;font-weight:400;color:#64748b">(5개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="폴락스산4g/포 Polyethylene glycol 4000 4g 비급여 변비,삼투성(비당류)하제,수분흡수 일어나지 않게함, 국내외 가이드라인 1차변비치료제로 권고"><td class="drug-name">폴락스산4g/포</td><td class="drug-ingr">Polyethylene glycol 4000 4g 비급여</td><td class="drug-dose">6개월-1세 1포, 1세이상~4세 1-2포, 4세이상-8세 2-4포(한포당 50ml물에 녹여서 복용한다) 복용후 1-2일 내에 효과 나타난다. 3개월이상 투여하지 않음! 오렌지-포도맛</td><td class="drug-sym">변비,삼투성(비당류)하제,수분흡수 일어나지 않게함, 국내외 가이드라인 1차변비치료제로 권고</td></tr><tr data-s="폴락스산10g/포 Macrogol 4000 10mg 비급여 변비"><td class="drug-name">폴락스산10g/포</td><td class="drug-ingr">Macrogol 4000 10mg 비급여</td><td class="drug-dose">8세이상 성인 1일 1-2포 한컵의 물에 한포 녹여 오전에 복용권장(어린이는 0.5포 가능)</td><td class="drug-sym">변비</td></tr><tr data-s="포탈락 산(듀락칸이지 품절) lacititol monohydrate 1g 삼투성(당류)하제,장내세균에 의해 분해되어 대장 내 산성도와 삼투압을 높임"><td class="drug-name">포탈락 산(듀락칸이지 품절)</td><td class="drug-ingr">lacititol monohydrate 1g</td><td class="drug-dose">1-6세 5-10ml, 7-14세 15ml 2~3일, 다음날부터 10ml/ 포탈락산 1-6세 2.5-5g, 6-12세 5-10g, 12-16세 10-20g 음료나 음식물에 섞어 먹을 수 있음 하루 최대 72g</td><td class="drug-sym">삼투성(당류)하제,장내세균에 의해 분해되어 대장 내 산성도와 삼투압을 높임</td></tr><tr data-s="마그밀정 Magnesium Hydroxide 500mg 삼투성(염류성)하제,결장이나 직장내 수분을 대변쪽으로 흘려보내 변을 묽게함,변비"><td class="drug-name">마그밀정</td><td class="drug-ingr">Magnesium Hydroxide 500mg</td><td class="drug-dose">0.05g/kg/d#2 ,or, 2-5세 1-2T, 6-11세 3-4T, 12세이상 6-8T 취짐전 qd</td><td class="drug-sym">삼투성(염류성)하제,결장이나 직장내 수분을 대변쪽으로 흘려보내 변을 묽게함,변비</td></tr><tr data-s="듀파락이지 1.34g/ml  "><td class="drug-name">듀파락이지 1.34g/ml</td><td class="drug-ingr"></td><td class="drug-dose">disimpaction 2-3cc/kg/d#2, 3-7일 max 60cc//maintanace 0.8-1.5cc/kg#1-#2 max 45-60cc</td><td class="drug-sym"></td></tr></tbody></table></div></div><div class="rf-cat" id="drug_소화기약___속쓰림_GERD"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">🔥 소화기약 — 속쓰림/GERD <span style="font-size:12px;font-weight:400;color:#64748b">(4개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="파모트리정 20mg (파모티딘) Famotidine 20mg 속쓰림 H2-blocker"><td class="drug-name">파모트리정 20mg (파모티딘)</td><td class="drug-ingr">Famotidine 20mg</td><td class="drug-dose">0.5mg/kg bid ,성인 1T bid or 2T qd 자기전</td><td class="drug-sym">속쓰림 H2-blocker</td></tr><tr data-s="란스톤엘에프디티정15mg/30mg Lansoprazole 15mg/30mg 속쓰림 위식도역류 PPI"><td class="drug-name">란스톤엘에프디티정15mg/30mg</td><td class="drug-ingr">Lansoprazole 15mg/30mg</td><td class="drug-dose">1-11세, 30kg 이하 15mg qd 12주, 30kg초과 30mg qd 12주 GER에 의한 기침에도 처방 및 미란성 역류 식도염의 단기 치료(12-17세 비미란성 15mg qd 8wks, 미란성 30mg qd 8wks)</td><td class="drug-sym">속쓰림 위식도역류 PPI</td></tr><tr data-s="잘나겔정 (알마게이트) Almagate 500mg ulcer 제산 흡착제"><td class="drug-name">잘나겔정 (알마게이트)</td><td class="drug-ingr">Almagate 500mg</td><td class="drug-dose">12세 이상의 소아 1g tid 식후 30분 씹어서 복용, 취짐시 1회더 복용가능</td><td class="drug-sym">ulcer 제산 흡착제</td></tr><tr data-s="네바민정 Rebamipide 100mg ulcer 속쓰림, PG E2 증가시키고 위점막 손상 감소"><td class="drug-name">네바민정</td><td class="drug-ingr">Rebamipide 100mg</td><td class="drug-dose">12세이상 성인 1T tid</td><td class="drug-sym">ulcer 속쓰림, PG E2 증가시키고 위점막 손상 감소</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_스테로이드_외용제"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">💉 스테로이드 외용제 <span style="font-size:12px;font-weight:400;color:#64748b">(16개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="마이케어로션1%(외용)(락티케어) Hydrocortisone 10mg/ml 7등급 지루성피부염 항문소양증"><td class="drug-name">마이케어로션1%(외용)(락티케어)</td><td class="drug-ingr">Hydrocortisone 10mg/ml</td><td class="drug-dose"></td><td class="drug-sym">7등급 지루성피부염 항문소양증</td></tr><tr data-s="데스오웬로션0.05% Desonide 500μg/g 6등급"><td class="drug-name">데스오웬로션0.05%</td><td class="drug-ingr">Desonide 500μg/g</td><td class="drug-dose">1FTU(finger tip unit) 0.5g 어른의 양 손바닥 면적 바를 수 있음 로션은 50원 동전 크기가 1FTU</td><td class="drug-sym">6등급</td></tr><tr data-s="삼아리도멕스로션 60g Prednisolone Valeroacetate 3mg/g 0.3% 5,6등급 알러지, 접촉성 ,아토피 피부염,, 신경피부염"><td class="drug-name">삼아리도멕스로션 60g</td><td class="drug-ingr">Prednisolone Valeroacetate 3mg/g 0.3%</td><td class="drug-dose"></td><td class="drug-sym">5,6등급 알러지, 접촉성 ,아토피 피부염,, 신경피부염</td></tr><tr data-s="삼아리도멕스크림 20g Prednisolone Valeroacetate 3mg/g 0.3% 5,6등급"><td class="drug-name">삼아리도멕스크림 20g</td><td class="drug-ingr">Prednisolone Valeroacetate 3mg/g 0.3%</td><td class="drug-dose"></td><td class="drug-sym">5,6등급</td></tr><tr data-s="더마톱연고0.25%(외용) Dermatop Ointment 2.5mg 5등급"><td class="drug-name">더마톱연고0.25%(외용)</td><td class="drug-ingr">Dermatop Ointment 2.5mg</td><td class="drug-dose"></td><td class="drug-sym">5등급</td></tr><tr data-s="아드반탄연고(외용) Methylprednisolone Aceponate 1mg/g 4등급  알러지, 접촉성 ,아토피 피부염,, 신경피부염"><td class="drug-name">아드반탄연고(외용)</td><td class="drug-ingr">Methylprednisolone Aceponate 1mg/g</td><td class="drug-dose"></td><td class="drug-sym">4등급  알러지, 접촉성 ,아토피 피부염,, 신경피부염</td></tr><tr data-s="아드반탄크림  4등급"><td class="drug-name">아드반탄크림</td><td class="drug-ingr"></td><td class="drug-dose"></td><td class="drug-sym">4등급</td></tr><tr data-s="실크론지크림(외용) Betamethasone Dipropionate 640μg/g+gentamicin sulfate 1mg "><td class="drug-name">실크론지크림(외용)</td><td class="drug-ingr">Betamethasone Dipropionate 640μg/g+gentamicin sulfate 1mg</td><td class="drug-dose">1일 2회정도 환부에 바르세요. 눈주위 안돼요XXX 스테로이드 포함되어있습니다. 증상 호전시 중단 비급여!!!</td><td class="drug-sym"></td></tr><tr data-s="프로토픽 연고 0.03% Tacrolimus Hydrate 0.306mg/g 주의 화끈거림-&gt;엘리델씀"><td class="drug-name">프로토픽 연고 0.03%<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">Tacrolimus Hydrate 0.306mg/g</td><td class="drug-dose">2세미만 금기!(피부를 쉽게 통과한다) 2-15세 완두콩크기로 짜서 지름 5cm로 바른다 하루 2번, 스테로이드 기존치료에 효과 없어 처방 이라고 차팅</td><td class="drug-sym">주의 화끈거림-&gt;엘리델씀</td></tr><tr data-s="프로토픽 연고 0.1% Tacrolimus Hydrate 1.02mg/g "><td class="drug-name">프로토픽 연고 0.1%</td><td class="drug-ingr">Tacrolimus Hydrate 1.02mg/g</td><td class="drug-dose">만16세 이상</td><td class="drug-sym"></td></tr><tr data-s="엘리델 크림 1% pimecrolimus 10mg "><td class="drug-name">엘리델 크림 1%<span class="warn-badge">⚠️ 연령 주의</span></td><td class="drug-ingr">pimecrolimus 10mg</td><td class="drug-dose">2세미만 금기!,2세이상! 전신흡수(x) 1일 2회 환부도포, 국소스테로이드를 사용했으나 치료에 반응이 불충분하여 2차 치료제로 투여 차팅</td><td class="drug-sym"></td></tr><tr data-s="메티스덤(45000원 의료실비)  "><td class="drug-name">메티스덤(45000원 의료실비)</td><td class="drug-ingr"></td><td class="drug-dose">아기 목욕시간 30분 전에 지루성 두피염이 있는 부근에분사해놓고 휴지로 비비면 됨</td><td class="drug-sym"></td></tr><tr data-s="하이졸크림(하이트리크림)20g hydrocortisone 10mg+clotrimazole 10mg 기저귀발진"><td class="drug-name">하이졸크림(하이트리크림)20g</td><td class="drug-ingr">hydrocortisone 10mg+clotrimazole 10mg</td><td class="drug-dose">급여 1일 2회</td><td class="drug-sym">기저귀발진</td></tr><tr data-s="트라보코트크림15g Diflucortolone Valerate 1mg/g + isoconazole 발백선(무좀)"><td class="drug-name">트라보코트크림15g</td><td class="drug-ingr">Diflucortolone Valerate 1mg/g + isoconazole</td><td class="drug-dose">1일 1-2회 최대 2주</td><td class="drug-sym">발백선(무좀)</td></tr><tr data-s="카네스텐크림 20g clotrimazole 10mg "><td class="drug-name">카네스텐크림 20g</td><td class="drug-ingr">clotrimazole 10mg</td><td class="drug-dose">1일 2-3회 환부에 얇게, 2주</td><td class="drug-sym"></td></tr><tr data-s="비판텐(덱스판테놀) 30g Dexpanthenol 50mg비급여 상처 찢긴상처 습진 기저귀 발진, 일광화상"><td class="drug-name">비판텐(덱스판테놀) 30g</td><td class="drug-ingr">Dexpanthenol 50mg비급여</td><td class="drug-dose">상처 청결히 한후 환부에 1일 1-수회</td><td class="drug-sym">상처 찢긴상처 습진 기저귀 발진, 일광화상</td></tr></tbody></table></div></div><div class="rf-cat" id="drug_안약___이약"><h3 class="rf-cat-title" style="color:#1e3a5f;border-color:#93c5fd">👁️ 안약 / 이약 <span style="font-size:12px;font-weight:400;color:#64748b">(10개)</span></h3><div class="drug-table-wrap"><table class="drug-table"><thead><tr><th>제품명</th><th>성분명</th><th>용량/용법</th><th>적응증</th></tr></thead><tbody><tr data-s="에펙신이용액 Ofloxacin 3mg/mL 중이염 외이염 포도상구균 연쇄상구균 녹농균"><td class="drug-name">에펙신이용액</td><td class="drug-ingr">Ofloxacin 3mg/mL</td><td class="drug-dose">성인 1회 6-10방울 1일 2회 점이 점이후 약 10분간 이욕(차가우면 어지러움 체온과 같은 온도로 점이</td><td class="drug-sym">중이염 외이염 포도상구균 연쇄상구균 녹농균</td></tr><tr data-s="리포직점안겔(카보머) carbomer 2mg 인공눈물"><td class="drug-name">리포직점안겔(카보머)</td><td class="drug-ingr">carbomer 2mg</td><td class="drug-dose">비급여!!!! 1회 1방울 1일 2-5회 결막낭 내에 점안, 취침시에는 약 30분전에 점안</td><td class="drug-sym">인공눈물</td></tr><tr data-s="리프레쉬플러스점안액0.5%(외용)(0.4ML/관) Carboxymethylcellulose Sodium 2mg/0.4mL 인공눈물"><td class="drug-name">리프레쉬플러스점안액0.5%(외용)(0.4ML/관)</td><td class="drug-ingr">Carboxymethylcellulose Sodium 2mg/0.4mL</td><td class="drug-dose">필요시 증상 있는 눈에 1-2방울</td><td class="drug-sym">인공눈물</td></tr><tr data-s="엑솔점안액 0.1% 5ml (올로파타딘) Olopatadine Hydrochloride 1.11mg/mL 가려움,알레르기결막염"><td class="drug-name">엑솔점안액 0.1% 5ml (올로파타딘)</td><td class="drug-ingr">Olopatadine Hydrochloride 1.11mg/mL</td><td class="drug-dose">1회 1방울 1일 2회(6-8시간간격)</td><td class="drug-sym">가려움,알레르기결막염</td></tr><tr data-s="엑솔점안액 0.2% 3ml (올로파타딘) Olopatadine Hydrochloride 2.22mg/mL 가려움"><td class="drug-name">엑솔점안액 0.2% 3ml (올로파타딘)</td><td class="drug-ingr">Olopatadine Hydrochloride 2.22mg/mL</td><td class="drug-dose">1회 1방울 1일 1회</td><td class="drug-sym">가려움</td></tr><tr data-s="에디펜점안액 6ml (케토티펜) Ketotifen Fumarate 0.69mg 가려움"><td class="drug-name">에디펜점안액 6ml (케토티펜)</td><td class="drug-ingr">Ketotifen Fumarate 0.69mg</td><td class="drug-dose">성인 1회 1적 1일 2-4회</td><td class="drug-sym">가려움</td></tr><tr data-s="산텐플루메토론0.02점안액 Fluorometholone 0.2mg/mL 염증,"><td class="drug-name">산텐플루메토론0.02점안액</td><td class="drug-ingr">Fluorometholone 0.2mg/mL</td><td class="drug-dose">1회 1-2방울 1일 2-4회</td><td class="drug-sym">염증,</td></tr><tr data-s="토베란점안액(6mL) Tobramycin 3mg/ml 세균성 결막염 안검염, 다래끼, 각막염"><td class="drug-name">토베란점안액(6mL)</td><td class="drug-ingr">Tobramycin 3mg/ml</td><td class="drug-dose">4시간마다 감염부위에 1-2방울씩</td><td class="drug-sym">세균성 결막염 안검염, 다래끼, 각막염</td></tr><tr data-s="네오덱스안연고 5g Dexamethasone 1mg/g + neomycin + polymyxin B sulfate 염증(스테로이드)+세균성"><td class="drug-name">네오덱스안연고 5g</td><td class="drug-ingr">Dexamethasone 1mg/g + neomycin + polymyxin B sulfate</td><td class="drug-dose">1일 3-4회 결막낭내 소량 도포, 취침시 점안액과 같이 사용</td><td class="drug-sym">염증(스테로이드)+세균성</td></tr><tr data-s="테라마이신안연고 3.5g Oxytetracycline Hydrochloride 5mg/g + polymyxin B sulfate 10000 IU "><td class="drug-name">테라마이신안연고 3.5g</td><td class="drug-ingr">Oxytetracycline Hydrochloride 5mg/g + polymyxin B sulfate 10000 IU</td><td class="drug-dose">약 1.3cm을 1일 2-4회 점안</td><td class="drug-sym"></td></tr></tbody></table></div></div></div>
-    <div class="panel" id="panel-pat"><div class="rf-intro" style="background:linear-gradient(135deg,#14532d,#166534)"><h2>📋 연령별 처방 패턴</h2><p>임상에서 자주 사용하는 질환별·연령별 조합 처방 참고 자료입니다.</p></div><div class="rf-cat" id="pat_uri"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">🫁 소아 호흡기질환 (URI / 기관지염)</h3><div class="pat-age-badge">2세 이상</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 레보투스시럽</td><td class="pat-ingr">levodropropizine</td><td class="pat-note">진해</td></tr><tr><td class="pat-name">💊 페니라민정</td><td class="pat-ingr">chlorpheniramine</td><td class="pat-note">콧물</td></tr><tr><td class="pat-name">💊 엘부날캡슐</td><td class="pat-ingr">erdosteine</td><td class="pat-note">거담</td></tr><tr><td class="pat-name">💊 싱귤레어/몬텐세립</td><td class="pat-ingr">montelukast</td><td class="pat-note">코막힘·알레르기비염 상병 시 추가</td></tr><tr><td class="pat-name">💊 펠리움시럽(움카민)</td><td class="pat-ingr">pelargonium</td><td class="pat-note">가래 심할 때 추가</td></tr><tr><td class="pat-name">💊 스키나제</td><td class="pat-ingr">streptokinase</td><td class="pat-note">인후통 심할 때 추가</td></tr><tr><td class="pat-name">💊 맥시부펜시럽</td><td class="pat-ingr">dexibuprofen</td><td class="pat-note">발열 시 추가</td></tr></tbody></table><div class="pat-age-badge">1~2세</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 코미시럽</td><td class="pat-ingr">chlorpheniramine + phenylephrine</td><td class="pat-note">코막힘+콧물</td></tr><tr><td class="pat-name">💊 엘부날캡슐</td><td class="pat-ingr">erdosteine</td><td class="pat-note">거담</td></tr><tr><td class="pat-name">💊 레브론정</td><td class="pat-ingr">levodropropizine</td><td class="pat-note">진해</td></tr></tbody></table><div class="pat-age-badge">1세 미만</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 쟈디텐시럽</td><td class="pat-ingr">ketotifen</td><td class="pat-note">알레르기 증상</td></tr><tr><td class="pat-name">💊 레브론정</td><td class="pat-ingr">levodropropizine</td><td class="pat-note">진해</td></tr></tbody></table><div class="pat-age-badge">항생제 처방 시</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 아클라네오시럽 + 람노스</td><td class="pat-ingr">amoxicillin-clavulanate 14:1</td><td class="pat-note">1차 선택 + 정장제</td></tr><tr><td class="pat-name">💊 바난건조시럽</td><td class="pat-ingr">cefpodoxime</td><td class="pat-note">재진 / 2차 항생제</td></tr></tbody></table></div><div class="rf-cat" id="pat_ge"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">🤢 소아 소화기질환 (GE / 장염)</h3><div class="pat-age-badge">기본 처방</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 후로스판액</td><td class="pat-ingr">phloroglucinol</td><td class="pat-note">복통·경련 완화</td></tr><tr><td class="pat-name">💊 포리부틴드라이시럽</td><td class="pat-ingr">trimebutine</td><td class="pat-note">위장관 운동 조절</td></tr><tr><td class="pat-name">💊 람노스산/비오플</td><td class="pat-ingr">lactobacillus/saccharomyces</td><td class="pat-note">정장제</td></tr><tr><td class="pat-name">💊 온세란</td><td class="pat-ingr">ondansetron</td><td class="pat-note">구역·구토 시 1회 추가 (8~15kg 2mg, 16~30kg 4mg)</td></tr><tr><td class="pat-name">💊 하이드라섹산</td><td class="pat-ingr">racecadotril</td><td class="pat-note">설사 — 정상변 2회 시 중단</td></tr></tbody></table></div><div class="rf-cat" id="pat_adult_cold"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">🚗 성인 감기</h3><div class="pat-age-badge">성인</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 엘부날캡슐</td><td class="pat-ingr">erdosteine</td><td class="pat-note">거담</td></tr><tr><td class="pat-name">💊 레브론정</td><td class="pat-ingr">levodropropizine</td><td class="pat-note">진해</td></tr><tr><td class="pat-name">💊 시네츄라</td><td class="pat-ingr">ivy leaf ext.</td><td class="pat-note">기침·가래·염증</td></tr><tr><td class="pat-name">💊 알레그라정</td><td class="pat-ingr">fexofenadine</td><td class="pat-note">알레르기비염</td></tr><tr><td class="pat-name">💊 슈다페드</td><td class="pat-ingr">pseudoephedrine</td><td class="pat-note">코막힘</td></tr></tbody></table></div><div class="rf-cat" id="pat_fever"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">🌡️ 해열제 교차복용 원칙</h3><div class="pat-age-badge">교차복용 방법</div><table class="pat-table"><tbody><tr><td class="pat-name">💊 아세트아미노펜 (세토펜/타이레놀)</td><td class="pat-ingr">10~15 mg/kg/dose</td><td class="pat-note">4~6시간 간격, 1일 5회 이하, 75 mg/kg/일 초과 금지</td></tr><tr><td class="pat-name">💊 덱시부프로펜 (맥시부펜)</td><td class="pat-ingr">5~7 mg/kg/dose</td><td class="pat-note">6개월 미만 금기, 4~6시간 간격, 28 mg/kg/일 초과 금지</td></tr><tr><td class="pat-name">💊 교차 타이밍</td><td class="pat-ingr">APP 복용 2시간 후에도 38°C 이상이면</td><td class="pat-note">→ 맥시부펜 복용. 이후 4~6시간 후 다시 APP</td></tr><tr><td class="pat-name">💊 좌약 (복합써스펜)</td><td class="pat-ingr">40 mg/kg 초회 → 20 mg/kg 유지</td><td class="pat-note">경구 복용이 어려울 때</td></tr></tbody></table></div></div>
+    <div class="panel active" id="panel-pat"><div class="rf-intro" style="background:linear-gradient(135deg,#14532d,#166534)"><h2>📋 처방 패턴 — Top 10 + 부록</h2><p>1차 진료실 회전용 표준 처방 세트. 각 카드: KCD 상병코드 · 한국 상품명 · 심평 주의 · Refer 기준 · 보호자 안내문</p></div>
+
+<!-- ═══════════════ 1. AOM 급성 중이염 ═══════════════ -->
+<div class="rf-cat" id="pat_aom"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">①  급성 중이염 (AOM)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 화농성 중이염</span><span class="kcd-pill">H66.0</span><span class="kcd-pill kcd-pill-alt">H66.9 (상세불명)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단 포인트</div><div class="patbox-body">
+      • 6개월~2세 발열·보챔·귀잡기 / 2세 이상 이통 + 고막 팽륜·발적·운동성 감소(otoscope)<br>
+      • <strong>중증 기준 (severe AOM)</strong>: ① 39°C 이상 ② 중등도~심한 이통 ③ 양측성 — 하나라도 해당 시 즉시 항생제<br>
+      • 비중증 + 6개월~2세 양측성·심한 이통: 즉시 항생제<br>
+      • 비중증 + 2세 이상 일측성: 48~72h 관찰 후(observation) 결정 가능
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방 (90 mg/kg/d, 고용량)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">크라맥스네오시럽 (14:1)</td><td>amoxicillin/clavulanate 120/8.58 mg/mL</td><td class="d">90 mg/kg/d ÷ bid × <strong>10일</strong> (2세 미만/어린이집/재발 시)</td></tr>
+      <tr><td class="dn">에이목스시럽 (250 mg/5mL)</td><td>amoxicillin</td><td class="d">90 mg/kg/d ÷ tid × 10일 (단독, 비β-락타마제 의심 시)</td></tr>
+      <tr><td class="dn">프론클러건조시럽</td><td>cefaclor 25 mg/mL</td><td class="d">40 mg/kg/d ÷ tid × 10일 (페니실린 알러지 / 2차)</td></tr>
+      <tr><td class="dn">맥시부펜시럽</td><td>dexibuprofen 12 mg/mL</td><td class="d">5~7 mg/kg q6h prn (이통·발열)</td></tr>
+      <tr><td class="dn">에펙신이용액 (천공 시 X)</td><td>ofloxacin 0.3%</td><td class="d">고막 천공 + 이루 있을 때 점이 4~6 drops bid</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 2세 이상 일측성·비중증·신뢰 가능한 보호자 → <strong>SNAP 처방(safety-net antibiotic prescription)</strong>: 처방 발급 후 48h 후에도 호전 없으면 약국 가서 받으세요 — 보호자 합의 차팅</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>초진부터 3세대 세파(바난·슈프락스 등) 처방 비율이 높은 1인의원 삭감사례 다수</strong> — 1차는 amoxicillin 또는 amoxiclav<br>
+      • 재진부터 2차 항생제(3세대) 사용은 급여 인정<br>
+      • 항생제 처방 시 정장제(람노스/비오플) 동시 처방은 인정. 단 만 6세부터는 환자 본인부담<br>
+      • 6개월 미만에 항생제 선처방은 적절한 사유(의원 차팅) 없으면 삭감 위험 — 단, AOM은 6개월 미만도 항생제 적응
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 (이비인후과 / 응급실)<br>
+      • 48~72h 항생제 후 무반응 → ENT 외래 (배농/고막절개 고려)<br>
+      • 만성 삼출성 중이염 3개월 이상 → ENT (튜브 삽입 평가)<br>
+      • 안면마비·심한 두통·고열·항부 강직·의식변화 → <strong>응급실 (intracranial complication 의심)</strong><br>
+      • 유양돌기 후방 발적·통증 → <strong>응급실 (mastoiditis)</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문 (복사 가능)<br>
+      <em>"중이염은 코감기에 동반된 귀의 염증입니다. 항생제는 처방대로 끝까지 다 드세요(중간에 좋아져도 중단하면 재발합니다). 24~48시간 안에 열·통증이 호전되어야 합니다. 호전이 없거나 귀에서 진물이 나오면 다시 오세요. 비행기·수영은 통증 없어진 후 가능. 잠잘 때 머리를 약간 높여 주시면 통증 경감에 도움 됩니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 2. GAS 인두편도염 / 바이러스 인두염 ═══════════════ -->
+<div class="rf-cat" id="pat_pharyngitis"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">② 급성 인두편도염 (GAS vs 바이러스)</h3>
+
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 연쇄구균성 편도염 (A군 β용혈성)</span><span class="kcd-pill">J03.0</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 GAS 의심 — McIsaac/Centor (소아 수정)</div><div class="patbox-body">
+      ① 발열 ≥38°C ② 편도 삼출/종창 ③ 압통성 전경부 림프절 ④ 기침 없음 ⑤ 3~14세 — 각 1점 / <strong>3점 이상이면 RADT(rapid antigen) 권장, 2점 이하는 RADT 없이 항생제 비권장</strong><br>
+      • RADT 음성이어도 임상의심 강하면 throat culture 추천 (가능한 경우)<br>
+      • 3세 미만은 GAS 인두염이 드물어 검사·항생제 모두 비권장 (예외: 가족 내 GAS 환자)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방 (50 mg/kg/d, 일반용량 — AOM의 절반)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">에이목스시럽</td><td>amoxicillin</td><td class="d">50 mg/kg/d ÷ bid 또는 qd × <strong>10일</strong> (PSAGN/RF 예방 위해 반드시 10일)</td></tr>
+      <tr><td class="dn">보령듀리세프건조시럽</td><td>cefadroxil 50 mg/mL</td><td class="d">30 mg/kg/d ÷ bid × 10일 (페니실린 경증 알러지)</td></tr>
+      <tr><td class="dn">아지탑스건조시럽</td><td>azithromycin 40 mg/mL</td><td class="d">12 mg/kg qd × 5일 (페니실린 type I 알러지) — <em>내성 증가로 1차 X</em></td></tr>
+      <tr><td class="dn">맥시부펜 / 세토펜</td><td>dexibuprofen / acetaminophen</td><td class="d">통증·발열 prn (NSAID 우선 — 인후통에 더 효과)</td></tr>
+    </tbody></table></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>편도염에 amoxicillin은 반드시 10일</strong> 처방 — 5~7일 처방 시 PSAGN/류마티스열 예방 효과 X. 단축 처방은 임상의 판단으로 차팅<br>
+      • 1차 항생제(amoxicillin) 없이 초진부터 마크롤라이드/3세대 세파 처방 시 삭감 가능<br>
+      • RADT 검사료(나-583) 청구 시 — 검사 결과 양성/음성 차팅 필수
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준<br>
+      • 편도 주위 농양(peritonsillar abscess) — 일측성 편도 비대·trismus·uvula deviation·hot potato voice → <strong>응급 ENT</strong><br>
+      • 호흡곤란·천명·침흘림 → <strong>응급실 (epiglottitis 감별)</strong> · <em>구강 검진 자제</em><br>
+      • 4주 이상 지속 인두통·발열 + 비전형 림프절 → IM(전염성 단핵구증) workup
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"세균성(연쇄구균) 편도염입니다. 항생제는 합병증(신장염·류마티스열) 예방을 위해 <strong>반드시 10일 다 드셔야 합니다</strong>. 24시간 항생제 복용 후 등원·등교 가능합니다. 인후통이 심하면 진통제 같이 드시고, 미지근한 음료·아이스크림 같은 부드럽고 차가운 음식이 도움 됩니다. 가족 내 같은 증상자가 있으면 같이 진료받으세요."</em>
+    </div></div>
+  </div>
+</div>
+
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">바이러스성 인두염 / 일반 감기 (URI)</span><span class="kcd-pill">J02.9</span><span class="kcd-pill kcd-pill-alt">J06.9</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">💊 대증 처방 (항생제 X)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">코벤시럽</td><td>chlorpheniramine + phenylephrine</td><td class="d">1 mL/kg ÷ tid (1세 이상, 콧물·코막힘) <span style="color:#dc2626">2세 미만 슈도에페드린·항히스타민 1세대 신중</span></td></tr>
+      <tr><td class="dn">아나레보시럽</td><td>levodropropizine 6 mg/mL</td><td class="d">10~19 kg 3 mL tid / 20~29 kg 5 mL tid (마른기침 / 2세 미만 신중)</td></tr>
+      <tr><td class="dn">크란톨시럽 (또는 암브로콜)</td><td>ambroxol + clenbuterol</td><td class="d">8~12 kg 5 mL bid / 12~16 kg 7.5 mL bid (가래·천명) <span style="color:#dc2626">8개월 미만 신중</span></td></tr>
+      <tr><td class="dn">시네츄라 / 움카민</td><td>ivy leaf / pelargonium</td><td class="d">2~6세 5 mL tid / 7~14세 10 mL tid (가래·기침)</td></tr>
+      <tr><td class="dn">렙티진액</td><td>levocetirizine 0.5 mg/mL</td><td class="d">2~6세 2.5 mL bid / 6세 이상 10 mL qd <span style="color:#dc2626">1세 미만 금기</span></td></tr>
+      <tr><td class="dn">맥시부펜 / 세토펜</td><td>해열제</td><td class="d">발열 시 교차복용</td></tr>
+    </tbody></table></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>바이러스성 URI에 항생제 처방은 1차 평가지표(항생제 처방률)에 직접 반영</strong> — 의원 등급 영향. 무항생제 처방이 원칙<br>
+      • 알레그라·리노에바스텔 등 → <strong>감기 관련 비염은 3일만 급여 인정</strong>. 4일 이상 처방 시 알레르기비염(J30.x) 상병 추가 필요<br>
+      • 슈프락스/바난 등 3세대 세파 — 단순 URI 상병에 처방 시 1차 의원 삭감 빈발<br>
+      • 항생제 처방 시 항생제 처방 사유(중이염·축농증 등 화농성 합병증) 차팅 필수
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준<br>
+      • 5일 이상 발열 지속 → 혈액검사 + 흉부 X-ray, 가와사키·세균중복감염·EBV 감별<br>
+      • 빈호흡(2개월 미만 ≥60, 2~12개월 ≥50, 1~5세 ≥40) / 늑간함몰 → <strong>응급실 (폐렴·세기관지염)</strong><br>
+      • 3개월 미만 발열은 무조건 ER (Red Flag 패널 참조)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"감기(바이러스 감염)입니다. 항생제는 도움이 되지 않고 오히려 부작용 위험이 있어 처방하지 않습니다. 충분한 수분 섭취·휴식이 가장 중요합니다. 보통 7~10일 안에 좋아집니다. 다음 증상이 있으면 다시 오세요: ① 5일 넘는 발열 ② 호흡 빠르거나 가슴 함몰 ③ 잘 못 먹고 처짐 ④ 귀 통증·진물 ⑤ 점점 더 나빠지는 기침."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 3. Croup ═══════════════ -->
+<div class="rf-cat" id="pat_croup"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">③ 크룹 (Acute laryngotracheobronchitis)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 폐쇄성 후두염 / 크룹</span><span class="kcd-pill">J05.0</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단 — Westley score</div><div class="patbox-body">
+      6개월~3세 호발 / 야간 악화 / 컹컹대는(barking) 기침 + 쉰 목소리 + 흡기성 천명(stridor)<br>
+      <strong>경증(0~2)</strong>: stridor·함몰 없음 — 외래 가능<br>
+      <strong>중등도(3~5)</strong>: 안정 시 stridor + 경도 함몰 — 의원/외래 처치<br>
+      <strong>중증(6~11)</strong>: 안정 시 stridor + 심한 함몰 + 청색증/의식변화 → <strong>즉시 ER</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">덱사메타손정 0.5 mg<br>(또는 소론도정 5 mg)</td><td>dexamethasone (또는 prednisolone)</td><td class="d"><strong>0.6 mg/kg PO 단회</strong> (max 16 mg) — 경증·중등도 모두 1st line<br>대체: prednisolone 1~2 mg/kg PO × 1~3일</td></tr>
+      <tr><td class="dn">피알디현탁시럽 0.1%</td><td>prednisolone 1 mg/mL</td><td class="d">10 kg 3 mL tid / 15 kg 5 mL tid / 20 kg 7 mL tid (영아·삼킴 어려운 경우)</td></tr>
+      <tr><td class="dn">에피네프린 nebulizer (의원 비치 시)</td><td>L-epinephrine 1:1000</td><td class="d">0.5 mL/kg (max 5 mL) NS와 mix nebulize — 중등도 이상 즉효</td></tr>
+      <tr><td class="dn">세토펜 / 맥시부펜</td><td>해열제</td><td class="d">발열 시</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 항생제 X (바이러스성). 가습기·시원한 공기 노출이 보조적 도움</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • 크룹 상병(J05.0)에 dexamethasone 단회 PO 처방은 표준 — 인정 잘 됨<br>
+      • <strong>스테로이드 처방 시 5~7일치 처방하면 삭감 위험</strong> — 1~3일 단기 처방 원칙. 차팅에 "single-dose Westley score X" 명시<br>
+      • 항생제 동시 처방은 적절한 사유(중복감염 의심) 없으면 부적절
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — <strong>응급실</strong><br>
+      • 안정 시 stridor + 함몰 (Westley ≥6)<br>
+      • 청색증 / SpO₂ &lt;94% / 의식 변화<br>
+      • Epi nebulizer 후 4시간 이내 재악화<br>
+      • <strong>과도한 침흘림·high fever·toxic appearance·자세 고정(tripod) → 후두개염(epiglottitis) 의심, 구강검진 X·즉시 ENT/ER</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"크룹(컹컹기침)은 후두 부위 바이러스 감염입니다. 새벽에 심해지는 게 특징이고 보통 3~4일 안에 좋아집니다. 오늘 먹은 약(스테로이드)은 12시간 안에 효과가 나타납니다. 다음 증상 있으면 즉시 응급실로 가세요: ① 가만히 있을 때도 들숨 시 쌕쌕 소리 ② 가슴이 쑥 들어감 ③ 입술·손발 파래짐 ④ 침을 못 삼킴 ⑤ 평소보다 처지고 잘 못 깨움. 시원한 밤공기·가습기가 도움 됩니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 4. Bronchiolitis ═══════════════ -->
+<div class="rf-cat" id="pat_bronchiolitis"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">④ 모세기관지염 (Bronchiolitis)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 세기관지염 (RSV가 가장 흔함)</span><span class="kcd-pill">J21.0 (RSV)</span><span class="kcd-pill kcd-pill-alt">J21.9 (상세불명)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단</div><div class="patbox-body">
+      2세 미만 (특히 6개월 미만) / 코감기 → 2~3일 후 기침·천명·빈호흡<br>
+      청진: 양측 미만성 wheezing + crackle<br>
+      <strong>1차에서 항생제·기관지확장제·스테로이드 모두 routine 사용 비권장 (AAP 2014)</strong> — 대증치료 + 적절한 모니터링이 핵심
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 처방 (대증)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">세토펜현탁액</td><td>acetaminophen</td><td class="d">10~15 mg/kg q4~6h prn (발열)</td></tr>
+      <tr><td class="dn">생리식염수 비강 점적 + 흡인</td><td>NS nasal drop</td><td class="d">수유·수면 전 — 가장 효과적인 처치 (보호자 교육)</td></tr>
+      <tr><td class="dn">크란톨/암브로콜시럽 (선택적)</td><td>ambroxol+clenbuterol</td><td class="d">천명 동반 시 시도 가능. 효과 없으면 중단</td></tr>
+      <tr><td class="dn">호쿠날린 패치</td><td>tulobuterol</td><td class="d">6개월~3세 0.5 mg / 3~9세 1 mg qd (보조적 — 효과 제한적)</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 살부타몰 nebulizer는 1회 trial 후 호전 시에만 지속 — routine X. 천식 가족력 있고 wheezing 반복 시 검토</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>모세기관지염에 항생제 routine 처방은 부적절 — 삭감/지표 영향</strong>. 중복 세균감염 의심 시 차팅 필수<br>
+      • Salbutamol nebulizer 반복 처방 시 호전 여부 차팅<br>
+      • 류코트리엔(싱귤레어/몬테루카스트) — RSV 후 wheezing 예방 목적은 근거 부족, 알레르기비염·천식 동반 시만<br>
+      • 1세 이하 codeine 함유 진해제(코대원 등) <strong>절대 금기</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — <strong>응급실/소아과 입원</strong><br>
+      • 빈호흡(2~12개월 ≥60, 2~12개월 ≥50) / 심한 함몰 / 무호흡 발작<br>
+      • SpO₂ &lt;92% (실내 공기)<br>
+      • 수유량 평소의 50% 이하 / 탈수 징후<br>
+      • <strong>3개월 미만, 미숙아, BPD/CHD 기저질환 — 외래 보지 말고 즉시 입원 의뢰</strong><br>
+      • 무호흡(apnea) 보고 — 무조건 입원
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"세기관지염은 작은 기관지가 좁아지는 바이러스 감염(보통 RSV)입니다. 약으로 직접 치료하는 게 아니라 시간이 약입니다. 보통 처음 3~5일이 가장 심하고 1~2주 안에 좋아집니다. 가장 중요한 것: ① 코를 자주 풀거나 식염수로 코를 씻겨 주세요 ② 조금씩 자주 먹이세요 ③ 다음 증상 있으면 즉시 응급실: 호흡이 너무 빨라 말을 못 함, 가슴이 쑥 들어감, 입술이 파래짐, 평소보다 절반도 못 먹음, 처져서 잘 못 깨움."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 5. AGE 급성 위장관염 ═══════════════ -->
+<div class="rf-cat" id="pat_age"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">⑤ 급성 위장관염 (AGE)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 위장관염 (대부분 바이러스성)</span><span class="kcd-pill">A09 (감염성/비특이성)</span><span class="kcd-pill kcd-pill-alt">A08.4 (바이러스성)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단 — 탈수 평가가 핵심</div><div class="patbox-body">
+      <strong>경증(&lt;5%)</strong>: 활력 정상 + 점막 약간 건조<br>
+      <strong>중등도(5~10%)</strong>: 처짐·소변 감소·CRT 2~3초·점막 마름<br>
+      <strong>중증(&gt;10%)</strong>: 무기력·손발 차가움·CRT &gt;3초·소변 거의 없음·맥박 약함 → <strong>즉시 ER (IV)</strong><br>
+      Stool exam 필요 시: 점혈변·고열·6일 이상 지속·면역저하·해외력
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">ORS 발란스라이트에프액</td><td>oral rehydration solution</td><td class="d">경증·중등도 첫 4h: 50~100 mL/kg, 이후 손실분만큼 보충</td></tr>
+      <tr><td class="dn">온세란정 4 mg / 8 mg</td><td>ondansetron ODT</td><td class="d">8~15 kg <strong>2 mg</strong> / 16~30 kg <strong>4 mg</strong> / 31 kg+ 8 mg PO 단회 — 구토 시 1회 (반복 X)</td></tr>
+      <tr><td class="dn">하이드라섹산 10/30 mg</td><td>racecadotril</td><td class="d">3개월 이상 1.5 mg/kg tid (분비성 설사 억제). <strong>정상변 2회 시 중단</strong></td></tr>
+      <tr><td class="dn">람노스산 / 비오플250산</td><td>L. rhamnosus / S. boulardii</td><td class="d">2세 이상 1 g tid / 1세 미만 0.5 g tid (보조적)</td></tr>
+      <tr><td class="dn">포리부틴드라이시럽</td><td>trimebutine</td><td class="d">kg/3 mL ÷ tid (복통)</td></tr>
+      <tr><td class="dn">후로스판액</td><td>phloroglucinol 8 mg/mL</td><td class="d">소아 10 mL bid (복통·경련)</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 <strong>로페라미드(로프민)·스멕타(포타겔)는 2세 미만 금기</strong>. 바이러스성에 항생제 X. 조기 식이재개(BRAT 식단 강요 X) 권고</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>온단세트론(온세란) — A09 상병에 1회 단회 처방만 인정</strong>. 반복 처방 시 삭감<br>
+      • 항생제 처방 — 점혈변·고열·세균감염 의심 차팅 없이 routine 처방 시 삭감 위험. 슈프락스(cefixime) 8 mg/kg ÷ bid가 1차 (확진 시)<br>
+      • 정장제(람노스/비오플) — 만 6세 이상 환자 본인부담<br>
+      • 라세카도트릴(하이드라섹) — 3개월 미만 사용 금기, 차팅 시 연령 확인
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — <strong>응급실</strong><br>
+      • 중증 탈수(&gt;10%) — IV resuscitation 필요<br>
+      • 지속 구토로 ORS 실패 — IV 수액<br>
+      • 점혈변 + 고열 + toxic — 세균성 의심 (Salmonella/Shigella/Campylobacter)<br>
+      • 3개월 미만 발열 동반 → <strong>무조건 ER</strong> (sepsis workup)<br>
+      • 담즙성 구토(녹색) — 장중첩·장폐쇄 의심, 즉시 응급
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"바이러스성 장염입니다. 약보다 <strong>수분·전해질 보충(ORS)</strong>이 가장 중요합니다. ① 한 번에 많이 먹이지 마시고 5~10분마다 한 숟가락씩 자주 주세요 ② 한 번 토하면 30분 쉬었다가 다시 시작 ③ 식사는 평소대로(미음·죽 강요 X), 유제품·기름진 음식은 잠시 피하세요 ④ 평소보다 절반 이하로 못 먹거나, 6시간 넘게 소변이 없거나, 처져서 잘 못 깨거나, 변에 피가 섞이면 응급실로 가세요. 보통 5~7일 안에 좋아집니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 6. HFMD / Herpangina ═══════════════ -->
+<div class="rf-cat" id="pat_hfmd"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">⑥ 수족구병 / 헤르팡지나</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">수족구병 (Coxsackie A16, EV71)</span><span class="kcd-pill">B08.4</span><span class="kcd-pill kcd-pill-alt">B08.5 (Herpangina)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단</div><div class="patbox-body">
+      6세 미만 호발 / 봄~가을 / 구내 수포·궤양 + 손·발·엉덩이 발진<br>
+      <strong>EV71</strong>은 더 위험: 신경계 합병증(뇌수막염·뇌간 뇌염·심근염) 가능<br>
+      Herpangina = 인두·연구개 후방의 수포·궤양만 있고 사지 발진 없음 (Coxsackie A)<br>
+      • 등원 제한: 발열·수포가 있는 동안 (보통 7~10일)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 처방 (대증)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">세토펜 / 맥시부펜</td><td>해열제·진통제</td><td class="d">통증·발열 (구내통으로 식이 거부 시 적극 사용)</td></tr>
+      <tr><td class="dn">탄툼베르데네뷸라이저</td><td>benzydamine 비급여</td><td class="d">1일 4회까지 분무 (인후통)</td></tr>
+      <tr><td class="dn">2% Argyrol</td><td>silver vitellinate</td><td class="d">구내 발진 도포 1일 수회 (보조적)</td></tr>
+      <tr><td class="dn">바이버시럽 (특정 케이스만)</td><td>acyclovir</td><td class="d"><strong>HFMD에는 효과 없음</strong>. HSV gingivostomatitis 감별 시만 — 80 mg/kg/d ÷ qid × 5~7일</td></tr>
+      <tr><td class="dn">차가운 음료·아이스크림</td><td>—</td><td class="d">탈수 예방 핵심 (구강 통증으로 식이 감소)</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 항생제·항바이러스제 모두 X (특수상황 제외). 탈수 모니터링이 핵심.</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>HFMD/herpangina에 acyclovir 처방은 부적절</strong> — HSV와 명확히 감별 차팅 없으면 삭감<br>
+      • 항생제 처방 — 세균 중복감염 차팅 없으면 부적절<br>
+      • 등원 가능 진단서 발급 시 — "발열 24시간 이상 없음 + 수포 가피화" 확인 후 발급<br>
+      • 보건소 신고 의무 X (지정감염병 아님), 단 집단발생 시 인지·신고
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — <strong>응급실 (EV71 의심)</strong><br>
+      • 고열 3일 이상 + 의식 변화·졸림·기면<br>
+      • 근간대성 경련(myoclonic jerk) / 운동실조 / 무력감<br>
+      • 빠른 호흡·쇼크 징후 (심근염·폐부종)<br>
+      • 심한 탈수로 ORS 실패 — IV 수액<br>
+      • <strong>EV71 신경계 합병증은 24~48h 안에 급격히 악화 가능 — 망설이지 말고 ER</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"수족구병은 바이러스 감염으로 약으로 빨리 낫게 할 수 없고 7~10일 자연경과를 거칩니다. <strong>가장 큰 위험은 입이 아파서 못 먹어서 생기는 탈수</strong>입니다. ① 차가운 음료·아이스크림·시원한 음식 적극 활용 ② 산성 음료(주스·이온음료)는 통증을 더 악화시킬 수 있음 ③ 진통제 시간 맞춰 드세요 ④ 다음 증상 있으면 즉시 응급실: 의식 처짐, 깜짝깜짝 놀라며 자다가 깸, 호흡 빨라짐, 6시간 이상 소변 없음. 등원 제한: 열·수포 모두 가라앉을 때까지(보통 7~10일)."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 7. Constipation ═══════════════ -->
+<div class="rf-cat" id="pat_constipation"><h3 class=" rf-cat-title" style="color:#14532d;border-color:#86efac">⑦ 기능성 변비 (Functional Constipation)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">기능성 변비 (Rome IV)</span><span class="kcd-pill">K59.0</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 Rome IV 기준 (4세 이하 — 1개월 이상)</div><div class="patbox-body">
+      2개 이상: ① 주 2회 이하 배변 ② 변실금 1회 이상/주(toilet trained 후) ③ 배변 보유 행동 과거력 ④ 통증성·딱딱한 배변 ⑤ 직장 내 다량 변괴 ⑥ 토끼똥 같은 굵은 변<br>
+      <strong>Red flag (기질적 원인 의심)</strong>: 생후 48시간 이상 태변 지연, 발열, 혈변, 체중감소, 항문 위치 이상, 신경학적 이상, 척추 기형
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방 — 2단계 (disimpaction → 유지)</div><table class="ot-pat"><tbody>
+      <tr><td class="dn"><strong>1단계 — Disimpaction (3~7일)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">폴락스산 4 g/포</td><td>PEG 4000 (1차 권장)</td><td class="d">1~1.5 g/kg/d × 3~7일 (max 100 g/d). 6m~1세 1포, 1~4세 1~2포, 4~8세 2~4포 (50 mL 물에 녹임)</td></tr>
+      <tr><td class="dn">마그밀정</td><td>magnesium hydroxide</td><td class="d">0.05 g/kg/d ÷ bid 또는 2~5세 1~2T qd. 폴락스 대체 가능</td></tr>
+      <tr><td class="dn">관장 (외래 처치)</td><td>glycerin enema</td><td class="d">PEG 실패 시 단회 — routine X</td></tr>
+      <tr><td class="dn"><strong>2단계 — 유지 (최소 2개월~1년)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">폴락스산 4 g/포</td><td>PEG 4000</td><td class="d">0.4~0.8 g/kg/d qd — 변 무름 정도 보면서 조절</td></tr>
+      <tr><td class="dn">듀파락이지 1.34 g/mL</td><td>lactulose</td><td class="d">1차 대체. 0.8~1.5 mL/kg ÷ qd~bid (max 45~60 mL)</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 <strong>1차 의원에서 가장 흔한 실수: 유지 너무 일찍 중단</strong>. 정상 배변 3개월 이상 + 점진적 감량. 행동 교정(시간 정해 변기 앉기·식이섬유)이 핵심</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>폴락스산은 비급여</strong> — 환자 부담 사전 설명 필수. 마그밀·듀파락은 급여<br>
+      • 변비 상병에 주사·관장·glycerin enema 처방 시 — 1차 의원에서 반복 처방 부적절<br>
+      • 항경련제·진통제(부스코판 등) routine 처방 시 삭감 위험<br>
+      • PEG 3개월 이상 장기처방 시 차팅 명확화 (Rome IV 기준 + 행동치료 병행)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — 소아소화기내과<br>
+      • Red flag (위 진단 항목) 있을 때 — Hirschsprung·anorectal malformation·hypothyroidism·cow milk allergy 감별<br>
+      • 3개월 이상 적극 치료에도 호전 X<br>
+      • 영아(1세 미만) 변비 — 기질적 원인 빈도 높아 외래 의뢰 권고<br>
+      • 변실금(encopresis) 동반 — 행동/심리 평가 병행
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"변비는 약을 잠깐 먹는다고 끝나지 않습니다. ① 처음 1주일은 막힌 변을 빼는 단계, 다음 2~3개월(혹은 그 이상)은 매일 부드러운 변을 보게 유지하는 단계입니다 ② 약을 너무 빨리 끊으면 다시 변이 굳어 통증이 생기고 아이가 변을 참게 됩니다 ③ 식이섬유(과일·채소·통곡물)·물 충분히 ④ 매일 식후 5~10분 변기에 앉는 습관 ⑤ 토끼똥·항문 갈라짐·통증으로 변 참기 신호 보이면 약 용량 늘려야 합니다. 약은 의존성·중독성 없습니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 8. Atopic Dermatitis ═══════════════ -->
+<div class="rf-cat" id="pat_atopic"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">⑧ 아토피 피부염</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">아토피 피부염</span><span class="kcd-pill">L20.9</span><span class="kcd-pill kcd-pill-alt">L20.8 (기타)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단 (Hanifin-Rajka 단순화)</div><div class="patbox-body">
+      필수: ① 가려움 ② 만성/재발 ③ 부위별 전형적 분포 (영아: 얼굴·신측, 소아: 굴측, 청소년: 굴측·손·얼굴)<br>
+      흔한 동반: 가족력, 천식·비염, 건조피부, IgE 상승<br>
+      • 중증도 — SCORAD/EASI 가능하나 1차에선 면적·수면 영향·삼출 정도로 판단
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방 — 단계별</div><table class="ot-pat"><tbody>
+      <tr><td class="dn"><strong>1단계 — 보습 (모든 단계 기본)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">아토팜·세타필·세라브 등</td><td>ceramide / petrolatum</td><td class="d">1일 2~3회 이상, 목욕 직후 3분 이내 적용 (200~250 g/주 적정)</td></tr>
+      <tr><td class="dn"><strong>2단계 — 국소 스테로이드 (홍반·소양)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">마이케어로션 1% (락티케어)</td><td>hydrocortisone 7등급</td><td class="d">얼굴·접힘부·영아 — bid × 5~7일</td></tr>
+      <tr><td class="dn">데스오웬로션 0.05%</td><td>desonide 6등급</td><td class="d">얼굴·접힘부·영아 (약한 강도) — bid × 5~7일</td></tr>
+      <tr><td class="dn">삼아리도멕스로션/크림</td><td>prednicarbate 5~6등급</td><td class="d">몸통·사지 — bid × 7~14일</td></tr>
+      <tr><td class="dn">아드반탄연고/크림</td><td>methylprednisolone aceponate 4등급</td><td class="d">중등도~심한 부위 — qd~bid × 7~14일</td></tr>
+      <tr><td class="dn"><strong>3단계 — 칼시뉴린 억제제 (스테로이드 절감 / 얼굴·접힘부 장기관리)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">엘리델크림 1%</td><td>pimecrolimus</td><td class="d"><strong>2세 이상</strong> · bid · 1차 치료 무반응 시 2nd line 차팅</td></tr>
+      <tr><td class="dn">프로토픽연고 0.03%</td><td>tacrolimus</td><td class="d"><strong>2세 이상</strong> · bid · 0.1%는 16세 이상</td></tr>
+      <tr><td class="dn"><strong>4단계 — 가려움·이차감염</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">렙티진액·지르텍·알레그라</td><td>2세대 항히스타민</td><td class="d">소양 시 (sedation 적은 2세대 우선)</td></tr>
+      <tr><td class="dn">에스로반연고</td><td>mupirocin</td><td class="d">국소 이차감염(농가진성) — 1일 2~3회 × 5~10일</td></tr>
+    </tbody></table></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>엘리델·프로토픽 — 1차 치료(국소스테로이드)에 효과 없을 때 2차 치료제로 처방한다는 차팅 필수</strong>. 1차로 처방 시 삭감<br>
+      • 2세 미만 칼시뉴린 억제제 금기 (전신흡수)<br>
+      • 강력한 스테로이드(베타메타손·클로베타솔 등) 얼굴·영아 사용 시 삭감 + 의학적 위험<br>
+      • <strong>국소스테로이드+항진균 복합제(트라보코트·실크론지)는 비급여</strong>. 명확한 진균 동반 시만<br>
+      • 보습제는 비급여 (일부 의료기기 등록 제품 제외) — 환자 사전 설명
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — 피부과 / 소아알레르기<br>
+      • 중등도 이상의 4단계 치료에도 무반응<br>
+      • 광범위 부위 / 얼굴 중심 / 수면 심각 영향<br>
+      • 반복적 이차세균감염 (특히 MRSA 의심)<br>
+      • 식품·환경 알레르기 의심 (특정 음식 섭취 후 악화) — 알레르기내과<br>
+      • 단순포진 감염 의심(eczema herpeticum: 통증·발열·다발성 수포) → <strong>응급실</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"아토피는 피부장벽이 약해서 재발하는 만성 질환입니다. 핵심은 ① <strong>매일 보습</strong>(목욕 후 3분 안에 듬뿍 발라야 효과적, 일주일에 200 g 이상 사용 권장) ② 가려운 부위는 처방받은 스테로이드를 5~7일 정도 충분히, 호전되면 보습제만 ③ 자주 재발하는 부위는 일주일에 2회씩 약하게 발라 예방(proactive therapy)도 가능 ④ 자극(거친 옷·향료비누·뜨거운 목욕) 피하기 ⑤ 대부분 어른이 되면서 호전됩니다. 스테로이드는 처방받은 부위에 처방받은 기간만 쓰면 안전합니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 9. Urticaria ═══════════════ -->
+<div class="rf-cat" id="pat_urticaria"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">⑨ 두드러기 (Urticaria)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">두드러기 (급성/만성)</span><span class="kcd-pill">L50.9</span><span class="kcd-pill kcd-pill-alt">L50.0 (알레르기성)</span><span class="kcd-pill kcd-pill-alt">L50.8 (만성)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 진단</div><div class="patbox-body">
+      이동성 팽진(wheal) + 가려움. 24시간 안에 사라지고 다른 부위로 이동<br>
+      <strong>급성</strong>(&lt;6주): 감염·약물·식품·곤충물림이 흔함 / <strong>만성</strong>(≥6주, 거의 매일): 자가면역·특발성 다수<br>
+      <strong>혈관부종(angioedema)</strong> 동반 — 입술·눈꺼풀·손발 부종 — 호흡곤란 동반 시 응급<br>
+      <strong>아나필락시스 감별</strong>: 두드러기 + ≥1개(호흡곤란·저혈압·실신·구토·설사) → <strong>즉시 epi IM</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 표준 처방</div><table class="ot-pat"><tbody>
+      <tr><td class="dn"><strong>1차 — 비진정 2세대 항히스타민 (정량 권장)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">렙티진액 0.5 mg/mL</td><td>levocetirizine</td><td class="d">1~2세 2.5 mL qd / 2~6세 2.5 mL bid / 6세+ 10 mL qd <span style="color:#dc2626">1세 미만 금기</span></td></tr>
+      <tr><td class="dn">알레그라정 30 mg / 180 mg</td><td>fexofenadine</td><td class="d">6~11세 30 mg bid / 12세+ 180 mg qd</td></tr>
+      <tr><td class="dn">씨티리진정 / 지르텍</td><td>cetirizine</td><td class="d">2~6세 2.5 mg qd / 6세+ 5~10 mg qd</td></tr>
+      <tr><td class="dn"><strong>2차 — 1차 무반응 시 (가이드라인: 정량의 4배까지 증량 가능)</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">동일 약물 증량 또는 다른 2세대 추가</td><td>—</td><td class="d">예: levocetirizine bid → qid (off-label, 차팅 필수)</td></tr>
+      <tr><td class="dn"><strong>심한 발진 / 혈관부종 — 단기 스테로이드</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">소론도정 5 mg / 피알디현탁시럽</td><td>prednisolone</td><td class="d">0.5~1 mg/kg/d ÷ qd~bid × 3~5일 (단기)</td></tr>
+      <tr><td class="dn">마이케어로션 / 칼라민로션</td><td>국소 — 보조</td><td class="d">소양 부위 도포</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 1세대(클로르페니라민·페니라민)는 진정·인지영향으로 <strong>2세대 우선</strong>. 가이드라인은 정량 4배까지 증량 권고 (1차 의원 차팅 필수)</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>알레그라·리노에바스텔 — 감기 관련 비염은 3일만 급여</strong>. 두드러기(L50.x) 상병으로 처방 시 일수 제한 X<br>
+      • 만성 두드러기 — 4주 초과 처방 시 만성 상병(L50.8) 적용 차팅<br>
+      • 항히스타민 정량 초과(off-label up to ×4) — 차팅 명확히 (가이드라인 근거)<br>
+      • 단순 두드러기에 항생제 동시 처방 시 삭감 (감염 동반 차팅 없을 시)<br>
+      • <strong>1세 미만에 levocetirizine 처방 시 즉시 삭감 + 부작용 위험</strong>
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — <strong>응급실 / 알레르기내과</strong><br>
+      • <strong>아나필락시스</strong>: 호흡곤란·천명·저혈압·실신·반복구토 → epi 0.01 mg/kg IM 즉시, 119<br>
+      • 후두 부종 — 쉰 목소리·삼킴 곤란·천명 → 즉시 ER<br>
+      • 6주 이상 지속 → 알레르기내과 (만성 자가면역 두드러기 평가)<br>
+      • 약물 의심 — 원인 약물 중단·기록·알러지 카드 발급<br>
+      • 가족 중 음식·약물 알레르기 강한 경우 — epi auto-injector(에피펜) 처방 검토
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"두드러기는 알레르기 반응의 일종으로 발진이 수 시간 안에 다른 부위로 옮겨가는 게 특징입니다. 처방받은 항히스타민제를 <strong>증상이 가라앉아도 며칠 더 꾸준히</strong> 드세요(중간에 끊으면 재발). 다음 증상은 <strong>응급</strong>입니다 — 119 또는 응급실: ① 입술·혀·목 부종 ② 숨쉬기 어려움·쌕쌕거림 ③ 어지럼·실신 ④ 반복 구토·설사. 원인을 못 찾는 경우가 절반 이상입니다(특발성). 6주 넘게 지속되면 추가 검사를 위해 큰병원 의뢰 가능합니다."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 10. Conjunctivitis ═══════════════ -->
+<div class="rf-cat" id="pat_conjunctivitis"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">⑩ 결막염 (Conjunctivitis)</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">급성 결막염 — 세균성 / 바이러스 / 알레르기</span><span class="kcd-pill">H10.0 (점액화농)</span><span class="kcd-pill kcd-pill-alt">H10.1 (알레르기)</span><span class="kcd-pill kcd-pill-alt">B30.x (바이러스)</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">📌 감별</div><div class="patbox-body">
+      <strong>세균성</strong>: 화농성 점성 분비물·아침에 눈꺼풀 붙음·일측 시작 → 양측 / 흔한 균: H. influenzae, S. pneumoniae, S. aureus<br>
+      <strong>바이러스성</strong>: 수양성 분비물·결막부종·이수성 림프절·상기도 동반 / 아데노바이러스 — 매우 전염력 강함<br>
+      <strong>알레르기성</strong>: 양측·심한 가려움·결막부종·계절성·아토피/비염 동반<br>
+      <strong>신생아 결막염</strong>(생후 1개월 이내): 즉시 안과 (임균·클라미디아 감별)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">💊 처방 — 분류별</div><table class="ot-pat"><tbody>
+      <tr><td class="dn"><strong>① 세균성</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">토베란점안액</td><td>tobramycin 0.3%</td><td class="d">4시간마다 1~2 drops × 5~7일</td></tr>
+      <tr><td class="dn">테라마이신안연고</td><td>oxytetracycline + polymyxin B</td><td class="d">1일 2~4회 결막낭 점안 (연고는 영아·잘 때 좋음)</td></tr>
+      <tr><td class="dn"><strong>② 바이러스성</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">인공눈물 (리포직·리프레쉬)</td><td>artificial tears</td><td class="d">수회/일 (대증, 항생제 X)</td></tr>
+      <tr><td class="dn">에디펜점안액 (보조)</td><td>ketotifen</td><td class="d">소양 동반 시</td></tr>
+      <tr><td class="dn"><strong>③ 알레르기성</strong></td><td></td><td></td></tr>
+      <tr><td class="dn">엑솔점안액 0.1%</td><td>olopatadine</td><td class="d">1 drop bid (6~8시간 간격)</td></tr>
+      <tr><td class="dn">엑솔점안액 0.2%</td><td>olopatadine 강도</td><td class="d">1 drop qd</td></tr>
+      <tr><td class="dn">렙티진액 / 알레그라</td><td>경구 항히스타민</td><td class="d">전신 알레르기 동반 시 추가</td></tr>
+    </tbody></table>
+    <div class="patbox-tip">💡 <strong>네오덱스(스테로이드 함유) 점안은 1차 의원에서 처방 자제</strong> — HSV 각막염 위험·녹내장. 안과 진료 후 처방</div></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평 주의<br>
+      • <strong>세균성 결막염 상병에 항생제 점안 7일 초과 처방 시 차팅 필요</strong> (일반적 5~7일이 표준)<br>
+      • 알레르기성·바이러스성에 항생제 routine 처방 시 삭감 위험<br>
+      • 점안 스테로이드(플루메토론·네오덱스)는 안과 진료 권장 — 1차 의원 routine 처방 부적절<br>
+      • 인공눈물(리포직·리프레쉬) — 비급여
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-refer">🚑 Refer 기준 — 안과<br>
+      • <strong>신생아 결막염 (1개월 이내) — 즉시 안과 (임균/클라미디아)</strong><br>
+      • 시력 저하·심한 통증·눈부심·각막 혼탁 — <strong>즉시 안과</strong> (각막염·포도막염)<br>
+      • 한쪽만 심한 발적·외상·이물감 — 각막 미란/이물 가능, 안과<br>
+      • 1~2주 항생제 무반응<br>
+      • 헤르페스 의심(수포·일측·심한 통증·dendrite 패턴) — 즉시 안과<br>
+      • 콘택트렌즈 사용자 결막염 — 안과 (Pseudomonas 각막염 위험)
+    </div></div>
+
+    <div class="patbox-col"><div class="patbox-edu">📢 보호자 안내문<br>
+      <em>"결막염은 종류에 따라 치료가 다릅니다. ① 세균성: 처방받은 안약을 일주일 정도 꾸준히 ② 바이러스성: 약은 보조적이고 시간이 약(7~14일), 매우 전염성 강해서 수건·베개 따로 쓰고 손 자주 씻기, 등원 제한 7~10일 ③ 알레르기성: 안약과 함께 원인 회피(꽃가루·먼지·렌즈) 중요. 다음 증상은 즉시 안과: 시력 저하, 심한 통증, 빛이 너무 부심, 검은자위가 흐려 보임. 신생아 결막염은 무조건 안과부터."</em>
+    </div></div>
+  </div>
+</div></div>
+
+<!-- ═══════════════ 부록 — 발열 교차복용 원칙 ═══════════════ -->
+<div class="rf-cat" id="pat_fever"><h3 class="rf-cat-title" style="color:#14532d;border-color:#86efac">📎 부록 — 해열제 교차복용 / 체중별 빠른 환산</h3>
+<div class="patbox">
+  <div class="patbox-hdr"><span class="patbox-dx">발열 대증 — 진료실에서 자주 쓰는 표</span></div>
+  <div class="patbox-grid">
+    <div class="patbox-col"><div class="patbox-lbl">💊 용량 원칙</div><table class="ot-pat"><tbody>
+      <tr><td class="dn">세토펜현탁액 (32 mg/mL)</td><td>acetaminophen 10~15 mg/kg/dose</td><td class="d"><strong>kg ÷ 2 = mL</strong> · q4~6h · max 5회/일 · 75 mg/kg/일 초과 X</td></tr>
+      <tr><td class="dn">맥시부펜시럽 (12 mg/mL)</td><td>dexibuprofen 5~7 mg/kg/dose</td><td class="d"><strong>kg ÷ 2 = mL</strong> · q4~6h · max 28 mg/kg/일 · <span style="color:#dc2626">6개월 미만 금기</span></td></tr>
+      <tr><td class="dn">교차 타이밍</td><td></td><td class="d">APP 복용 후 <strong>2시간 뒤에도 38°C 이상</strong>이면 → 맥시부펜. 다시 4~6h 후 APP</td></tr>
+      <tr><td class="dn">복합써스펜좌약</td><td>APAP + methionine</td><td class="d">3~12개월 1개 / 1~2세 1~2개 / 3~6세 2개 (경구 거부 시)</td></tr>
+    </tbody></table></div>
+
+    <div class="patbox-col"><div class="patbox-lbl">⚖️ 체중별 빠른 환산 (q6h 1회 분량)</div><table class="ot-pat"><tbody>
+      <tr><th>체중</th><th>세토펜 mL</th><th>맥시부펜 mL</th></tr>
+      <tr><td class="dn">5 kg</td><td>2.5 mL</td><td>2.5 mL (6m+)</td></tr>
+      <tr><td class="dn">7 kg</td><td>3.5 mL</td><td>3.5 mL</td></tr>
+      <tr><td class="dn">10 kg</td><td>5 mL</td><td>5 mL</td></tr>
+      <tr><td class="dn">12 kg</td><td>6 mL</td><td>6 mL</td></tr>
+      <tr><td class="dn">15 kg</td><td>7.5 mL</td><td>7.5 mL</td></tr>
+      <tr><td class="dn">18 kg</td><td>9 mL</td><td>9 mL</td></tr>
+      <tr><td class="dn">20 kg</td><td>10 mL</td><td>10 mL</td></tr>
+      <tr><td class="dn">25 kg</td><td>12.5 mL</td><td>12.5 mL</td></tr>
+      <tr><td class="dn">30 kg</td><td>15 mL</td><td>15 mL</td></tr>
+    </tbody></table></div>
+
+    <div class="patbox-col"><div class="patbox-warn">⚠️ 심평·임상 주의<br>
+      • <strong>3개월 미만 발열은 무조건 ER (Red Flag 패널)</strong> — 해열제 외래 처방 X<br>
+      • 6개월 미만 ibuprofen·dexibuprofen 금기<br>
+      • 코대원(codeine) — <strong>12세 미만 절대 금기</strong> (FDA, 2017)<br>
+      • 1세 미만 슈도에페드린·1세대 항히스타민 신중<br>
+      • 해열제 + 감기약 multi-ingredient 동시처방 시 APAP 중복 주의 (총량 초과 위험)
+    </div></div>
+  </div>
+</div></div>
+
+</div>
+    <div class="panel" id="panel-refer"><div class="rf-intro" style="background:linear-gradient(135deg,#7c2d12,#b91c1c)"><h2>🚑 Refer 가이드 — 누구에게·언제·어떻게</h2><p>1차 진료실에서 망설이지 않고 결정하는 의뢰 컷오프와 의뢰서 템플릿</p></div>
+
+<!-- ═══════════════ A. 즉시 119 / ER ═══════════════ -->
+<div class="rf-cat" id="ref_immediate"><h3 class="rf-cat-title" style="color:#7c2d12;border-color:#fca5a5">🚨 A. 즉시 119 / ER (망설이지 말 것)</h3>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🔴 호흡·순환계</div>
+  <ul class="ref-list">
+    <li>SpO₂ &lt;92% (실내 공기) / 청색증 / 무호흡 발작</li>
+    <li>안정 시 stridor + 함몰 (심한 크룹·후두개염)</li>
+    <li><strong>침흘림 + 자세 고정(tripod) + 고열 + toxic appearance</strong> — 후두개염 의심, 구강검진 X</li>
+    <li>심한 함몰·빈호흡 (2개월 미만 RR≥60, 2~12개월 ≥50)</li>
+    <li>아나필락시스 (호흡곤란·천명·저혈압·실신 + 두드러기)</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🔴 신경계</div>
+  <ul class="ref-list">
+    <li>경련 &gt;5분 또는 반복 / 의식 저하 / 깨워도 안 깸</li>
+    <li>발열 + 경부강직 / 대천문 팽창 (수막염 의심)</li>
+    <li>발열 + 점상출혈·자반(petechiae/purpura) — <strong>수막구균 패혈증 골든타임</strong></li>
+    <li>EV71 의심 — 수족구병 + myoclonic jerk·기면·운동실조</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🔴 영아 (특히 3개월 미만)</div>
+  <ul class="ref-list">
+    <li><strong>0~28일 발열 ≥38°C — 무조건 ER (sepsis workup)</strong></li>
+    <li>29~60일 발열 + 상태 불량 / 수유 거부 — 즉시 ER</li>
+    <li>3개월 미만에서 발열 자체 — 의원에서 항생제 선처방 X, ER 의뢰</li>
+    <li>황달 + 처짐·수유 저하 (영아 sepsis)</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🔴 소화기·외과적 응급</div>
+  <ul class="ref-list">
+    <li>담즙성 구토(녹색) — 장폐쇄·장중첩 의심</li>
+    <li>심한 복통 + 무릎 끌어안기 + 점혈변(currant jelly stool) — 장중첩</li>
+    <li>심한 탈수 (&gt;10%, CRT &gt;3초, 무뇨)</li>
+    <li>혈변 + 고열 + toxic — 세균성 장염 (HUS 위험: Shigella·STEC)</li>
+    <li>고환 통증 (특히 갑작스러운) — 고환 염전, 6시간 골든타임</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🔴 외상·기타</div>
+  <ul class="ref-list">
+    <li>두부 외상 + 의식변화·반복구토·경련·후두부 혈종(영아)</li>
+    <li>심한 화상 (10% BSA 이상) / 전기·화학화상 / 흡입화상</li>
+    <li>소아학대 의심 (병원 도착 전 보호자 분리 X — 신고는 의무)</li>
+    <li>독극물 섭취 — 1339 또는 119 (즉시 후송)</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════ B. 당일 / 24시간 이내 ═══════════════ -->
+<div class="rf-cat" id="ref_today"><h3 class="rf-cat-title" style="color:#7c2d12;border-color:#fca5a5">🟠 B. 당일 또는 24시간 이내 (외래 또는 ER)</h3>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟠 발열·감염</div>
+  <ul class="ref-list">
+    <li>5일 이상 지속 발열 — 가와사키·EBV·세균중복감염 감별</li>
+    <li>61~90일 발열 + 상태 양호 — 검사 후 외래 추적 가능 (Rochester criteria)</li>
+    <li>요로감염 의심 (영아: 발열 + 수유 저하 + 무기력 / 학동기: 빈뇨·배뇨통)</li>
+    <li>심한 인후통 + 일측성 편도 비대·trismus·hot potato voice — peritonsillar abscess</li>
+    <li>3일 이상 항생제 무반응</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟠 호흡기</div>
+  <ul class="ref-list">
+    <li>모세기관지염 — 3개월 미만, 미숙아, BPD/CHD 기저질환 — 외래 보지 말고 입원 의뢰</li>
+    <li>천식 발작 — 살부타몰 nebulizer 후 증상 지속 / SpO₂ &lt;94%</li>
+    <li>이물 흡인 의심 — 갑작스러운 기침·천명음, 결절성 무기폐 X-ray 소견</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟠 탈수·소화기</div>
+  <ul class="ref-list">
+    <li>중등도 탈수(5~10%) — ORS 시도 후 실패 시 IV 필요</li>
+    <li>지속적 구토로 ORS 불가능 — 온단세트론 1회 시도 후 무효 시 ER</li>
+    <li>점혈변 동반 설사 + 고열 — 세균배양 + 세균감염 평가</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════ C. 외래 의뢰 (전문과별) ═══════════════ -->
+<div class="rf-cat" id="ref_outpatient"><h3 class="rf-cat-title" style="color:#7c2d12;border-color:#fca5a5">🟢 C. 외래 의뢰 — 전문과별</h3>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 소아청소년과 (3차 또는 종합병원)</div>
+  <ul class="ref-list">
+    <li>1세 미만 변비 — 기질적 원인 빈도 높음 (Hirschsprung·갑상선기능저하·CMA)</li>
+    <li>3개월 적극 치료에도 호전 없는 변비·만성 위장관 증상</li>
+    <li>성장 부진 (FTT) — 성장곡선 2개 이상 percentile 하락</li>
+    <li>야뇨증 — 7세 이상 + 1차 치료(행동·desmopressin) 무반응</li>
+    <li>경련 — 첫 발작이 단순열성경련 외 (복합·국소·15분 이상) — 소아신경과</li>
+    <li>발달 지연 의심 — K-ASQ·M-CHAT 양성</li>
+    <li>반복적 폐렴 / 만성 기침 6주 이상 — 면역검사·결핵·천식 평가</li>
+    <li>의심 가와사키 / JIA / SLE — 류마티스</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 이비인후과</div>
+  <ul class="ref-list">
+    <li>AOM 48~72h 항생제 무반응 — 배농·고막절개</li>
+    <li>3개월 이상 만성 삼출성 중이염 — 튜브 삽입 평가</li>
+    <li>편도·아데노이드 비대 — 폐쇄성 수면무호흡 / 반복 편도염 (PFAPA·연 7회 이상)</li>
+    <li>반복 비출혈 / 만성 부비동염 / 음성 이상</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 안과</div>
+  <ul class="ref-list">
+    <li>신생아 결막염 (생후 1개월 이내) — 즉시</li>
+    <li>1주 이상 항생제 점안 무반응 결막염</li>
+    <li>각막염·외상·이물 의심 — 시력 저하·심한 통증·눈부심</li>
+    <li>사시 의심 — 6개월 이후 지속</li>
+    <li>약시 의심 (시력검사 가능 연령부터) — 만 4세 정기검진</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 피부과 / 알레르기</div>
+  <ul class="ref-list">
+    <li>중등도 이상 아토피 — 4단계 치료 무반응</li>
+    <li>광범위/얼굴 중심 아토피 — 수면 영향</li>
+    <li>의심 식품·환경 알레르기 — IgE·SPT 필요</li>
+    <li>만성 두드러기 6주 이상 — 자가면역·물리적 두드러기 평가</li>
+    <li>의심 eczema herpeticum — 응급실 (단순포진 + 아토피)</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 정형외과</div>
+  <ul class="ref-list">
+    <li>발열 + 사지통증·보행거부 — 화농성 관절염·골수염 의심 → ER</li>
+    <li>외상성 통증·관절가동 제한·점진 악화 — X-ray 후 의뢰</li>
+    <li>척추측만증 의심 / 발달성 고관절 이형성 / 평발·내반슬·외반슬 심한 경우</li>
+    <li>야간통증 + 체중감소 + 림프절 — 악성 종양 감별 → 소아혈액종양</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">🟢 소아정신과 / 발달</div>
+  <ul class="ref-list">
+    <li>자폐 스펙트럼 의심 (M-CHAT 양성, 18~24개월)</li>
+    <li>ADHD 의심 — 학교·가정 모두에서 6개월 이상 부주의·과잉행동</li>
+    <li>야뇨·변실금 동반 행동/심리 문제</li>
+    <li>학교 거부·심한 분리불안</li>
+    <li>식이장애 의심 — 청소년 체중감소·식이행동 변화</li>
+  </ul>
+</div>
+</div>
+
+<!-- ═══════════════ D. 의뢰서 템플릿 ═══════════════ -->
+<div class="rf-cat" id="ref_template"><h3 class="rf-cat-title" style="color:#7c2d12;border-color:#fca5a5">📝 D. 의뢰서 템플릿 (복사해서 사용)</h3>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">📝 응급 의뢰 (ER) — 표준 양식</div>
+<div class="ref-template" id="tmpl_er">수신: _________ 응급의료센터 귀하
+환자: 만 ___세 ___개월 ___kg / [성별]
+의뢰 사유: _________________________________
+
+[현병력]
+- 발생 시점: ___ 일 / 시간 전
+- 주요 증상: _________________________________
+- 발열: ___°C (___시간 지속) / 활력: HR ___, RR ___, SpO₂ ___%
+- 수유·식이: 평소의 ___ %
+- 소변량: _________________________________
+
+[과거력·예방접종]
+- 기저질환: ____ / 약물·알러지: ____ / 예방접종: 정상스케줄 [O/X]
+
+[1차 의원 시행 처치]
+- _________________________________
+
+[의뢰 목적]
+□ Sepsis workup □ 입원 평가 □ 영상검사 □ 외과적 처치 □ 기타: ____
+
+[보호자 연락]
+- 이름·관계: _____ / 연락처: _____
+
+발신: _________ 의원  ___과 전문의 ___ (면허 ___)
+연락: _________ / 작성일: ____년 __월 __일</div>
+  <button class="ref-copy-btn" onclick="copyTmpl('tmpl_er')">📋 복사</button>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">📝 외래 의뢰 — 전문과 진료의뢰서 (요양급여의뢰서)</div>
+<div class="ref-template" id="tmpl_op">수신: _________ 병원 ___과 귀하
+
+환자: 성명 ____ / 만 ___세 / ____kg
+주민번호: ______ / 성별: ___
+
+[의뢰 진단명 (KCD)]
+- ____ (____)
+- ____ (____)
+
+[현병력 요약]
+_________________________________
+_________________________________
+
+[1차 의원 시행 검사·치료]
+- 검사: ____
+- 처방: ____
+- 경과: ____
+
+[의뢰 목적]
+□ 정밀검사 □ 전문 치료 □ 입원·시술 □ 추적관찰
+구체적 사유: _________________________________
+
+[심평 참고]
+- 본 의뢰는 1차 의료기관에서 충분한 평가 후 _____ 사유로 상급 의료기관 의뢰가 필요하다고 판단됨
+
+발신: _________ 의원  ___과 전문의 ____
+의료기관 기호: _____ / 연락: _____
+작성일: ____년 __월 __일
+
+[첨부]
+□ 검사결과지 □ 영상자료 □ 처방기록</div>
+  <button class="ref-copy-btn" onclick="copyTmpl('tmpl_op')">📋 복사</button>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">📝 단축 SBAR — 전화 인계 (응급 시)</div>
+<div class="ref-template" id="tmpl_sbar">[S] 만 ___세 / ___kg / 주소(C/C): _____
+[B] 발생 ___시간 전부터 _____ / 기저질환·약물: _____
+[A] V/S: T___ HR___ RR___ SpO₂___ / 의식: _____
+    소견: _____ / 1차 의원 처치: _____
+[R] _____ 사유로 응급 진료·입원 의뢰 부탁드립니다.
+    EMS 후송 ___분 후 도착 예정.</div>
+  <button class="ref-copy-btn" onclick="copyTmpl('tmpl_sbar')">📋 복사</button>
+</div>
+</div>
+
+<!-- ═══════════════ E. 심평·법규 의뢰 팁 ═══════════════ -->
+<div class="rf-cat" id="ref_hira"><h3 class="rf-cat-title" style="color:#7c2d12;border-color:#fca5a5">⚖️ E. 심평·법규 의뢰 팁</h3>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">⚖️ 의뢰서 작성 시 챙길 것</div>
+  <ul class="ref-list">
+    <li><strong>의뢰 사유 차팅 명확화</strong> — "1차 의원 평가 후 ___ 한계로 의뢰" 형태로 객관 사유 기재</li>
+    <li>전원 사유 코드 적절히 사용 (요양기관 간 진료의뢰)</li>
+    <li>1차 시행 검사·처방 결과 첨부 — 중복 검사 시 삭감 사유</li>
+    <li>회신 받은 후에는 차트에 회신 내용 부착 — 추적 진료 근거</li>
+    <li>예방접종 이상반응 — VAERS·예방접종 도우미 신고 의무</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">⚖️ 신고 의무 (소아 진료 흔한 항목)</div>
+  <ul class="ref-list">
+    <li><strong>법정감염병</strong>: 수두(B01)·홍역·풍진·유행성이하선염·백일해·결핵 — 24시간 이내 보건소 신고 (질병관리청 통합신고)</li>
+    <li><strong>아동학대 의심</strong>: 즉시 112 또는 1577-1391 (의무 신고자, 미신고 과태료)</li>
+    <li><strong>예방접종 이상반응</strong>: 사이트 등록 (예방접종 도우미)</li>
+    <li><strong>출생·사망 확인서</strong>: 의원 발급 가능 범위 확인 후 작성</li>
+  </ul>
+</div>
+
+<div class="ref-card">
+  <div class="ref-card-hdr">⚖️ 흔한 삭감 패턴 — 의뢰로 회피</div>
+  <ul class="ref-list">
+    <li>1차에서 무리한 검사·처방을 한 후 무효한 결과로 의뢰 — <strong>적절한 1차 평가 후 즉시 의뢰가 더 적절</strong></li>
+    <li>3개월 미만 발열 — 1차에서 항생제 선처방 X, 즉시 ER 의뢰가 정답</li>
+    <li>반복 wheezing — 살부타몰 nebulizer 반복 처방보다 소아호흡기·알레르기 외래 의뢰</li>
+    <li>만성 변비 PEG 6개월 이상 — 의뢰 검토 + 차팅 보강</li>
+    <li>아토피 강력 스테로이드 장기 처방 — 피부과 의뢰가 보호적</li>
+  </ul>
+</div>
+</div>
+
+</div>
     <div class="panel" id="panel-vacc"><div class="rf-intro" style="background:linear-gradient(135deg,#4a1942,#7b2d8b)"><h2>💉 소아 예방접종 일정</h2><p>국가필수예방접종 및 기타 권장 접종 일정 (대한소아과학회 기준)</p></div><div class="vacc-grid"><div class="vacc-card">
   <div class="vacc-header" style="border-left:4px solid #1e40af">
     <div class="vacc-name">B형 간염 (HepB)</div>
@@ -2094,14 +2919,14 @@ body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:var
   </div>
 </div>
 <script>
-const TITLES={'exam':'🔬 검사 오더','rx':'💊 처방 오더','rf':'🚨 Red Flag','drug':'💊 소아약 DB','pat':'📋 처방 패턴','vacc':'💉 예방접종','edu':'📢 환자 안내'};
+const TITLES={'exam':'🔬 검사 오더','rx':'💊 처방 오더','rf':'🚨 Red Flag','drug':'💊 소아약 DB','pat':'📋 처방 패턴 Top 10','refer':'🚑 Refer 가이드','vacc':'💉 예방접종','edu':'📢 환자 안내'};
 function activatePanel(name){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   const p=document.getElementById('panel-'+name);
   if(p) p.classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>{
-    const map={'exam':'검사','rx':'처방','rf':'Red','drug':'약 DB','pat':'패턴','vacc':'접종','edu':'안내문'};
+    const map={'exam':'검사','rx':'처방','rf':'Red','drug':'약 DB','pat':'패턴','refer':'Refer','vacc':'접종','edu':'안내문'};
     if(t.textContent.includes(map[name]||name)) t.classList.add('active');
   });
   document.getElementById('ptitle').textContent=TITLES[name]||name;
@@ -2116,7 +2941,7 @@ document.querySelectorAll('.toc-grp').forEach(g=>g.classList.add('closed'));
 function search(q){
   const lq=q.toLowerCase().trim();
   const panel=document.querySelector('.panel.active');
-  panel.querySelectorAll('.card,.rf-card,.vacc-card,.drug-table tbody tr,.pat-table tbody tr').forEach(c=>{
+  panel.querySelectorAll('.card,.rf-card,.vacc-card,.patbox,.ref-card,.drug-table tbody tr,.pat-table tbody tr,.ot-pat tbody tr').forEach(c=>{
     const txt=(c.dataset.s||c.innerText||'').toLowerCase();
     c.classList.toggle('hidden', lq.length>0 && !txt.includes(lq));
   });
@@ -2139,6 +2964,23 @@ const obs=new IntersectionObserver(ents=>{
     }
   });
 },{threshold:0.3});
-document.querySelectorAll('.card,.rf-card,.rf-cat,.vacc-card').forEach(c=>obs.observe(c));
+document.querySelectorAll('.card,.rf-card,.rf-cat,.vacc-card,.patbox,.ref-card').forEach(c=>obs.observe(c));
+
+function copyTmpl(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const txt=el.innerText;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=el.parentElement.querySelector('.ref-copy-btn');
+    if(btn){const o=btn.textContent;btn.textContent='✅ 복사됨';btn.classList.add('copied');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied')},1500)}
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(e){}
+    document.body.removeChild(ta);
+    const btn=el.parentElement.querySelector('.ref-copy-btn');
+    if(btn){const o=btn.textContent;btn.textContent='✅ 복사됨';btn.classList.add('copied');setTimeout(()=>{btn.textContent=o;btn.classList.remove('copied')},1500)}
+  });
+}
 </script>
 </body></html>
