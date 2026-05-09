@@ -53,7 +53,7 @@ export default function KcdSearch({ value, onChange, placeholder = '상병코드
 
   const CAT_COLORS = {
     '호흡기': '#dbeafe', '순환기': '#fee2e2', '내분비': '#fef9c3',
-    '소화기': '#D0F7EC', '근골격': '#f3e8ff', '비뇨기': '#ffedd5',
+    '소화기': '#FFEDD5', '근골격': '#f3e8ff', '비뇨기': '#ffedd5',
     '피부': '#fce7f3',   '신경': '#e0f2fe',   '정신': '#f0fdf4',
     '이비인후': '#fef3c7','안과': '#ede9fe',   '증상': '#f1f5f9',
   }
@@ -75,7 +75,7 @@ export default function KcdSearch({ value, onChange, placeholder = '상병코드
           placeholder={placeholder}
           style={{
             width: '100%', padding: '10px 36px 10px 12px', borderRadius: 8,
-            border: focused ? '1.5px solid #00C07F' : '1px solid #e5e7eb',
+            border: focused ? '1.5px solid #C2410C' : '1px solid #e5e7eb',
             fontSize: 14, outline: 'none', boxSizing: 'border-box',
             fontFamily: 'inherit', background: '#fff',
           }}
@@ -93,7 +93,7 @@ export default function KcdSearch({ value, onChange, placeholder = '상병코드
       {value && (
         <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{
-            fontSize: 12, fontWeight: 700, background: '#00C07F', color: '#fff',
+            fontSize: 12, fontWeight: 700, background: '#C2410C', color: '#fff',
             borderRadius: 6, padding: '2px 8px',
           }}>{value.code}</span>
           <span style={{ fontSize: 12, color: '#374151' }}>{value.name}</span>
@@ -118,14 +118,14 @@ export default function KcdSearch({ value, onChange, placeholder = '상병코드
                 padding: '10px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
                 borderBottom: '1px solid #f9fafb',
               }}
-              onMouseEnter={e => e.currentTarget.style.background = '#EDFFF8'}
+              onMouseEnter={e => e.currentTarget.style.background = '#FEF7F0'}
               onMouseLeave={e => e.currentTarget.style.background = '#fff'}
             >
               <span style={{
-                fontSize: 12, fontWeight: 700, background: '#EDFFF8', color: '#00C07F',
+                fontSize: 12, fontWeight: 700, background: '#FEF7F0', color: '#C2410C',
                 borderRadius: 5, padding: '2px 7px', flexShrink: 0, minWidth: 48, textAlign: 'center',
               }}>{item.code}</span>
-              <span style={{ fontSize: 13, color: '#0D1117', flex: 1 }}>{item.name}</span>
+              <span style={{ fontSize: 13, color: '#1C1917', flex: 1 }}>{item.name}</span>
               <span style={{
                 fontSize: 11, borderRadius: 10, padding: '1px 6px', flexShrink: 0,
                 background: CAT_COLORS[item.cat] || '#f3f4f6',

@@ -7,8 +7,6 @@ import { db } from '../firebase'
 import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from './ui'
 import CaseStudyTab from './CaseStudyTab'
 import PresetRxTab from './PresetRxTab'
-import DrugCardTab from './DrugCardTab'
-import ScenarioTab from './ScenarioTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
@@ -83,13 +81,13 @@ export default function RxTab() {
 
   // ── 서브탭 바 ────────────────────────────────────────────
   const SubTabBar = ({ style = {} }) => (
-    <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#F0F4F8', ...style }}>
-      {[['notes', '🏥 케이스'], ['drugs', '💊 약물 카드'], ['scenario', '🎯 시나리오'], ['preset', '📋 약속처방']].map(([k, l]) => (
+    <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#F3EFE7', ...style }}>
+      {[['notes', '🏥 케이스 스터디'], ['drugs', '💊 약물 카드'], ['preset', '📋 약속처방']].map(([k, l]) => (
         <button key={k} onClick={() => setSubTab(k)}
           style={{
             flex: 1, padding: '7px 0', borderRadius: 7, border: 'none',
             background: subTab === k ? '#fff' : 'transparent',
-            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : k === 'scenario' ? '#0EA5E9' : '#00C07F') : '#9ca3af',
+            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : '#C2410C') : '#9ca3af',
             fontSize: 13, fontWeight: subTab === k ? 700 : 400, cursor: 'pointer',
             boxShadow: subTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
             transition: 'all 0.15s',
@@ -133,7 +131,7 @@ export default function RxTab() {
               <div style={{ fontSize: 12, color: '#6b7280', fontWeight: 600, marginBottom: 8 }}>등록된 약물 ({myDrugs.length})</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {myDrugs.map(name => (
-                  <span key={name} style={{ fontSize: 12, background: '#EDFFF8', color: '#00C07F', border: '1px solid #C7F7E8', borderRadius: 20, padding: '3px 10px' }}>
+                  <span key={name} style={{ fontSize: 12, background: '#FEF7F0', color: '#C2410C', border: '1px solid #FED7AA', borderRadius: 20, padding: '3px 10px' }}>
                     💊 {name}
                   </span>
                 ))}
@@ -149,16 +147,16 @@ export default function RxTab() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
               <span style={{ fontSize: 20, fontWeight: 700 }}>{detail.drugName}</span>
               {detail.category && (
-                <span style={{ fontSize: 11, background: '#D0F7EC', color: '#007A52', borderRadius: 6, padding: '3px 9px', fontWeight: 600 }}>{detail.category}</span>
+                <span style={{ fontSize: 11, background: '#FFEDD5', color: '#9A330A', borderRadius: 6, padding: '3px 9px', fontWeight: 600 }}>{detail.category}</span>
               )}
             </div>
             {detail.indication && <div style={{ fontSize: 14, color: '#6b7280' }}>{detail.indication}</div>}
           </div>
           {[['💊 용량', detail.dosage], ['⏰ 용법', detail.usage], ['📆 처방일수', detail.duration]]
             .filter(([, v]) => v).map(([l, v]) => (
-              <div key={l} style={{ background: '#F8F9FB', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
+              <div key={l} style={{ background: '#FAF7F1', borderRadius: 10, padding: '12px 14px', marginBottom: 8 }}>
                 <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>{l}</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#0D1117' }}>{v}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: '#1C1917' }}>{v}</div>
               </div>
           ))}
           {detail.note && (
@@ -176,17 +174,17 @@ export default function RxTab() {
   // ── 약물 카드 컴포넌트 ───────────────────────────────────
   const RxCard = ({ rx }) => (
     <div onClick={() => setDetail(rx)}
-      style={{ background: '#fff', borderRadius: 13, padding: '14px 16px', cursor: 'pointer', border: '1px solid #EDF0F4', borderLeft: '3px solid #00C07F', transition: 'box-shadow 0.15s' }}
+      style={{ background: '#fff', borderRadius: 13, padding: '14px 16px', cursor: 'pointer', border: '1px solid #E7E2D7', borderLeft: '3px solid #C2410C', transition: 'box-shadow 0.15s' }}
       onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)'}
       onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#0D1117' }}>{rx.drugName}</span>
-        {rx.category && <span style={{ fontSize: 11, background: '#D0F7EC', color: '#007A52', borderRadius: 6, padding: '2px 8px', marginLeft: 8, fontWeight: 600, whiteSpace: 'nowrap' }}>{rx.category}</span>}
+        <span style={{ fontSize: 15, fontWeight: 700, color: '#1C1917' }}>{rx.drugName}</span>
+        {rx.category && <span style={{ fontSize: 11, background: '#FFEDD5', color: '#9A330A', borderRadius: 6, padding: '2px 8px', marginLeft: 8, fontWeight: 600, whiteSpace: 'nowrap' }}>{rx.category}</span>}
       </div>
       <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 10, lineHeight: 1.4 }}>{rx.indication}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
         {[['💊', rx.dosage], ['⏰', rx.usage], ['📆', rx.duration]].filter(([, v]) => v).map(([icon, v]) => (
-          <span key={icon} style={{ fontSize: 12, background: '#F4F6F9', color: '#6b7280', borderRadius: 6, padding: '3px 8px' }}>{icon} {v}</span>
+          <span key={icon} style={{ fontSize: 12, background: '#F9F6F1', color: '#6b7280', borderRadius: 6, padding: '3px 8px' }}>{icon} {v}</span>
         ))}
       </div>
     </div>
@@ -205,9 +203,39 @@ export default function RxTab() {
           ? <CaseStudyTab drugSuggestions={drugSuggestions} />
           : subTab === 'preset'
           ? <PresetRxTab />
-          : subTab === 'scenario'
-          ? <ScenarioTab />
-          : <DrugCardTab />
+          : <>
+              <div style={{ padding: '0 16px 10px' }}>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9ca3af' }}>🔍</span>
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="약명, 적응증 검색..."
+                    style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff' }} />
+                </div>
+              </div>
+              <div style={{ padding: '0 16px 10px', overflowX: 'auto' }}>
+                <div style={{ display: 'flex', gap: 6, minWidth: 'max-content' }}>
+                  {categories.map(c => (
+                    <button key={c} onClick={() => setCatFilter(c)}
+                      style={{ padding: '5px 12px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#C2410C' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: catFilter === c ? 600 : 400 }}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length}개</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => setAddMyDrug(true)} style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 20, padding: '5px 11px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>+ 약물 등록</button>
+                  <button onClick={() => setAddRx(true)} style={{ background: '#C2410C', color: '#fff', border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>+ 처방 추가</button>
+                </div>
+              </div>
+              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {filtered.length === 0
+                  ? <div style={{ textAlign: 'center', padding: '48px 0', color: '#9ca3af', fontSize: 13 }}>💊 등록된 처방이 없습니다</div>
+                  : filtered.map(rx => <RxCard key={rx.id} rx={rx} />)
+                }
+              </div>
+              {DrugSheets}
+            </>
         }
       </div>
     )
@@ -217,7 +245,7 @@ export default function RxTab() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', flexDirection: 'column' }}>
       {/* 상단 서브탭 바 */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #EDF0F4', padding: '12px 24px' }}>
+      <div style={{ background: '#fff', borderBottom: '1px solid #E7E2D7', padding: '12px 24px' }}>
         <SubTabBar style={{ maxWidth: 320 }} />
       </div>
 
@@ -226,14 +254,62 @@ export default function RxTab() {
             <CaseStudyTab drugSuggestions={drugSuggestions} />
           </div>
         : subTab === 'preset'
-        ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto', background: '#F4F6F9' }}>
+        ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto', background: '#F9F6F1' }}>
             <PresetRxTab />
           </div>
-        : subTab === 'scenario'
-        ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto' }}>
-            <ScenarioTab />
+        : <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            {/* 좌측 카테고리 */}
+            <div style={{ width: 210, background: '#fff', borderRight: '1px solid #E7E2D7', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '16px 14px', borderBottom: '1px solid #F3EFE7' }}>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9ca3af' }}>🔍</span>
+                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..."
+                    style={{ width: '100%', padding: '8px 10px 8px 30px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+                </div>
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
+                <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, letterSpacing: '0.5px', padding: '4px 8px 6px' }}>카테고리</div>
+                {categories.map(c => {
+                  const count = c === '전체' ? rxList.length : rxList.filter(r => r.category === c).length
+                  const active = catFilter === c
+                  return (
+                    <button key={c} onClick={() => setCatFilter(c)}
+                      style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: 8, border: 'none', background: active ? '#FEF7F0' : 'transparent', color: active ? '#C2410C' : '#374151', fontSize: 13, fontWeight: active ? 700 : 400, cursor: 'pointer', marginBottom: 2 }}>
+                      <span>{c}</span>
+                      <span style={{ fontSize: 11, background: active ? '#FFEDD5' : '#f3f4f6', color: active ? '#C2410C' : '#9ca3af', borderRadius: 10, padding: '1px 7px' }}>{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div style={{ padding: '12px', borderTop: '1px solid #F3EFE7', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <button onClick={() => setAddMyDrug(true)} style={{ width: '100%', padding: '8px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  + 약물 빠른 등록
+                </button>
+                <button onClick={() => setAddRx(true)} style={{ width: '100%', padding: '9px', background: '#C2410C', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                  + 처방 추가
+                </button>
+              </div>
+            </div>
+            {/* 우측 그리드 */}
+            <div style={{ flex: 1, overflowY: 'auto', background: '#F9F6F1', padding: '28px 32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{catFilter === '전체' ? '전체 처방' : catFilter}</h2>
+                  <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>{filtered.length}개</div>
+                </div>
+              </div>
+              {filtered.length === 0
+                ? <div style={{ textAlign: 'center', paddingTop: 80, color: '#9ca3af' }}>
+                    <div style={{ fontSize: 36, marginBottom: 10 }}>💊</div>
+                    <div style={{ fontSize: 14 }}>등록된 처방이 없습니다</div>
+                  </div>
+                : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+                    {filtered.map(rx => <RxCard key={rx.id} rx={rx} />)}
+                  </div>
+              }
+            </div>
+            {DrugSheets}
           </div>
-        : <DrugCardTab />
       }
     </div>
   )

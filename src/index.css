@@ -2,32 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Design Tokens ── */
+/* ── Design Tokens (Cream / Terracotta) ── */
 :root {
-  --accent:        #00C07F;
-  --accent-light:  rgba(0, 192, 127, 0.08);
-  --accent-mid:    rgba(0, 192, 127, 0.18);
-  --accent-border: rgba(0, 192, 127, 0.28);
+  --cream:        #F9F6F1;
+  --cream-2:      #F3EFE7;
+  --cream-3:      #ECE7DC;
+  --paper:        #FFFFFF;
 
-  --bg:            #F4F6F9;
-  --surface:       #FFFFFF;
-  --border:        #EDF0F4;
-  --border-strong: #E2E8F0;
+  --ink:          #1C1917;
+  --ink-2:        #44403C;
+  --ink-3:        #78716C;
+  --ink-mute:     #A8A29E;
 
-  --text-1:        #0D1117;
-  --text-2:        #374151;
-  --text-3:        #6B7280;
-  --text-muted:    #9CA3AF;
+  --line:         #E7E2D7;
+  --line-2:       #D6D0C2;
 
-  --sidebar-bg:    #0D1117;
-  --sidebar-b:     rgba(255,255,255,0.07);
-  --sidebar-text:  #E2E8F0;
-  --sidebar-muted: #4B5563;
+  --accent:       #C2410C;
+  --accent-deep:  #9A330A;
+  --accent-light: #FFEDD5;
+  --accent-soft:  rgba(194,65,12,0.08);
+  --accent-glow:  rgba(194,65,12,0.18);
 
-  --radius-card:   12px;
-  --radius-btn:    9px;
-  --shadow-sm:     0 1px 3px rgba(0,0,0,0.04);
-  --shadow-md:     0 4px 16px rgba(0,0,0,0.07);
+  --good:         #65A30D;
+  --warn:         #D97706;
+  --danger:       #DC2626;
+  --info:         #2563EB;
+
+  --bg:           var(--cream);
+  --surface:      var(--paper);
+  --border:       var(--line);
+  --border-strong:var(--line-2);
+
+  --text-1:       var(--ink);
+  --text-2:       var(--ink-2);
+  --text-3:       var(--ink-3);
+  --text-muted:   var(--ink-mute);
+
+  --sidebar-bg:    var(--cream);
+  --sidebar-b:     var(--line);
+  --sidebar-text:  var(--ink-2);
+  --sidebar-muted: var(--ink-mute);
+
+  --radius-card:  10px;
+  --radius-btn:   8px;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.06);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -35,15 +54,16 @@
 body {
   margin: 0;
   font-family: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
-  background: var(--bg);
-  color: var(--text-1);
+  background: var(--cream);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
 }
 
 input, textarea, select, button { font-family: inherit; }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
