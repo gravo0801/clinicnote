@@ -249,6 +249,8 @@ JSON 형식:
 ${rawText.slice(0, 12000)}
 """`
 
+    const SYSTEM_CATS = '소화기 / 호흡기 / 순환기 / 비뇨생식기 / 근골격·통증 / 신경 / 피부 / 내분비·대사 / 정신·수면 / 이비인후 / 안과 / 산부인과 / 알레르기·면역 / 감염 / 영양·일반'
+
     const refineOnePrompt = (section, scenarioGroup) => `당신은 한국 1차 의료 임상약학 전문가입니다. 아래 단일 약물 정보를 학습용 스키마로 정리하면서 다음을 수행하세요:
 1. 의심·불완전 부분 보강·수정 (특히 임산부/소아/노인/금기/약물상호작용 누락 보강)
 2. KCD 코드는 단정 금지 — "후보"로 분류, insuranceNote에 "심평원 고시 재확인 필수" 포함
@@ -262,8 +264,14 @@ ${rawText.slice(0, 12000)}
 ${section.slice(0, 4000)}
 """
 
+분류 규칙 (가장 중요):
+- systemCategory: 다음 중 정확히 하나만 선택 (한국 1차 의료 계통 분류) — ${SYSTEM_CATS}
+- subCategories: 이 약을 처방하는 임상 상황 (진단명·증상명 혼용 가능, 짧게). 1~5개 배열. 예) ["급성 인두편도염", "편도염"], ["GERD", "속쓰림", "소화불량"], ["고혈압", "본태성 고혈압 1단계"]
+
 JSON만 출력 (마크다운/설명 금지):
 {
+  "systemCategory": "위 목록 중 하나",
+  "subCategories": [string],
   "drugName": string, "genericName": string, "drugClass": string,
   "indication": string, "dosage": string, "usage": string, "duration": string,
   "kcdCodes": [string], "insuranceNote": string,
@@ -306,6 +314,34 @@ JSON만 출력 (마크다운/설명 금지):
         cards: okCards,
         ...(errCount > 0 ? { partialError: `${errCount}/${results.length}개 카드 정리 실패` } : {}),
       })
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
+  // classify_drug_cards: 기존 카드 일괄 자동 분류 (systemCategory + subCategories)
+  if (type === 'classify_drug_cards') {
+    const items = caseData?.items || []
+    if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'items required' })
+
+    const SYSTEM_CATS = '소화기 / 호흡기 / 순환기 / 비뇨생식기 / 근골격·통증 / 신경 / 피부 / 내분비·대사 / 정신·수면 / 이비인후 / 안과 / 산부인과 / 알레르기·면역 / 감염 / 영양·일반'
+    const classifyPrompt = `한국 1차 의료 약물 카드들을 계통 분류하세요.
+각 약마다 systemCategory를 다음 중 정확히 하나 선택: ${SYSTEM_CATS}
+subCategories는 그 약을 처방하는 임상 상황(진단명·증상명) 1~5개 배열. 짧고 구체적으로.
+
+입력:
+${JSON.stringify(items.slice(0, 50), null, 2)}
+
+JSON만 출력 (마크다운 금지):
+{ "results": [ { "id": "<원본 id>", "systemCategory": "...", "subCategories": [string] }, ... ] }`
+
+    try {
+      const data = await callAnthropic(apiKey, classifyPrompt, { max_tokens: 4000 })
+      if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
+      const text = data.content?.[0]?.text || ''
+      const parsed = extractJSON(text)
+      if (!Array.isArray(parsed.results)) return res.status(500).json({ error: 'results 배열 없음' })
+      return res.status(200).json(parsed)
     } catch (err) {
       return res.status(500).json({ error: err.message })
     }

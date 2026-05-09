@@ -7,8 +7,16 @@ import { db } from '../firebase'
 import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from './ui'
 import RecallQuiz from './RecallQuiz'
 
+const SYSTEM_CATEGORIES = [
+  '소화기', '호흡기', '순환기', '비뇨생식기', '근골격·통증', '신경',
+  '피부', '내분비·대사', '정신·수면', '이비인후', '안과', '산부인과',
+  '알레르기·면역', '감염', '영양·일반',
+]
+const UNCATEGORIZED = '미분류'
+
 const EMPTY = {
   drugName: '', genericName: '', drugClass: '',
+  systemCategory: '', subCategories: '',
   indication: '', dosage: '', usage: '', duration: '',
   kcdCodes: '', insuranceNote: '',
   patientCounseling: '', sideEffects: '',
@@ -36,7 +44,10 @@ export default function DrugCardTab() {
   const [loading, setLoading]   = useState(true)
   const [search, setSearch]     = useState('')
   const [filter, setFilter]     = useState('approved')   // approved | pending | starred | all
-  const [classFilter, setClassFilter] = useState('전체')
+  const [systemFilter, setSystemFilter] = useState('전체')   // 대분류
+  const [subFilter, setSubFilter]       = useState('전체')   // 소분류
+  const [classifying, setClassifying]   = useState(false)
+  const [classifyError, setClassifyError] = useState('')
   const [showAdd, setShowAdd]   = useState(false)
   const [detail, setDetail]     = useState(null)
   const [form, setForm]         = useState(EMPTY)
@@ -67,26 +78,60 @@ export default function DrugCardTab() {
     }).length
   }, [cards])
   const starredCount = useMemo(() => cards.filter(c => c.starred).length, [cards])
-  const drugClasses = useMemo(() =>
-    ['전체', ...new Set(cards.map(c => c.drugClass).filter(Boolean))],
-    [cards]
-  )
+
+  // 카드 그룹화: systemCategory별로 카드 수, 그 안에서 사용된 subCategories 수집
+  const categoryTree = useMemo(() => {
+    const tree = {}
+    cards.forEach(c => {
+      const sc = c.systemCategory || UNCATEGORIZED
+      if (!tree[sc]) tree[sc] = { count: 0, subs: {} }
+      tree[sc].count += 1
+      ;(c.subCategories || []).forEach(sub => {
+        if (!sub) return
+        tree[sc].subs[sub] = (tree[sc].subs[sub] || 0) + 1
+      })
+    })
+    return tree
+  }, [cards])
+
+  // 정렬: 표준 분류 순서 → 그 외 → 미분류 마지막
+  const orderedSystemCats = useMemo(() => {
+    const present = Object.keys(categoryTree)
+    const ordered = SYSTEM_CATEGORIES.filter(c => present.includes(c))
+    const extras = present.filter(c => !SYSTEM_CATEGORIES.includes(c) && c !== UNCATEGORIZED).sort()
+    return [...ordered, ...extras, ...(present.includes(UNCATEGORIZED) ? [UNCATEGORIZED] : [])]
+  }, [categoryTree])
+
+  // 현재 systemFilter에서 사용 가능한 소분류
+  const subOptions = useMemo(() => {
+    if (systemFilter === '전체') return []
+    const subs = categoryTree[systemFilter]?.subs || {}
+    return Object.entries(subs).sort((a, b) => b[1] - a[1])
+  }, [categoryTree, systemFilter])
+
+  const unclassifiedCount = (categoryTree[UNCATEGORIZED]?.count) || 0
 
   const visible = useMemo(() => cards.filter(c => {
     if (filter === 'pending'  && c.status !== 'pending') return false
     if (filter === 'approved' && c.status !== 'approved') return false
     if (filter === 'starred'  && !c.starred) return false
-    if (classFilter !== '전체' && c.drugClass !== classFilter) return false
+    if (systemFilter !== '전체') {
+      const sc = c.systemCategory || UNCATEGORIZED
+      if (sc !== systemFilter) return false
+      if (subFilter !== '전체' && !(c.subCategories || []).includes(subFilter)) return false
+    }
     const q = search.trim().toLowerCase()
     if (!q) return true
-    return [c.drugName, c.genericName, c.drugClass, c.indication, c.scenarioGroup, c.userMemo]
+    return [c.drugName, c.genericName, c.drugClass, c.indication, c.scenarioGroup, c.userMemo, c.systemCategory, ...(c.subCategories || [])]
       .some(t => t?.toLowerCase().includes(q))
-  }), [cards, filter, classFilter, search])
+  }), [cards, filter, systemFilter, subFilter, search])
 
   const buildPayload = (f, status) => ({
     drugName: f.drugName.trim(),
     genericName: f.genericName.trim(),
     drugClass: f.drugClass.trim(),
+    systemCategory: f.systemCategory?.trim() || '',
+    subCategories: toArr(f.subCategories),
     indication: f.indication.trim(),
     dosage: f.dosage.trim(),
     usage: f.usage.trim(),
@@ -117,6 +162,8 @@ export default function DrugCardTab() {
     drugName: c.drugName || '',
     genericName: c.genericName || '',
     drugClass: c.drugClass || '',
+    systemCategory: c.systemCategory || '',
+    subCategories: toCsv(c.subCategories),
     scenarioGroup: c.scenarioGroup || scenarioGroup || '',
     indication: c.indication || '',
     dosage: c.dosage || '',
@@ -230,6 +277,46 @@ export default function DrugCardTab() {
     setDetail(null)
   }
 
+  const classifyUnclassified = async () => {
+    const targets = cards.filter(c => !c.systemCategory)
+    if (targets.length === 0) return
+    setClassifying(true); setClassifyError('')
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'classify_drug_cards',
+          caseData: {
+            items: targets.map(c => ({
+              id: c.id,
+              drugName: c.drugName, genericName: c.genericName,
+              indication: c.indication, scenarioGroup: c.scenarioGroup,
+            })),
+          },
+        }),
+      })
+      const rawBody = await res.text()
+      let data
+      try { data = JSON.parse(rawBody) }
+      catch { throw new Error(`서버 응답이 JSON이 아닙니다 (HTTP ${res.status}). 본문: ${rawBody.slice(0, 200)}`) }
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`)
+      const map = new Map((data.results || []).map(r => [r.id, r]))
+      await Promise.all(targets.map(c => {
+        const r = map.get(c.id)
+        if (!r) return Promise.resolve()
+        return updateDoc(doc(db, 'drugCards', c.id), {
+          systemCategory: r.systemCategory || '',
+          subCategories: Array.isArray(r.subCategories) ? r.subCategories : [],
+        })
+      }))
+    } catch (e) {
+      setClassifyError(e.message || '오류')
+    } finally {
+      setClassifying(false)
+    }
+  }
+
   const openDetail = (card) => {
     setDetail(card)
     setForm({
@@ -251,7 +338,15 @@ export default function DrugCardTab() {
     <>
       <Field label="상품명 *"   value={form.drugName}    onChange={v => setForm(p => ({ ...p, drugName: v }))} placeholder="예: 오구멘틴 듀오 정" />
       <Field label="성분명"     value={form.genericName} onChange={v => setForm(p => ({ ...p, genericName: v }))} placeholder="예: amoxicillin/clavulanate" />
-      <Field label="약물군"     value={form.drugClass}   onChange={v => setForm(p => ({ ...p, drugClass: v }))} placeholder="예: 베타락탐/베타락타마제 억제제" />
+      <Field label="대분류 (계통)">
+        <select value={form.systemCategory} onChange={e => setForm(p => ({ ...p, systemCategory: e.target.value }))}
+          style={{ width: '100%', padding: '10px 13px', borderRadius: 9, border: '1.5px solid #e5e7eb', fontSize: 13.5, fontFamily: 'inherit', outline: 'none', background: '#fff' }}>
+          <option value="">— 선택 —</option>
+          {SYSTEM_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+      </Field>
+      <Field label="소분류 (진단·증상, 쉼표 구분)" value={form.subCategories} onChange={v => setForm(p => ({ ...p, subCategories: v }))} placeholder="예: GERD, 속쓰림, 소화불량" />
+      <Field label="약물군 (선택)"     value={form.drugClass}   onChange={v => setForm(p => ({ ...p, drugClass: v }))} placeholder="예: 베타락탐/베타락타마제 억제제" />
       <Field label="진단군 묶음" value={form.scenarioGroup} onChange={v => setForm(p => ({ ...p, scenarioGroup: v }))} placeholder="예: 급성 인두편도염" />
       <Field label="효능/적응증" value={form.indication}  onChange={v => setForm(p => ({ ...p, indication: v }))} multiline />
       <Field label="용량"       value={form.dosage}      onChange={v => setForm(p => ({ ...p, dosage: v }))} placeholder="예: 625mg 1T" />
@@ -411,16 +506,16 @@ export default function DrugCardTab() {
           <span style={{ fontSize: 15, fontWeight: 700, color: '#0D1117' }}>{card.drugName}</span>
           {card.genericName && <span style={{ fontSize: 11, color: '#9ca3af' }}>{card.genericName}</span>}
         </div>
-        {card.scenarioGroup && (
-          <div style={{ fontSize: 11, color: '#7c3aed', background: '#F5F3FF', display: 'inline-block', borderRadius: 6, padding: '2px 8px', marginBottom: 6, fontWeight: 600 }}>
-            🏥 {card.scenarioGroup}
-          </div>
-        )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
+          {card.systemCategory && <span style={chipStyle('#DCFCE7', '#166534')}>📂 {card.systemCategory}</span>}
+          {(card.subCategories || []).slice(0, 3).map(s => (
+            <span key={s} style={chipStyle('#F5F3FF', '#7c3aed')}>{s}</span>
+          ))}
+        </div>
         {card.indication && (
           <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 1.4 }}>{card.indication}</div>
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {card.drugClass && <span style={chipStyle('#D0F7EC', '#007A52')}>{card.drugClass}</span>}
           {isPending && <span style={chipStyle('#FEF3C7', '#92400E')}>검토 대기</span>}
           {card.source === 'claude-daily' && <span style={chipStyle('#EDE9FE', '#6D28D9')}>Claude</span>}
           {card.source === 'gemini-daily' && <span style={chipStyle('#DBEAFE', '#1E40AF')}>Gemini</span>}
@@ -450,20 +545,52 @@ export default function DrugCardTab() {
             style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
         </div>
         <div style={{ padding: '0 16px 10px' }}>{FilterBar}</div>
-        {drugClasses.length > 1 && (
+        {/* 대분류 칩 */}
+        <div style={{ padding: '0 16px 8px', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: 6, minWidth: 'max-content' }}>
+            {['전체', ...orderedSystemCats].map(c => {
+              const count = c === '전체' ? cards.length : (categoryTree[c]?.count || 0)
+              const active = systemFilter === c
+              return (
+                <button key={c} onClick={() => { setSystemFilter(c); setSubFilter('전체') }} style={{
+                  padding: '5px 11px', borderRadius: 16,
+                  border: active ? 'none' : '1px solid #e5e7eb',
+                  background: active ? '#166534' : '#fff',
+                  color: active ? '#fff' : '#6b7280',
+                  fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap',
+                  fontWeight: active ? 700 : 400,
+                }}>{c} ({count})</button>
+              )
+            })}
+          </div>
+        </div>
+        {/* 소분류 칩 */}
+        {systemFilter !== '전체' && subOptions.length > 0 && (
           <div style={{ padding: '0 16px 10px', overflowX: 'auto' }}>
             <div style={{ display: 'flex', gap: 6, minWidth: 'max-content' }}>
-              {drugClasses.map(c => (
-                <button key={c} onClick={() => setClassFilter(c)} style={{
-                  padding: '4px 10px', borderRadius: 16,
-                  border: classFilter === c ? 'none' : '1px solid #e5e7eb',
-                  background: classFilter === c ? '#0F6E56' : '#fff',
-                  color: classFilter === c ? '#fff' : '#6b7280',
-                  fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap',
-                  fontWeight: classFilter === c ? 700 : 400,
-                }}>{c}</button>
-              ))}
+              {[['전체', null], ...subOptions].map(([s, n]) => {
+                const active = subFilter === s
+                return (
+                  <button key={s} onClick={() => setSubFilter(s)} style={{
+                    padding: '4px 10px', borderRadius: 16,
+                    border: active ? 'none' : '1px solid #e5e7eb',
+                    background: active ? '#7c3aed' : '#F5F3FF',
+                    color: active ? '#fff' : '#7c3aed',
+                    fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap',
+                    fontWeight: active ? 700 : 500,
+                  }}>{s}{n != null ? ` (${n})` : ''}</button>
+                )
+              })}
             </div>
+          </div>
+        )}
+        {unclassifiedCount > 0 && (systemFilter === '전체' || systemFilter === UNCATEGORIZED) && (
+          <div style={{ padding: '0 16px 10px' }}>
+            <button onClick={classifyUnclassified} disabled={classifying}
+              style={{ width: '100%', padding: '9px', borderRadius: 10, border: '1.5px dashed #C4B5FD', background: '#FAF5FF', color: '#5B21B6', fontWeight: 600, fontSize: 12, cursor: classifying ? 'wait' : 'pointer' }}>
+              {classifying ? 'Claude로 분류 중…' : `🤖 미분류 ${unclassifiedCount}개를 Claude로 자동 분류`}
+            </button>
+            {classifyError && <div style={{ marginTop: 6, fontSize: 11, color: '#991B1B' }}>{classifyError}</div>}
           </div>
         )}
         <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -492,23 +619,51 @@ export default function DrugCardTab() {
         </div>
         <div style={{ padding: '12px 12px 8px' }}>{FilterBar}</div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
-          <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, padding: '6px 8px' }}>약물군</div>
-          {drugClasses.map(c => {
-            const count = c === '전체' ? cards.length : cards.filter(x => x.drugClass === c).length
-            const active = classFilter === c
+          <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, padding: '6px 8px' }}>계통 (대분류)</div>
+          {[['전체', cards.length], ...orderedSystemCats.map(c => [c, categoryTree[c]?.count || 0])].map(([c, count]) => {
+            const active = systemFilter === c
             return (
-              <button key={c} onClick={() => setClassFilter(c)} style={{
-                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '7px 10px', borderRadius: 8, border: 'none',
-                background: active ? '#EDFFF8' : 'transparent',
-                color: active ? '#00C07F' : '#374151',
-                fontSize: 12.5, fontWeight: active ? 700 : 400, cursor: 'pointer', marginBottom: 2,
-              }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c}</span>
-                <span style={{ fontSize: 10.5, background: active ? '#D0F7EC' : '#f3f4f6', color: active ? '#00C07F' : '#9ca3af', borderRadius: 10, padding: '1px 7px', flexShrink: 0, marginLeft: 6 }}>{count}</span>
-              </button>
+              <div key={c} style={{ marginBottom: 2 }}>
+                <button onClick={() => { setSystemFilter(c); setSubFilter('전체') }} style={{
+                  width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '7px 10px', borderRadius: 8, border: 'none',
+                  background: active ? '#DCFCE7' : 'transparent',
+                  color: active ? '#166534' : '#374151',
+                  fontSize: 12.5, fontWeight: active ? 700 : 400, cursor: 'pointer',
+                }}>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c}</span>
+                  <span style={{ fontSize: 10.5, background: active ? '#86EFAC' : '#f3f4f6', color: active ? '#166534' : '#9ca3af', borderRadius: 10, padding: '1px 7px', flexShrink: 0, marginLeft: 6 }}>{count}</span>
+                </button>
+                {/* 활성 대분류 아래에 소분류 칩 펼침 */}
+                {active && c !== '전체' && subOptions.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, padding: '6px 10px 4px' }}>
+                    {[['전체', null], ...subOptions].map(([s, n]) => {
+                      const sActive = subFilter === s
+                      return (
+                        <button key={s} onClick={() => setSubFilter(s)} style={{
+                          padding: '3px 9px', borderRadius: 12,
+                          border: sActive ? 'none' : '1px solid #e9d5ff',
+                          background: sActive ? '#7c3aed' : '#F5F3FF',
+                          color: sActive ? '#fff' : '#7c3aed',
+                          fontSize: 10.5, cursor: 'pointer', whiteSpace: 'nowrap',
+                          fontWeight: sActive ? 700 : 500,
+                        }}>{s}{n != null ? ` ${n}` : ''}</button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             )
           })}
+          {unclassifiedCount > 0 && (
+            <div style={{ padding: '10px 8px 4px' }}>
+              <button onClick={classifyUnclassified} disabled={classifying}
+                style={{ width: '100%', padding: '8px', borderRadius: 9, border: '1.5px dashed #C4B5FD', background: '#FAF5FF', color: '#5B21B6', fontWeight: 600, fontSize: 11, cursor: classifying ? 'wait' : 'pointer', lineHeight: 1.4 }}>
+                {classifying ? 'Claude로 분류 중…' : `🤖 미분류 ${unclassifiedCount}개\n자동 분류`}
+              </button>
+              {classifyError && <div style={{ marginTop: 4, fontSize: 10.5, color: '#991B1B' }}>{classifyError}</div>}
+            </div>
+          )}
         </div>
         <div style={{ padding: 12, borderTop: '1px solid #F0F4F8' }}>
           <button onClick={() => { setForm(EMPTY); setShowAdd(true) }} style={{ width: '100%', padding: '9px', background: '#00C07F', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>+ 카드 추가</button>
@@ -569,8 +724,14 @@ function DetailView({ card, onToggleStar }) {
           <button onClick={onToggleStar} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 22, color: card.starred ? '#F59E0B' : '#D1D5DB' }}>★</button>
         </div>
         {card.genericName && <div style={{ fontSize: 13, color: '#6b7280' }}>{card.genericName}</div>}
-        {card.drugClass && <div style={{ fontSize: 12, color: '#007A52', marginTop: 4 }}>{card.drugClass}</div>}
-        {card.scenarioGroup && <div style={{ fontSize: 12, color: '#7c3aed', marginTop: 2 }}>🏥 {card.scenarioGroup}</div>}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+          {card.systemCategory && <span style={chipStyle('#DCFCE7', '#166534')}>📂 {card.systemCategory}</span>}
+          {(card.subCategories || []).map(s => (
+            <span key={s} style={chipStyle('#F5F3FF', '#7c3aed')}>{s}</span>
+          ))}
+          {card.drugClass && <span style={chipStyle('#F4F6F9', '#6b7280')}>{card.drugClass}</span>}
+        </div>
+        {card.scenarioGroup && <div style={{ fontSize: 12, color: '#7c3aed', marginTop: 6 }}>🏥 {card.scenarioGroup}</div>}
       </div>
       <Section label="💊 적응증"     value={card.indication} />
       <Section label="용량"           value={card.dosage} />
