@@ -112,6 +112,32 @@ export default function DrugCardTab() {
     reviewInterval: 0,
   })
 
+  const cardToForm = (c, scenarioGroup) => ({
+    ...EMPTY,
+    drugName: c.drugName || '',
+    genericName: c.genericName || '',
+    drugClass: c.drugClass || '',
+    scenarioGroup: c.scenarioGroup || scenarioGroup || '',
+    indication: c.indication || '',
+    dosage: c.dosage || '',
+    usage: c.usage || '',
+    duration: c.duration || '',
+    kcdCodes: toCsv(c.kcdCodes),
+    insuranceNote: c.insuranceNote || '',
+    patientCounseling: c.patientCounseling || '',
+    sideEffects: toCsv(c.sideEffects),
+    interactions: toCsv(c.interactions),
+    contraindications: toCsv(c.contraindications),
+    pregnancy: c.pregnancy || '',
+    pediatric: c.pediatric || '',
+    geriatric: c.geriatric || '',
+    renalAdjust: c.renalAdjust || '',
+    hepaticAdjust: c.hepaticAdjust || '',
+    sourceRefs: toCsv(c.sourceRefs),
+    userMemo: '',
+    claudeRefineNote: c.claudeNote || '',
+  })
+
   const refineFromText = async () => {
     if (!pasteText.trim()) return
     setRefining(true); setRefineError('')
@@ -123,34 +149,31 @@ export default function DrugCardTab() {
       })
       const data = await res.json()
       if (!res.ok || data.error) throw new Error(data.error || 'refine failed')
-      setForm({
-        ...EMPTY,
-        drugName: data.drugName || '',
-        genericName: data.genericName || '',
-        drugClass: data.drugClass || '',
-        scenarioGroup: data.scenarioGroup || '',
-        indication: data.indication || '',
-        dosage: data.dosage || '',
-        usage: data.usage || '',
-        duration: data.duration || '',
-        kcdCodes: toCsv(data.kcdCodes),
-        insuranceNote: data.insuranceNote || '',
-        patientCounseling: data.patientCounseling || '',
-        sideEffects: toCsv(data.sideEffects),
-        interactions: toCsv(data.interactions),
-        contraindications: toCsv(data.contraindications),
-        pregnancy: data.pregnancy || '',
-        pediatric: data.pediatric || '',
-        geriatric: data.geriatric || '',
-        renalAdjust: data.renalAdjust || '',
-        hepaticAdjust: data.hepaticAdjust || '',
-        sourceRefs: toCsv(data.sourceRefs),
-        userMemo: '',
-        claudeRefineNote: data.claudeNote || '',
-      })
-      setClaudeNote(data.claudeNote || '')
-      setPasteMode(false)
-      setPasteText('')
+      const scenarioGroup = data.scenarioGroup || ''
+      const cardsArr = Array.isArray(data.cards) ? data.cards : []
+      if (cardsArr.length === 0) throw new Error('정리된 카드가 없습니다')
+
+      if (cardsArr.length === 1) {
+        // 1개면 폼에 미리 채워서 사용자 검토 후 저장
+        const f = cardToForm(cardsArr[0], scenarioGroup)
+        setForm(f)
+        setClaudeNote(f.claudeRefineNote || '')
+        setPasteMode(false)
+        setPasteText('')
+      } else {
+        // 여러 개면 모두 검토대기(pending)로 저장 → 사용자가 검토 탭에서 하나씩 승인
+        const batch = cardsArr.map(c => {
+          const f = cardToForm(c, scenarioGroup)
+          return {
+            ...buildPayload(f, 'pending'),
+            source: 'gemini-daily',
+            createdAt: serverTimestamp(),
+          }
+        })
+        await Promise.all(batch.map(payload => addDoc(collection(db, 'drugCards'), payload)))
+        setShowAdd(false); setPasteMode(false); setPasteText(''); setForm(EMPTY); setClaudeNote('')
+        setFilter('pending')
+      }
     } catch (e) {
       setRefineError(e.message || '오류')
     } finally {
@@ -292,13 +315,16 @@ export default function DrugCardTab() {
       {pasteMode ? (
         <>
           <div style={{ background: '#EDE9FE', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#5B21B6', lineHeight: 1.6 }}>
-            🤖 Gemini가 보낸 약물 정보 텍스트를 그대로 붙여넣으면, Claude가 다음을 수행합니다:
+            🤖 Gemini가 보낸 약물 정보(1개~여러 개) 텍스트를 그대로 붙여넣으면, Claude가 다음을 수행합니다:
             <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
-              <li>스키마 필드별로 정리</li>
+              <li>약물별로 분리해 스키마 필드별로 정리</li>
               <li>누락된 임산부/소아/노인/금기 정보 보강</li>
               <li>의심스러운 상병코드는 "후보" 처리 + 심평원 재확인 안내</li>
               <li>출처 추가, 보강·수정 사항을 별도로 표시</li>
             </ul>
+            <div style={{ marginTop: 6, fontSize: 11.5, opacity: 0.8 }}>
+              💡 1개면 폼에 채워져 검토 후 저장. 2개 이상이면 모두 <b>검토 대기</b>로 저장돼 하나씩 승인합니다.
+            </div>
           </div>
           <textarea value={pasteText} onChange={e => setPasteText(e.target.value)}
             placeholder="Gemini 응답 전체를 그대로 붙여넣기..."

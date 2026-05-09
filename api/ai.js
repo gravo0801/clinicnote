@@ -233,13 +233,14 @@ JSON 형식:
     }
   }
 
-  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리
+  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리 (1개 또는 여러 개)
   if (type === 'refine_drug_card') {
     const rawText = caseData?.rawText || ''
     if (!rawText.trim()) return res.status(400).json({ error: 'rawText required' })
 
     const refinePrompt = `당신은 한국 1차 의료 임상약학 전문가입니다.
-아래는 다른 AI(Gemini 등)가 생성한 약물 정보 원문입니다. 이 텍스트를 학습용 약물 카드 스키마로 정리하면서, 동시에 다음 작업을 수행하세요:
+아래는 다른 AI(Gemini 등)가 생성한 약물 정보 원문입니다. 원문에 약물이 여러 개 포함된 경우 각각을 별도 카드로 분리하세요.
+각 약물 카드를 학습용 스키마로 정리하면서, 동시에 다음 작업을 수행하세요:
 
 1. **검증·심화**: 원문에서 의심스럽거나 불완전한 부분은 보강·수정. 누락된 임상 정보(특히 임산부/소아/노인/금기/약물상호작용)는 가능한 범위에서 채워 넣기.
 2. **상병코드 신중 처리**: 원문이 단정적으로 제시한 KCD 코드도 "후보"로 분류. insuranceNote에 반드시 "심평원 고시 재확인 필수"를 포함.
@@ -249,38 +250,49 @@ JSON 형식:
 
 원문:
 """
-${rawText.slice(0, 6000)}
+${rawText.slice(0, 12000)}
 """
 
-JSON만 출력 (마크다운/코드블록/설명 금지). 스키마:
+JSON만 출력 (마크다운/코드블록/설명 절대 금지). 반드시 단일 객체로 다음 스키마를 따르세요:
 {
-  "drugName": string,
-  "genericName": string,
-  "drugClass": string,
-  "scenarioGroup": string,
-  "indication": string,
-  "dosage": string,
-  "usage": string,
-  "duration": string,
-  "kcdCodes": [string],
-  "insuranceNote": string,
-  "patientCounseling": string,
-  "sideEffects": [string],
-  "interactions": [string],
-  "contraindications": [string],
-  "pregnancy": string,
-  "pediatric": string,
-  "geriatric": string,
-  "renalAdjust": string,
-  "hepaticAdjust": string,
-  "sourceRefs": [string],
-  "claudeNote": "원문에서 보강·수정·의문 제기한 핵심 1~3가지 (사용자가 한눈에 보고 검증할 수 있도록)"
-}`
+  "scenarioGroup": "원문 전체의 진단군 (예: 급성 인두편도염). 추출 불가 시 빈 문자열.",
+  "cards": [
+    {
+      "drugName": string,
+      "genericName": string,
+      "drugClass": string,
+      "indication": string,
+      "dosage": string,
+      "usage": string,
+      "duration": string,
+      "kcdCodes": [string],
+      "insuranceNote": string,
+      "patientCounseling": string,
+      "sideEffects": [string],
+      "interactions": [string],
+      "contraindications": [string],
+      "pregnancy": string,
+      "pediatric": string,
+      "geriatric": string,
+      "renalAdjust": string,
+      "hepaticAdjust": string,
+      "sourceRefs": [string],
+      "claudeNote": "원문에서 보강·수정·의문 제기한 핵심 1~3가지 (사용자가 한눈에 보고 검증할 수 있도록)"
+    }
+  ]
+}
+
+원문에 약물이 1개면 cards 배열에 1개, 5개면 5개를 넣으세요. 각 카드의 scenarioGroup은 비워두고 최상위 scenarioGroup만 채우세요.`
     try {
-      const data = await callAnthropic(apiKey, refinePrompt, { max_tokens: 3000 })
+      const data = await callAnthropic(apiKey, refinePrompt, { max_tokens: 8000 })
       if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
       const text = data.content?.[0]?.text || ''
       const parsed = extractJSON(text)
+      // 정규화: cards 배열이 없으면 단일 객체를 배열로 감싸 반환
+      if (!parsed.cards) {
+        const { scenarioGroup = '', ...card } = parsed
+        return res.status(200).json({ scenarioGroup, cards: [card] })
+      }
       return res.status(200).json(parsed)
     } catch (err) {
       return res.status(500).json({ error: err.message })
