@@ -233,67 +233,79 @@ JSON 형식:
     }
   }
 
-  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리 (1개 또는 여러 개)
+  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리
+  // 2-pass: (1) 원문을 약물별로 분할 (2) 각 약물을 병렬로 정리
   if (type === 'refine_drug_card') {
     const rawText = caseData?.rawText || ''
     if (!rawText.trim()) return res.status(400).json({ error: 'rawText required' })
 
-    const refinePrompt = `당신은 한국 1차 의료 임상약학 전문가입니다.
-아래는 다른 AI(Gemini 등)가 생성한 약물 정보 원문입니다. 원문에 약물이 여러 개 포함된 경우 각각을 별도 카드로 분리하세요.
-각 약물 카드를 학습용 스키마로 정리하면서, 동시에 다음 작업을 수행하세요:
+    const splitPrompt = `다음은 한 가지 진단군의 1차 의료 약물 정보입니다. 원문에 포함된 각 약물의 본문을 그대로 분리하여 JSON 배열로 반환하세요. 약물 1개면 배열 길이 1, 5개면 5. 본문은 원문 그대로 잘라 넣고 요약·재작성하지 마세요. 마크다운/설명 금지, JSON만.
 
-1. **검증·심화**: 원문에서 의심스럽거나 불완전한 부분은 보강·수정. 누락된 임상 정보(특히 임산부/소아/노인/금기/약물상호작용)는 가능한 범위에서 채워 넣기.
-2. **상병코드 신중 처리**: 원문이 단정적으로 제시한 KCD 코드도 "후보"로 분류. insuranceNote에 반드시 "심평원 고시 재확인 필수"를 포함.
-3. **출처 명시**: 의학적 주장 근거(KIMS/식약처/UpToDate/심평원 고시 등)를 sourceRefs에 명시. 원문에 없으면 일반적 근거 자료명 기재.
-4. **한국 시판 상품명** 우선. 성분명도 함께.
-5. **정보 없음 → "정보 없음" 명시** (추측 금지).
+스키마:
+{ "scenarioGroup": "전체 진단군명 (없으면 빈 문자열)", "drugSections": ["약물1 본문", "약물2 본문", ...] }
 
 원문:
 """
 ${rawText.slice(0, 12000)}
+"""`
+
+    const refineOnePrompt = (section, scenarioGroup) => `당신은 한국 1차 의료 임상약학 전문가입니다. 아래 단일 약물 정보를 학습용 스키마로 정리하면서 다음을 수행하세요:
+1. 의심·불완전 부분 보강·수정 (특히 임산부/소아/노인/금기/약물상호작용 누락 보강)
+2. KCD 코드는 단정 금지 — "후보"로 분류, insuranceNote에 "심평원 고시 재확인 필수" 포함
+3. 의학적 주장 근거 (KIMS/식약처/UpToDate/심평원 고시 등)를 sourceRefs에 명시
+4. 한국 시판 상품명 우선, 성분명 병기
+5. 정보 없으면 "정보 없음" 명시 (추측 금지)
+
+진단군 컨텍스트: ${scenarioGroup || '(불명)'}
+약물 본문:
+"""
+${section.slice(0, 4000)}
 """
 
-JSON만 출력 (마크다운/코드블록/설명 절대 금지). 반드시 단일 객체로 다음 스키마를 따르세요:
+JSON만 출력 (마크다운/설명 금지):
 {
-  "scenarioGroup": "원문 전체의 진단군 (예: 급성 인두편도염). 추출 불가 시 빈 문자열.",
-  "cards": [
-    {
-      "drugName": string,
-      "genericName": string,
-      "drugClass": string,
-      "indication": string,
-      "dosage": string,
-      "usage": string,
-      "duration": string,
-      "kcdCodes": [string],
-      "insuranceNote": string,
-      "patientCounseling": string,
-      "sideEffects": [string],
-      "interactions": [string],
-      "contraindications": [string],
-      "pregnancy": string,
-      "pediatric": string,
-      "geriatric": string,
-      "renalAdjust": string,
-      "hepaticAdjust": string,
-      "sourceRefs": [string],
-      "claudeNote": "원문에서 보강·수정·의문 제기한 핵심 1~3가지 (사용자가 한눈에 보고 검증할 수 있도록)"
-    }
-  ]
-}
+  "drugName": string, "genericName": string, "drugClass": string,
+  "indication": string, "dosage": string, "usage": string, "duration": string,
+  "kcdCodes": [string], "insuranceNote": string,
+  "patientCounseling": string, "sideEffects": [string],
+  "interactions": [string], "contraindications": [string],
+  "pregnancy": string, "pediatric": string, "geriatric": string,
+  "renalAdjust": string, "hepaticAdjust": string,
+  "sourceRefs": [string],
+  "claudeNote": "원문 대비 보강·수정·의문 제기한 핵심 1~3가지"
+}`
 
-원문에 약물이 1개면 cards 배열에 1개, 5개면 5개를 넣으세요. 각 카드의 scenarioGroup은 비워두고 최상위 scenarioGroup만 채우세요.`
     try {
-      const data = await callAnthropic(apiKey, refinePrompt, { max_tokens: 8000 })
-      if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
-      const text = data.content?.[0]?.text || ''
-      const parsed = extractJSON(text)
-      // 정규화: cards 배열이 없으면 단일 객체를 배열로 감싸 반환
-      if (!parsed.cards) {
-        const { scenarioGroup = '', ...card } = parsed
-        return res.status(200).json({ scenarioGroup, cards: [card] })
-      }
-      return res.status(200).json(parsed)
+      // Pass 1: split
+      const splitRes = await callAnthropic(apiKey, splitPrompt, { max_tokens: 4000 })
+      if (splitRes.error) return res.status(500).json({ error: 'split: ' + JSON.stringify(splitRes.error) })
+      const splitText = splitRes.content?.[0]?.text || ''
+      let splitParsed
+      try { splitParsed = extractJSON(splitText) }
+      catch (e) { return res.status(500).json({ error: 'split JSON 파싱 실패: ' + e.message + ' / 원문 일부: ' + splitText.slice(0, 200) }) }
+
+      const scenarioGroup = splitParsed.scenarioGroup || ''
+      const sections = Array.isArray(splitParsed.drugSections) ? splitParsed.drugSections.filter(s => typeof s === 'string' && s.trim()) : []
+      if (sections.length === 0) return res.status(500).json({ error: '분할 결과 없음' })
+
+      // Pass 2: refine each in parallel
+      const results = await Promise.all(sections.map(async (sec) => {
+        const r = await callAnthropic(apiKey, refineOnePrompt(sec, scenarioGroup), { max_tokens: 1800 })
+        if (r.error) return { _error: JSON.stringify(r.error) }
+        const t = r.content?.[0]?.text || ''
+        try { return extractJSON(t) }
+        catch (e) { return { _error: 'card JSON 실패: ' + e.message } }
+      }))
+
+      const okCards = results.filter(c => !c._error)
+      const errCount = results.length - okCards.length
+      if (okCards.length === 0) return res.status(500).json({ error: '모든 카드 정리 실패. 첫 오류: ' + (results[0]?._error || 'unknown') })
+
+      return res.status(200).json({
+        scenarioGroup,
+        cards: okCards,
+        ...(errCount > 0 ? { partialError: `${errCount}/${results.length}개 카드 정리 실패` } : {}),
+      })
     } catch (err) {
       return res.status(500).json({ error: err.message })
     }

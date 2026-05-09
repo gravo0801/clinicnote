@@ -147,8 +147,13 @@ export default function DrugCardTab() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'refine_drug_card', caseData: { rawText: pasteText } }),
       })
-      const data = await res.json()
-      if (!res.ok || data.error) throw new Error(data.error || 'refine failed')
+      const rawBody = await res.text()
+      let data
+      try { data = JSON.parse(rawBody) }
+      catch {
+        throw new Error(`서버 응답이 JSON이 아닙니다 (HTTP ${res.status}). 본문: ${rawBody.slice(0, 200)}`)
+      }
+      if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`)
       const scenarioGroup = data.scenarioGroup || ''
       const cardsArr = Array.isArray(data.cards) ? data.cards : []
       if (cardsArr.length === 0) throw new Error('정리된 카드가 없습니다')
