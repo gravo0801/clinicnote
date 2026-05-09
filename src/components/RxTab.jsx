@@ -7,6 +7,8 @@ import { db } from '../firebase'
 import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from './ui'
 import CaseStudyTab from './CaseStudyTab'
 import PresetRxTab from './PresetRxTab'
+import DrugCardTab from './DrugCardTab'
+import ScenarioTab from './ScenarioTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
@@ -82,12 +84,12 @@ export default function RxTab() {
   // ── 서브탭 바 ────────────────────────────────────────────
   const SubTabBar = ({ style = {} }) => (
     <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#F0F4F8', ...style }}>
-      {[['notes', '🏥 케이스 스터디'], ['drugs', '💊 약물 카드'], ['preset', '📋 약속처방']].map(([k, l]) => (
+      {[['notes', '🏥 케이스'], ['drugs', '💊 약물 카드'], ['scenario', '🎯 시나리오'], ['preset', '📋 약속처방']].map(([k, l]) => (
         <button key={k} onClick={() => setSubTab(k)}
           style={{
             flex: 1, padding: '7px 0', borderRadius: 7, border: 'none',
             background: subTab === k ? '#fff' : 'transparent',
-            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : '#00C07F') : '#9ca3af',
+            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : k === 'scenario' ? '#0EA5E9' : '#00C07F') : '#9ca3af',
             fontSize: 13, fontWeight: subTab === k ? 700 : 400, cursor: 'pointer',
             boxShadow: subTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
             transition: 'all 0.15s',
@@ -203,39 +205,9 @@ export default function RxTab() {
           ? <CaseStudyTab drugSuggestions={drugSuggestions} />
           : subTab === 'preset'
           ? <PresetRxTab />
-          : <>
-              <div style={{ padding: '0 16px 10px' }}>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: '#9ca3af' }}>🔍</span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="약명, 적응증 검색..."
-                    style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: 10, border: '1px solid #e5e7eb', fontSize: 14, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', background: '#fff' }} />
-                </div>
-              </div>
-              <div style={{ padding: '0 16px 10px', overflowX: 'auto' }}>
-                <div style={{ display: 'flex', gap: 6, minWidth: 'max-content' }}>
-                  {categories.map(c => (
-                    <button key={c} onClick={() => setCatFilter(c)}
-                      style={{ padding: '5px 12px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#00C07F' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: catFilter === c ? 600 : 400 }}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{ padding: '0 16px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length}개</span>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button onClick={() => setAddMyDrug(true)} style={{ background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 20, padding: '5px 11px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>+ 약물 등록</button>
-                  <button onClick={() => setAddRx(true)} style={{ background: '#00C07F', color: '#fff', border: 'none', borderRadius: 20, padding: '6px 14px', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}>+ 처방 추가</button>
-                </div>
-              </div>
-              <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {filtered.length === 0
-                  ? <div style={{ textAlign: 'center', padding: '48px 0', color: '#9ca3af', fontSize: 13 }}>💊 등록된 처방이 없습니다</div>
-                  : filtered.map(rx => <RxCard key={rx.id} rx={rx} />)
-                }
-              </div>
-              {DrugSheets}
-            </>
+          : subTab === 'scenario'
+          ? <ScenarioTab />
+          : <DrugCardTab />
         }
       </div>
     )
@@ -257,59 +229,11 @@ export default function RxTab() {
         ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto', background: '#F4F6F9' }}>
             <PresetRxTab />
           </div>
-        : <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-            {/* 좌측 카테고리 */}
-            <div style={{ width: 210, background: '#fff', borderRight: '1px solid #EDF0F4', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ padding: '16px 14px', borderBottom: '1px solid #F0F4F8' }}>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: '#9ca3af' }}>🔍</span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} placeholder="검색..."
-                    style={{ width: '100%', padding: '8px 10px 8px 30px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
-                </div>
-              </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '10px' }}>
-                <div style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, letterSpacing: '0.5px', padding: '4px 8px 6px' }}>카테고리</div>
-                {categories.map(c => {
-                  const count = c === '전체' ? rxList.length : rxList.filter(r => r.category === c).length
-                  const active = catFilter === c
-                  return (
-                    <button key={c} onClick={() => setCatFilter(c)}
-                      style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', borderRadius: 8, border: 'none', background: active ? '#EDFFF8' : 'transparent', color: active ? '#00C07F' : '#374151', fontSize: 13, fontWeight: active ? 700 : 400, cursor: 'pointer', marginBottom: 2 }}>
-                      <span>{c}</span>
-                      <span style={{ fontSize: 11, background: active ? '#D0F7EC' : '#f3f4f6', color: active ? '#00C07F' : '#9ca3af', borderRadius: 10, padding: '1px 7px' }}>{count}</span>
-                    </button>
-                  )
-                })}
-              </div>
-              <div style={{ padding: '12px', borderTop: '1px solid #F0F4F8', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <button onClick={() => setAddMyDrug(true)} style={{ width: '100%', padding: '8px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                  + 약물 빠른 등록
-                </button>
-                <button onClick={() => setAddRx(true)} style={{ width: '100%', padding: '9px', background: '#00C07F', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                  + 처방 추가
-                </button>
-              </div>
-            </div>
-            {/* 우측 그리드 */}
-            <div style={{ flex: 1, overflowY: 'auto', background: '#F4F6F9', padding: '28px 32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <div>
-                  <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{catFilter === '전체' ? '전체 처방' : catFilter}</h2>
-                  <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 2 }}>{filtered.length}개</div>
-                </div>
-              </div>
-              {filtered.length === 0
-                ? <div style={{ textAlign: 'center', paddingTop: 80, color: '#9ca3af' }}>
-                    <div style={{ fontSize: 36, marginBottom: 10 }}>💊</div>
-                    <div style={{ fontSize: 14 }}>등록된 처방이 없습니다</div>
-                  </div>
-                : <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
-                    {filtered.map(rx => <RxCard key={rx.id} rx={rx} />)}
-                  </div>
-              }
-            </div>
-            {DrugSheets}
+        : subTab === 'scenario'
+        ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto' }}>
+            <ScenarioTab />
           </div>
+        : <DrugCardTab />
       }
     </div>
   )

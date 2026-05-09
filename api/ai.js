@@ -233,6 +233,60 @@ JSON 형식:
     }
   }
 
+  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리
+  if (type === 'refine_drug_card') {
+    const rawText = caseData?.rawText || ''
+    if (!rawText.trim()) return res.status(400).json({ error: 'rawText required' })
+
+    const refinePrompt = `당신은 한국 1차 의료 임상약학 전문가입니다.
+아래는 다른 AI(Gemini 등)가 생성한 약물 정보 원문입니다. 이 텍스트를 학습용 약물 카드 스키마로 정리하면서, 동시에 다음 작업을 수행하세요:
+
+1. **검증·심화**: 원문에서 의심스럽거나 불완전한 부분은 보강·수정. 누락된 임상 정보(특히 임산부/소아/노인/금기/약물상호작용)는 가능한 범위에서 채워 넣기.
+2. **상병코드 신중 처리**: 원문이 단정적으로 제시한 KCD 코드도 "후보"로 분류. insuranceNote에 반드시 "심평원 고시 재확인 필수"를 포함.
+3. **출처 명시**: 의학적 주장 근거(KIMS/식약처/UpToDate/심평원 고시 등)를 sourceRefs에 명시. 원문에 없으면 일반적 근거 자료명 기재.
+4. **한국 시판 상품명** 우선. 성분명도 함께.
+5. **정보 없음 → "정보 없음" 명시** (추측 금지).
+
+원문:
+"""
+${rawText.slice(0, 6000)}
+"""
+
+JSON만 출력 (마크다운/코드블록/설명 금지). 스키마:
+{
+  "drugName": string,
+  "genericName": string,
+  "drugClass": string,
+  "scenarioGroup": string,
+  "indication": string,
+  "dosage": string,
+  "usage": string,
+  "duration": string,
+  "kcdCodes": [string],
+  "insuranceNote": string,
+  "patientCounseling": string,
+  "sideEffects": [string],
+  "interactions": [string],
+  "contraindications": [string],
+  "pregnancy": string,
+  "pediatric": string,
+  "geriatric": string,
+  "renalAdjust": string,
+  "hepaticAdjust": string,
+  "sourceRefs": [string],
+  "claudeNote": "원문에서 보강·수정·의문 제기한 핵심 1~3가지 (사용자가 한눈에 보고 검증할 수 있도록)"
+}`
+    try {
+      const data = await callAnthropic(apiKey, refinePrompt, { max_tokens: 3000 })
+      if (data.error) return res.status(500).json({ error: JSON.stringify(data.error) })
+      const text = data.content?.[0]?.text || ''
+      const parsed = extractJSON(text)
+      return res.status(200).json(parsed)
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   const prompt = prompts[type]
   if (!prompt) return res.status(400).json({ error: 'Invalid type' })
 
