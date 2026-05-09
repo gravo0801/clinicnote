@@ -251,7 +251,9 @@ ${rawText.slice(0, 12000)}
 
     const SYSTEM_CATS = '소화기 / 호흡기 / 순환기 / 비뇨생식기 / 근골격·통증 / 신경 / 피부 / 내분비·대사 / 정신·수면 / 이비인후 / 안과 / 산부인과 / 알레르기·면역 / 감염 / 영양·일반'
 
-    const refineOnePrompt = (section, scenarioGroup) => `당신은 한국 1차 의료 임상약학 전문가입니다. 아래 단일 약물 정보를 학습용 스키마로 정리하면서 다음을 수행하세요:
+    const refineOnePrompt = (section, scenarioGroup) => `JSON 객체 1개만 출력하세요. 첫 글자는 반드시 "{". 설명·머리말·코드블록 금지.
+
+당신은 한국 1차 의료 임상약학 전문가입니다. 아래 단일 약물 정보를 학습용 스키마로 정리하면서 다음을 수행하세요:
 1. 의심·불완전 부분 보강·수정 (특히 임산부/소아/노인/금기/약물상호작용 누락 보강)
 2. KCD 코드는 단정 금지 — "후보"로 분류, insuranceNote에 "심평원 고시 재확인 필수" 포함
 3. 의학적 주장 근거 (KIMS/식약처/UpToDate/심평원 고시 등)를 sourceRefs에 명시
@@ -298,11 +300,15 @@ JSON만 출력 (마크다운/설명 금지):
 
       // Pass 2: refine each in parallel
       const results = await Promise.all(sections.map(async (sec) => {
-        const r = await callAnthropic(apiKey, refineOnePrompt(sec, scenarioGroup), { max_tokens: 1800 })
-        if (r.error) return { _error: JSON.stringify(r.error) }
+        const r = await callAnthropic(apiKey, refineOnePrompt(sec, scenarioGroup), { max_tokens: 3000 })
+        if (r.error) return { _error: 'API: ' + JSON.stringify(r.error) }
         const t = r.content?.[0]?.text || ''
+        const stop = r.stop_reason || ''
         try { return extractJSON(t) }
-        catch (e) { return { _error: 'card JSON 실패: ' + e.message } }
+        catch (e) {
+          const snippet = t.slice(0, 220).replace(/\s+/g, ' ')
+          return { _error: `card JSON 실패: ${e.message} | stop=${stop} | resp="${snippet}"` }
+        }
       }))
 
       const okCards = results.filter(c => !c._error)
