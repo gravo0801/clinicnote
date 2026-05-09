@@ -32,12 +32,12 @@ function Ic({ name, s = 16, c = 'currentColor', w = 1.75 }) {
 }
 
 const NAV = [
-  { key: 'rx',     icon: 'pill',     label: '처방 노하우' },
-  { key: 'notes',  icon: 'book',     label: '질환 노트'  },
-  { key: 'family', icon: 'users',    label: '가족 건강'  },
-  { key: 'us',     icon: 'wave',     label: '초음파'    },
-  { key: 'ops',    icon: 'briefcase',label: '운영 노하우' },
-  { key: 'backup', icon: 'cloud',    label: '백업/복원'  },
+  { key: 'rx',     icon: 'pill',     label: '처방 노하우', short: '처방' },
+  { key: 'notes',  icon: 'book',     label: '질환 노트',   short: '질환' },
+  { key: 'family', icon: 'users',    label: '가족 건강',   short: '가족' },
+  { key: 'us',     icon: 'wave',     label: '초음파',     short: '초음파' },
+  { key: 'ops',    icon: 'briefcase',label: '운영 노하우', short: '운영' },
+  { key: 'backup', icon: 'cloud',    label: '백업/복원',   short: '백업' },
 ]
 
 export default function App() {
@@ -67,10 +67,13 @@ export default function App() {
             </div>
             <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--line)', background: 'none', color: 'var(--ink-3)', fontSize: 12, cursor: 'pointer' }}>로그아웃</button>
           </div>
-          <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--cream-2)' }}>
-            {NAV.map(({ key, icon, label }) => (
+          <div style={{
+            display: 'flex', gap: 2, padding: 3, borderRadius: 10, background: 'var(--cream-2)',
+            overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none',
+          }} className="cn-hide-scroll">
+            {NAV.map(({ key, icon, short }) => (
               <button key={key} onClick={() => setTab(key)} style={{
-                flex: 1, padding: '8px 4px', borderRadius: 7, border: 'none',
+                flexShrink: 0, padding: '8px 12px', borderRadius: 7, border: 'none',
                 background: tab === key ? 'var(--paper)' : 'transparent',
                 color: tab === key ? 'var(--ink)' : 'var(--ink-3)',
                 fontSize: 12.5, fontWeight: tab === key ? 600 : 500,
@@ -79,10 +82,11 @@ export default function App() {
                 whiteSpace: 'nowrap', fontFamily: 'inherit',
               }}>
                 <Ic name={icon} s={13} c={tab === key ? 'var(--accent)' : 'var(--ink-3)'}/>
-                {label}
+                {short}
               </button>
             ))}
           </div>
+          <style>{`.cn-hide-scroll::-webkit-scrollbar { display: none; }`}</style>
         </div>
         {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : tab === 'us' ? <UltrasoundTab /> : tab === 'ops' ? <OpsTab /> : tab === 'backup' ? <BackupTab /> : <RxTab />}
       </div>
