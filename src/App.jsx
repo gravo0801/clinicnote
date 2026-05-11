@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Login from './components/Login'
+import AdultDailyTab from './components/AdultDailyTab'
 import FamilyTab from './components/FamilyTab'
 import RxTab from './components/RxTab'
 import DiseaseNoteTab from './components/DiseaseNoteTab'
@@ -14,8 +15,6 @@ const ICON_PATHS = {
   book:     '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
   users:    '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   out:      '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
-  search:   '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
-  more:     '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
   wave:     '<path d="M2 12c2 0 2-4 4-4s2 8 4 8 2-12 4-12 2 16 4 16 2-4 4-4"/>',
   briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   cloud:    '<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.78A6 6 0 1 0 6 14"/><path d="M12 12v9"/><polyline points="8 17 12 21 16 17"/>',
@@ -32,13 +31,24 @@ function Ic({ name, s = 16, c = 'currentColor', w = 1.75 }) {
 }
 
 const NAV = [
-  { key: 'rx',     icon: 'pill',     label: '처방 노하우', short: '처방' },
-  { key: 'notes',  icon: 'book',     label: '질환 노트',   short: '질환' },
-  { key: 'family', icon: 'users',    label: '가족 건강',   short: '가족' },
-  { key: 'us',     icon: 'wave',     label: '초음파',     short: '초음파' },
-  { key: 'ops',    icon: 'briefcase',label: '운영 노하우', short: '운영' },
-  { key: 'backup', icon: 'cloud',    label: '백업/복원',   short: '백업' },
+  { key: 'adult',  icon: 'book',      label: '성인 Daily', short: '성인' },
+  { key: 'rx',     icon: 'pill',      label: '처방 노하우', short: '처방' },
+  { key: 'notes',  icon: 'book',      label: '질환 노트',   short: '질환' },
+  { key: 'family', icon: 'users',     label: '가족 건강',   short: '가족' },
+  { key: 'us',     icon: 'wave',      label: '초음파',      short: '초음파' },
+  { key: 'ops',    icon: 'briefcase', label: '운영 노하우', short: '운영' },
+  { key: 'backup', icon: 'cloud',     label: '백업/복원',   short: '백업' },
 ]
+
+function ActiveTab({ tab }) {
+  if (tab === 'adult') return <AdultDailyTab />
+  if (tab === 'family') return <FamilyTab />
+  if (tab === 'notes') return <DiseaseNoteTab />
+  if (tab === 'us') return <UltrasoundTab />
+  if (tab === 'ops') return <OpsTab />
+  if (tab === 'backup') return <BackupTab />
+  return <RxTab />
+}
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false)
@@ -49,11 +59,13 @@ export default function App() {
     if (sessionStorage.getItem('cn_auth') === '1') setLoggedIn(true)
   }, [])
 
-  const logout = () => { sessionStorage.removeItem('cn_auth'); setLoggedIn(false) }
+  const logout = () => {
+    sessionStorage.removeItem('cn_auth')
+    setLoggedIn(false)
+  }
 
   if (!loggedIn) return <Login onLogin={() => setLoggedIn(true)} />
 
-  /* Mobile */
   if (isMobile) {
     return (
       <div style={{ maxWidth: 600, margin: '0 auto', minHeight: '100vh', background: 'var(--cream)' }}>
@@ -61,7 +73,7 @@ export default function App() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Ic name="steth" s={16} c="#fff" w={2}/>
+                <Ic name="steth" s={16} c="#fff" w={2} />
               </div>
               <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.3px' }}>ClinicNote</span>
             </div>
@@ -81,19 +93,18 @@ export default function App() {
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
                 whiteSpace: 'nowrap', fontFamily: 'inherit',
               }}>
-                <Ic name={icon} s={13} c={tab === key ? 'var(--accent)' : 'var(--ink-3)'}/>
+                <Ic name={icon} s={13} c={tab === key ? 'var(--accent)' : 'var(--ink-3)'} />
                 {short}
               </button>
             ))}
           </div>
           <style>{`.cn-hide-scroll::-webkit-scrollbar { display: none; }`}</style>
         </div>
-        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : tab === 'us' ? <UltrasoundTab /> : tab === 'ops' ? <OpsTab /> : tab === 'backup' ? <BackupTab /> : <RxTab />}
+        <ActiveTab tab={tab} />
       </div>
     )
   }
 
-  /* Desktop */
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--cream)' }}>
       <aside style={{
@@ -104,7 +115,7 @@ export default function App() {
         <div style={{ padding: '22px 22px 18px', borderBottom: '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Ic name="steth" s={16} c="#fff" w={2}/>
+              <Ic name="steth" s={16} c="#fff" w={2} />
             </div>
             <div style={{ lineHeight: 1.15 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.3px' }}>ClinicNote</div>
@@ -127,7 +138,7 @@ export default function App() {
                 cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
                 whiteSpace: 'nowrap',
               }}>
-                <Ic name={icon} s={15} c={active ? 'var(--accent)' : 'var(--ink-3)'} w={1.85}/>
+                <Ic name={icon} s={15} c={active ? 'var(--accent)' : 'var(--ink-3)'} w={1.85} />
                 {label}
               </button>
             )
@@ -141,13 +152,13 @@ export default function App() {
             fontSize: 12.5, cursor: 'pointer', textAlign: 'left',
             display: 'flex', alignItems: 'center', gap: 9, fontFamily: 'inherit',
           }}>
-            <Ic name="out" s={14} c="var(--ink-3)"/>로그아웃
+            <Ic name="out" s={14} c="var(--ink-3)" />로그아웃
           </button>
         </div>
       </aside>
 
       <main style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-        {tab === 'family' ? <FamilyTab /> : tab === 'notes' ? <DiseaseNoteTab /> : tab === 'us' ? <UltrasoundTab /> : tab === 'ops' ? <OpsTab /> : tab === 'backup' ? <BackupTab /> : <RxTab />}
+        <ActiveTab tab={tab} />
       </main>
     </div>
   )
