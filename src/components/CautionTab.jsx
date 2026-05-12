@@ -89,6 +89,13 @@ export default function CautionTab() {
       .some(t => t?.toLowerCase().includes(q))
   }), [notes, catFilter, statusFilter, search])
 
+  const visibleFilteredByStatus = useMemo(() => notes.filter(n => {
+    if (statusFilter === 'approved' && n.status !== 'approved') return false
+    if (statusFilter === 'pending'  && n.status !== 'pending')  return false
+    if (statusFilter === 'starred'  && !n.starred) return false
+    return true
+  }), [notes, statusFilter])
+
   const buildPayload = (f, status) => ({
     category: f.category,
     title: f.title.trim(),
@@ -424,13 +431,6 @@ export default function CautionTab() {
       })}
     </div>
   )
-
-  const visibleFilteredByStatus = useMemo(() => notes.filter(n => {
-    if (statusFilter === 'approved' && n.status !== 'approved') return false
-    if (statusFilter === 'pending'  && n.status !== 'pending')  return false
-    if (statusFilter === 'starred'  && !n.starred) return false
-    return true
-  }), [notes, statusFilter])
 
   const CategoryChips = (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
