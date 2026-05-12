@@ -261,6 +261,97 @@ function ImagePreview({ img, onRemove }) {
 
 const CATEGORIES = ['전체','내과','호흡기','소화기','순환기','내분비','근골격','신경','감염','소아','피부','이비인후','안과','비뇨기','정신','기타']
 
+// ── A4 출력 ────────────────────────────────────────────────
+function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
+function buildPrintHTML(notes, title) {
+  const css = `
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif; color: #1C1917; line-height: 1.75; font-size: 10.5pt; margin: 0; }
+    .doc-header { text-align: center; margin-bottom: 16pt; padding-bottom: 10pt; border-bottom: 1.5px solid #C2410C; }
+    .doc-title { font-size: 16pt; font-weight: 700; margin: 0; color: #C2410C; }
+    .doc-sub { font-size: 9pt; color: #888; margin-top: 4pt; }
+    .note { page-break-after: always; padding-top: 6pt; }
+    .note:last-child { page-break-after: auto; }
+    .note h1 { font-size: 14.5pt; margin: 0 0 6pt; color: #1C1917; border-left: 4pt solid #C2410C; padding-left: 8pt; }
+    .meta { font-size: 9pt; color: #6b7280; margin-bottom: 10pt; }
+    .meta .pill { display: inline-block; background: #FEF7F0; color: #C2410C; border: 1px solid #FED7AA; padding: 1pt 7pt; border-radius: 8pt; font-size: 8.5pt; margin-right: 4pt; }
+    .meta .tag { display: inline-block; background: #f3f4f6; color: #374151; padding: 1pt 7pt; border-radius: 8pt; font-size: 8.5pt; margin-right: 4pt; }
+    h2.section { font-size: 11pt; margin: 12pt 0 4pt; color: #C2410C; border-bottom: 1px dashed #FED7AA; padding-bottom: 2pt; }
+    .content { white-space: pre-wrap; word-break: break-word; margin-bottom: 12pt; font-size: 10.5pt; line-height: 1.85; }
+    .imgs { display: flex; flex-wrap: wrap; gap: 6pt; margin-bottom: 12pt; }
+    .imgs img { max-width: 48%; max-height: 200pt; object-fit: contain; border: 1px solid #ddd; border-radius: 4pt; page-break-inside: avoid; }
+    ul.refs { padding-left: 16pt; margin: 0 0 12pt; font-size: 9.5pt; }
+    ul.refs li { margin-bottom: 4pt; word-break: break-all; }
+    .url { font-size: 8pt; color: #888; }
+    .print-actions { position: fixed; top: 10px; right: 10px; display: flex; gap: 6pt; z-index: 9999; }
+    .print-actions button { padding: 6pt 12pt; font-size: 11pt; cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 4pt; font-family: inherit; }
+    .print-actions button.primary { background: #C2410C; color: #fff; border-color: #C2410C; }
+    @media print { .print-actions { display: none; } }
+  `
+  const fmtDate = (n) => {
+    const d = n.createdAt?.toDate ? n.createdAt.toDate() : null
+    return d ? d.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
+  }
+  const noteHtml = notes.map(n => {
+    const date = fmtDate(n)
+    const tags = (n.tags || []).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('')
+    const images = (n.images || []).map(img => `<img src="${escapeHtml(img.data || img.url || '')}" alt="${escapeHtml(img.name || '')}" />`).join('')
+    return `
+      <article class="note">
+        <h1>${escapeHtml(n.title || '제목 없음')}</h1>
+        <div class="meta">
+          ${n.category ? `<span class="pill">${escapeHtml(n.category)}</span>` : ''}
+          ${date ? `<span>${date}</span>` : ''}
+          ${tags ? `<div style="margin-top:5pt">${tags}</div>` : ''}
+        </div>
+        ${n.content ? `<h2 class="section">내용</h2><div class="content">${escapeHtml(n.content)}</div>` : ''}
+        ${images ? `<h2 class="section">첨부 사진</h2><div class="imgs">${images}</div>` : ''}
+        ${(n.cloudFiles || []).length ? `<h2 class="section">첨부 파일</h2><ul class="refs">${(n.cloudFiles || []).map(f => `<li>${escapeHtml(f.name || '')} <span class="url">${escapeHtml(f.url || '')}</span></li>`).join('')}</ul>` : ''}
+        ${(n.links || []).length ? `<h2 class="section">참고 링크</h2><ul class="refs">${(n.links || []).map(l => `<li>${escapeHtml(l.title || l.url || '')}<br><span class="url">${escapeHtml(l.url || '')}</span></li>`).join('')}</ul>` : ''}
+      </article>
+    `
+  }).join('')
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(title)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>${css}</style>
+</head>
+<body>
+  <div class="print-actions">
+    <button class="primary" onclick="window.print()">🖨 인쇄 / PDF 저장</button>
+    <button onclick="window.close()">닫기</button>
+  </div>
+  <div class="doc-header">
+    <div class="doc-title">ClinicNote 질환 노트</div>
+    <div class="doc-sub">${escapeHtml(title)} · 출력: ${new Date().toLocaleString('ko-KR')}</div>
+  </div>
+  ${noteHtml || '<p style="text-align:center;color:#888;padding:40pt 0">출력할 노트가 없습니다.</p>'}
+</body>
+</html>`
+}
+
+function printNotes(notes, title) {
+  if (!notes || notes.length === 0) { alert('출력할 노트가 없습니다.'); return }
+  const w = window.open('', '_blank', 'width=900,height=1000')
+  if (!w) { alert('팝업이 차단되었습니다. 브라우저에서 팝업을 허용한 뒤 다시 시도해주세요.'); return }
+  w.document.open()
+  w.document.write(buildPrintHTML(notes, title))
+  w.document.close()
+  // 이미지·폰트 로딩 대기 후 자동 인쇄 미리보기
+  setTimeout(() => { try { w.focus() } catch (_) {} }, 300)
+}
+
 function LinkInput({ links, onChange }) {
   const [url, setUrl] = useState('')
   const [title, setTitle] = useState('')
@@ -543,6 +634,7 @@ function NoteCard({ note, onEdit, onDelete }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 5, flexShrink: 0, alignItems: 'center' }}>
+          <button onClick={e => { e.stopPropagation(); printNotes([note], note.title || '노트') }} style={{ fontSize: 11, color: '#1d4ed8', background: 'none', border: '1px solid #bfdbfe', borderRadius: 5, padding: '3px 8px', cursor: 'pointer' }}>🖨 출력</button>
           <button onClick={e => { e.stopPropagation(); onEdit(note) }} style={{ fontSize: 11, color: '#6b7280', background: 'none', border: '1px solid #e5e7eb', borderRadius: 5, padding: '3px 8px', cursor: 'pointer' }}>수정</button>
           <button onClick={e => { e.stopPropagation(); onDelete(note.id) }} style={{ fontSize: 11, color: '#ef4444', background: 'none', border: '1px solid #fca5a5', borderRadius: 5, padding: '3px 8px', cursor: 'pointer' }}>삭제</button>
           <span style={{ fontSize: 10, color: '#9ca3af', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>v</span>
@@ -668,9 +760,13 @@ export default function DiseaseNoteTab() {
         <div style={{ display: 'flex', gap: 5, overflowX: 'auto', paddingBottom: 4, marginBottom: 10 }}>
           {CATEGORIES.map(c => <button key={c} onClick={() => setCatFilter(c)} style={{ padding: '4px 11px', borderRadius: 20, border: catFilter === c ? 'none' : '1px solid #e5e7eb', background: catFilter === c ? '#C2410C' : '#fff', color: catFilter === c ? '#fff' : '#6b7280', fontSize: 11, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontWeight: catFilter === c ? 700 : 400 }}>{catCounts[c] > 0 ? (c + ' (' + catCounts[c] + ')') : c}</button>)}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 8 }}>
           <span style={{ fontSize: 12, color: '#9ca3af' }}>{filtered.length + '개 노트'}</span>
-          <button onClick={() => setShowForm(true)} style={{ background: '#C2410C', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => printNotes(filtered, catFilter === '전체' ? '전체 노트' : (catFilter + ' 노트'))} disabled={filtered.length === 0}
+              style={{ background: '#fff', color: filtered.length ? '#1d4ed8' : '#9ca3af', border: '1px solid ' + (filtered.length ? '#bfdbfe' : '#e5e7eb'), borderRadius: 20, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: filtered.length ? 'pointer' : 'not-allowed' }}>🖨 출력</button>
+            <button onClick={() => setShowForm(true)} style={{ background: '#C2410C', color: '#fff', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          </div>
         </div>
         {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n2 => setEditTarget(n2)} onDelete={deleteNote} />)}
         <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
@@ -701,7 +797,11 @@ export default function DiseaseNoteTab() {
             <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{catFilter === '전체' ? '전체 노트' : (catFilter + ' 노트')}</h2>
             <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{filtered.length + '개'}</div>
           </div>
-          <button onClick={() => setShowForm(true)} style={{ background: '#C2410C', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => printNotes(filtered, catFilter === '전체' ? '전체 노트' : (catFilter + ' 노트'))} disabled={filtered.length === 0}
+              style={{ background: '#fff', color: filtered.length ? '#1d4ed8' : '#9ca3af', border: '1px solid ' + (filtered.length ? '#bfdbfe' : '#e5e7eb'), borderRadius: 20, padding: '7px 16px', fontSize: 13, fontWeight: 700, cursor: filtered.length ? 'pointer' : 'not-allowed' }}>🖨 출력 ({filtered.length})</button>
+            <button onClick={() => setShowForm(true)} style={{ background: '#C2410C', color: '#fff', border: 'none', borderRadius: 20, padding: '8px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>+ 새 노트</button>
+          </div>
         </div>
         {filtered.length === 0 ? <EmptyState onAdd={() => setShowForm(true)} search={search} /> : paginated.map(n => <NoteCard key={n.id} note={n} onEdit={n2 => setEditTarget(n2)} onDelete={deleteNote} />)}
         <Pagination total={filtered.length} page={page} perPage={NOTES_PER_PAGE} onChange={setPage} />
