@@ -233,32 +233,64 @@ JSON 형식:
     }
   }
 
-  // refine_drug_card: Gemini 등 외부 LLM이 만든 약물 정보 텍스트를 우리 스키마로 정리
-  // 2-pass: (1) 원문을 약물별로 분할 (2) 각 약물을 병렬로 정리
+  // refine_drug_card: 외부 LLM(Gemini/ChatGPT 등) 텍스트를 우리 스키마로 정리.
+  // 입력: caseData.rawText (단일) 또는 caseData.sources[{label,text}] (멀티 — 비교·병합)
+  // 2-pass: (1) 약물별로 분할 (멀티면 소스별 섹션을 함께 묶음) (2) 각 약물을 병렬로 정리
   if (type === 'refine_drug_card') {
-    const rawText = caseData?.rawText || ''
-    if (!rawText.trim()) return res.status(400).json({ error: 'rawText required' })
+    let sources = []
+    if (Array.isArray(caseData?.sources)) {
+      sources = caseData.sources
+        .filter(s => s && typeof s.text === 'string' && s.text.trim())
+        .map(s => ({ label: String(s.label || '원문').slice(0, 30), text: s.text }))
+    } else if (caseData?.rawText && caseData.rawText.trim()) {
+      sources = [{ label: '원문', text: caseData.rawText }]
+    }
+    if (sources.length === 0) return res.status(400).json({ error: 'rawText 또는 sources 필요' })
+    const isMulti = sources.length >= 2
 
-    const splitPrompt = `다음은 한 가지 진단군의 1차 의료 약물 정보입니다. 원문에 포함된 각 약물의 본문을 그대로 분리하여 JSON 배열로 반환하세요. 약물 1개면 배열 길이 1, 5개면 5. 본문은 원문 그대로 잘라 넣고 요약·재작성하지 마세요. 마크다운/설명 금지, JSON만.
+    const SYSTEM_CATS = '소화기 / 호흡기 / 순환기 / 비뇨생식기 / 근골격·통증 / 신경 / 피부 / 내분비·대사 / 정신·수면 / 이비인후 / 안과 / 산부인과 / 알레르기·면역 / 감염 / 영양·일반'
+
+    // Pass 1: split. 멀티 소스면 약물 단위로 묶어서 sectionsBySource 반환
+    const splitPrompt = isMulti
+      ? `다음은 한 가지 진단군의 1차 의료 약물 정보로, ${sources.length}개의 서로 다른 AI(또는 출처)에서 받은 응답입니다. 동일한 약물에 대한 정보가 여러 소스에 걸쳐 있을 수 있습니다. 모든 소스를 검토해 등장하는 각 약물(중복 제거)의 본문을 소스별로 묶어 반환하세요.
+
+스키마 (JSON만):
+{
+  "scenarioGroup": "전체 진단군명 (없으면 빈 문자열)",
+  "drugs": [
+    {
+      "name": "약물명 (가장 일반적·대표적인 한국 시판명)",
+      "sectionsBySource": { "${sources.map(s => s.label).join('": "...", "')}": "..." }
+    }
+  ]
+}
+
+규칙:
+- 같은 성분/같은 약을 다른 상품명·다른 표기로 쓴 소스가 있으면 같은 drugs 항목으로 묶기
+- 어떤 소스에 해당 약물이 없으면 그 키를 생략(또는 빈 문자열)
+- 본문은 원문 그대로 잘라 넣고 요약·재작성 금지
+- 마크다운/설명 금지
+
+${sources.map((s, i) => `=== 소스 [${s.label}] ===\n${s.text.slice(0, 8000)}`).join('\n\n')}`
+      : `다음은 한 가지 진단군의 1차 의료 약물 정보입니다. 원문에 포함된 각 약물의 본문을 그대로 분리하여 JSON 배열로 반환하세요. 약물 1개면 배열 길이 1, 5개면 5. 본문은 원문 그대로 잘라 넣고 요약·재작성하지 마세요. 마크다운/설명 금지, JSON만.
 
 스키마:
 { "scenarioGroup": "전체 진단군명 (없으면 빈 문자열)", "drugSections": ["약물1 본문", "약물2 본문", ...] }
 
 원문:
 """
-${rawText.slice(0, 12000)}
+${sources[0].text.slice(0, 12000)}
 """`
 
-    const SYSTEM_CATS = '소화기 / 호흡기 / 순환기 / 비뇨생식기 / 근골격·통증 / 신경 / 피부 / 내분비·대사 / 정신·수면 / 이비인후 / 안과 / 산부인과 / 알레르기·면역 / 감염 / 영양·일반'
-
-    const refineOnePrompt = (section, scenarioGroup) => `JSON 객체 1개만 출력하세요. 첫 글자는 반드시 "{". 설명·머리말·코드블록 금지.
+    const refineSinglePrompt = (section, scenarioGroup) => `JSON 객체 1개만 출력하세요. 첫 글자는 반드시 "{". 설명·머리말·코드블록 금지.
 
 당신은 한국 1차 의료 임상약학 전문가입니다. 아래 단일 약물 정보를 학습용 스키마로 정리하면서 다음을 수행하세요:
 1. 의심·불완전 부분 보강·수정 (특히 임산부/소아/노인/금기/약물상호작용 누락 보강)
 2. KCD 코드는 단정 금지 — "후보"로 분류, insuranceNote에 "심평원 고시 재확인 필수" 포함
-3. 의학적 주장 근거 (KIMS/식약처/UpToDate/심평원 고시 등)를 sourceRefs에 명시
-4. 한국 시판 상품명 우선, 성분명 병기
-5. 정보 없으면 "정보 없음" 명시 (추측 금지)
+3. sourceRefs는 다음 우선순위로 명시: 식약처 e-약은요 / 약학정보원(health.kr) / 심평원 고시 / KIMS / UpToDate. 가능하면 구체 URL 또는 문헌·고시번호.
+4. 한국 시판 상품명 우선, 성분명 병기. koreanBrands에는 동일성분 대표 시판명 2~3개 (확신 없으면 빈 배열).
+5. patientCounseling은 환자가 이해할 수 있는 평이한 문장(존댓말, 의학용어 풀이)로.
+6. 정보 없으면 "정보 없음" 명시 (추측 금지).
 
 진단군 컨텍스트: ${scenarioGroup || '(불명)'}
 약물 본문:
@@ -266,15 +298,14 @@ ${rawText.slice(0, 12000)}
 ${section.slice(0, 4000)}
 """
 
-분류 규칙 (가장 중요):
-- systemCategory: 다음 중 정확히 하나만 선택 (한국 1차 의료 계통 분류) — ${SYSTEM_CATS}
-- subCategories: 이 약을 처방하는 임상 상황 (진단명·증상명 혼용 가능, 짧게). 1~5개 배열. 예) ["급성 인두편도염", "편도염"], ["GERD", "속쓰림", "소화불량"], ["고혈압", "본태성 고혈압 1단계"]
+분류 규칙:
+- systemCategory: 다음 중 정확히 하나 — ${SYSTEM_CATS}
+- subCategories: 처방 임상 상황 (진단명·증상명) 1~5개 배열. 예) ["GERD","속쓰림"], ["고혈압"]
 
-JSON만 출력 (마크다운/설명 금지):
+JSON만 출력:
 {
-  "systemCategory": "위 목록 중 하나",
-  "subCategories": [string],
-  "drugName": string, "genericName": string, "drugClass": string,
+  "systemCategory": "...", "subCategories": [string],
+  "drugName": string, "genericName": string, "drugClass": string, "koreanBrands": [string],
   "indication": string, "dosage": string, "usage": string, "duration": string,
   "kcdCodes": [string], "insuranceNote": string,
   "patientCounseling": string, "sideEffects": [string],
@@ -282,12 +313,57 @@ JSON만 출력 (마크다운/설명 금지):
   "pregnancy": string, "pediatric": string, "geriatric": string,
   "renalAdjust": string, "hepaticAdjust": string,
   "sourceRefs": [string],
-  "claudeNote": "원문 대비 보강·수정·의문 제기한 핵심 1~3가지"
+  "claudeNote": "원문 대비 보강·수정·의문 제기한 핵심 1~3가지",
+  "claudeComparisonNote": ""
 }`
+
+    const refineMultiPrompt = (drugName, sectionsBySource, scenarioGroup) => {
+      const block = Object.entries(sectionsBySource)
+        .filter(([, text]) => text && String(text).trim())
+        .map(([label, text]) => `=== ${label} 응답 ===\n${String(text).slice(0, 3500)}`)
+        .join('\n\n')
+      return `JSON 객체 1개만 출력하세요. 첫 글자는 반드시 "{". 설명·머리말·코드블록 금지.
+
+당신은 한국 1차 의료 임상약학 전문가입니다. 아래는 동일한 약물(${drugName})에 대해 여러 AI/출처에서 받은 응답입니다. 이를 비교·병합하여 단일 학습 카드로 정리하세요.
+
+비교·병합 규칙 (매우 중요):
+- 두 응답이 일치하는 정보 → 그대로 채택
+- 응답이 갈리는 정보 (예: 임산부 카테고리, 소아 용량, 부작용 빈도) → 임상적으로 더 표준에 가까운 쪽 채택. 다만 차이점을 반드시 claudeComparisonNote에 "[항목] X쪽은 A, Y쪽은 B — 재확인 필요" 형태로 기록.
+- 한쪽 소스에만 있는 정보 → 포함하되 claudeComparisonNote에 "[항목] X쪽에만 언급" 명시.
+- 두 응답 모두에서 정보 없는 항목 → "정보 없음".
+
+추가 규칙:
+1. KCD 코드는 단정 금지 — insuranceNote에 "심평원 고시 재확인 필수" 포함.
+2. sourceRefs 우선순위: 식약처 e-약은요 / 약학정보원(health.kr) / 심평원 고시 / KIMS / UpToDate.
+3. 한국 시판 상품명 우선, 성분명 병기. koreanBrands에 대표 시판명 2~3개 (확신 없으면 빈 배열).
+4. patientCounseling은 환자용 평이한 문장(존댓말, 용어 풀이).
+5. systemCategory: ${SYSTEM_CATS} 중 정확히 하나.
+6. subCategories: 처방 임상 상황 1~5개.
+
+진단군 컨텍스트: ${scenarioGroup || '(불명)'}
+약물명: ${drugName}
+
+${block}
+
+JSON만 출력:
+{
+  "systemCategory": "...", "subCategories": [string],
+  "drugName": string, "genericName": string, "drugClass": string, "koreanBrands": [string],
+  "indication": string, "dosage": string, "usage": string, "duration": string,
+  "kcdCodes": [string], "insuranceNote": string,
+  "patientCounseling": string, "sideEffects": [string],
+  "interactions": [string], "contraindications": [string],
+  "pregnancy": string, "pediatric": string, "geriatric": string,
+  "renalAdjust": string, "hepaticAdjust": string,
+  "sourceRefs": [string],
+  "claudeNote": "비교·병합 결과에서 사용자가 검증해야 할 핵심 의문점 1~3가지",
+  "claudeComparisonNote": "소스 간 차이점·한쪽 누락 정보 요약 (없으면 빈 문자열)"
+}`
+    }
 
     try {
       // Pass 1: split
-      const splitRes = await callAnthropic(apiKey, splitPrompt, { max_tokens: 4000 })
+      const splitRes = await callAnthropic(apiKey, splitPrompt, { max_tokens: isMulti ? 6000 : 4000 })
       if (splitRes.error) return res.status(500).json({ error: 'split: ' + JSON.stringify(splitRes.error) })
       const splitText = splitRes.content?.[0]?.text || ''
       let splitParsed
@@ -295,12 +371,30 @@ JSON만 출력 (마크다운/설명 금지):
       catch (e) { return res.status(500).json({ error: 'split JSON 파싱 실패: ' + e.message + ' / 원문 일부: ' + splitText.slice(0, 200) }) }
 
       const scenarioGroup = splitParsed.scenarioGroup || ''
-      const sections = Array.isArray(splitParsed.drugSections) ? splitParsed.drugSections.filter(s => typeof s === 'string' && s.trim()) : []
-      if (sections.length === 0) return res.status(500).json({ error: '분할 결과 없음' })
+
+      // 단일·멀티 분기
+      let drugUnits = []  // [{ name, sectionsBySource? , section? }]
+      if (isMulti) {
+        const drugs = Array.isArray(splitParsed.drugs) ? splitParsed.drugs : []
+        drugUnits = drugs
+          .filter(d => d && (d.name || d.sectionsBySource))
+          .map(d => ({
+            name: d.name || '약물',
+            sectionsBySource: d.sectionsBySource || {},
+          }))
+          .filter(d => Object.values(d.sectionsBySource).some(t => t && String(t).trim()))
+      } else {
+        const sections = Array.isArray(splitParsed.drugSections) ? splitParsed.drugSections.filter(s => typeof s === 'string' && s.trim()) : []
+        drugUnits = sections.map(section => ({ section }))
+      }
+      if (drugUnits.length === 0) return res.status(500).json({ error: '분할 결과 없음' })
 
       // Pass 2: refine each in parallel
-      const results = await Promise.all(sections.map(async (sec) => {
-        const r = await callAnthropic(apiKey, refineOnePrompt(sec, scenarioGroup), { max_tokens: 3000 })
+      const results = await Promise.all(drugUnits.map(async (unit) => {
+        const prompt = isMulti
+          ? refineMultiPrompt(unit.name, unit.sectionsBySource, scenarioGroup)
+          : refineSinglePrompt(unit.section, scenarioGroup)
+        const r = await callAnthropic(apiKey, prompt, { max_tokens: 3500 })
         if (r.error) return { _error: 'API: ' + JSON.stringify(r.error) }
         const t = r.content?.[0]?.text || ''
         const stop = r.stop_reason || ''
@@ -318,6 +412,7 @@ JSON만 출력 (마크다운/설명 금지):
       return res.status(200).json({
         scenarioGroup,
         cards: okCards,
+        sourceLabels: sources.map(s => s.label),
         ...(errCount > 0 ? { partialError: `${errCount}/${results.length}개 카드 정리 실패` } : {}),
       })
     } catch (err) {

@@ -15,7 +15,7 @@ const SYSTEM_CATEGORIES = [
 const UNCATEGORIZED = '미분류'
 
 const EMPTY = {
-  drugName: '', genericName: '', drugClass: '',
+  drugName: '', genericName: '', drugClass: '', koreanBrands: '',
   systemCategory: '', subCategories: '',
   indication: '', dosage: '', usage: '', duration: '',
   kcdCodes: '', insuranceNote: '',
@@ -24,6 +24,7 @@ const EMPTY = {
   pregnancy: '', pediatric: '', geriatric: '',
   renalAdjust: '', hepaticAdjust: '',
   scenarioGroup: '', sourceRefs: '', userMemo: '',
+  claudeRefineNote: '', claudeComparisonNote: '',
 }
 
 // CSV ↔ array helpers
@@ -54,7 +55,10 @@ export default function DrugCardTab() {
   const [editMode, setEditMode] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const [pasteMode, setPasteMode] = useState(false)
-  const [pasteText, setPasteText] = useState('')
+  const [sources, setSources]     = useState([
+    { label: 'Gemini',  text: '' },
+    { label: 'ChatGPT', text: '' },
+  ])
   const [refining, setRefining]   = useState(false)
   const [refineError, setRefineError] = useState('')
   const [claudeNote, setClaudeNote] = useState('')
@@ -130,6 +134,7 @@ export default function DrugCardTab() {
     drugName: f.drugName.trim(),
     genericName: f.genericName.trim(),
     drugClass: f.drugClass.trim(),
+    koreanBrands: toArr(f.koreanBrands),
     systemCategory: f.systemCategory?.trim() || '',
     subCategories: toArr(f.subCategories),
     indication: f.indication.trim(),
@@ -153,6 +158,7 @@ export default function DrugCardTab() {
     status,
     source: 'manual',
     claudeRefineNote: f.claudeRefineNote || '',
+    claudeComparisonNote: f.claudeComparisonNote || '',
     starred: false,
     reviewInterval: 0,
   })
@@ -162,6 +168,7 @@ export default function DrugCardTab() {
     drugName: c.drugName || '',
     genericName: c.genericName || '',
     drugClass: c.drugClass || '',
+    koreanBrands: toCsv(c.koreanBrands),
     systemCategory: c.systemCategory || '',
     subCategories: toCsv(c.subCategories),
     scenarioGroup: c.scenarioGroup || scenarioGroup || '',
@@ -182,17 +189,22 @@ export default function DrugCardTab() {
     hepaticAdjust: c.hepaticAdjust || '',
     sourceRefs: toCsv(c.sourceRefs),
     userMemo: '',
-    claudeRefineNote: c.claudeNote || '',
+    claudeRefineNote: c.claudeNote || c.claudeRefineNote || '',
+    claudeComparisonNote: c.claudeComparisonNote || '',
   })
 
   const refineFromText = async () => {
-    if (!pasteText.trim()) return
+    const activeSources = sources.filter(s => s.text && s.text.trim())
+    if (activeSources.length === 0) return
     setRefining(true); setRefineError('')
     try {
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'refine_drug_card', caseData: { rawText: pasteText } }),
+        body: JSON.stringify({
+          type: 'refine_drug_card',
+          caseData: { sources: activeSources.map(s => ({ label: s.label || '원문', text: s.text })) },
+        }),
       })
       const rawBody = await res.text()
       let data
@@ -205,25 +217,29 @@ export default function DrugCardTab() {
       const cardsArr = Array.isArray(data.cards) ? data.cards : []
       if (cardsArr.length === 0) throw new Error('정리된 카드가 없습니다')
 
+      const isMultiSource = activeSources.length >= 2
+      const sourceTag = isMultiSource ? 'multi-ai' : (activeSources[0].label?.toLowerCase().includes('chatgpt') ? 'chatgpt-daily' : 'gemini-daily')
+
       if (cardsArr.length === 1) {
         // 1개면 폼에 미리 채워서 사용자 검토 후 저장
         const f = cardToForm(cardsArr[0], scenarioGroup)
         setForm(f)
         setClaudeNote(f.claudeRefineNote || '')
         setPasteMode(false)
-        setPasteText('')
+        setSources([{ label: 'Gemini', text: '' }, { label: 'ChatGPT', text: '' }])
       } else {
         // 여러 개면 모두 검토대기(pending)로 저장 → 사용자가 검토 탭에서 하나씩 승인
         const batch = cardsArr.map(c => {
           const f = cardToForm(c, scenarioGroup)
           return {
             ...buildPayload(f, 'pending'),
-            source: 'gemini-daily',
+            source: sourceTag,
             createdAt: serverTimestamp(),
           }
         })
         await Promise.all(batch.map(payload => addDoc(collection(db, 'drugCards'), payload)))
-        setShowAdd(false); setPasteMode(false); setPasteText(''); setForm(EMPTY); setClaudeNote('')
+        setShowAdd(false); setPasteMode(false); setForm(EMPTY); setClaudeNote('')
+        setSources([{ label: 'Gemini', text: '' }, { label: 'ChatGPT', text: '' }])
         setFilter('pending')
       }
     } catch (e) {
@@ -338,6 +354,7 @@ export default function DrugCardTab() {
     <>
       <Field label="상품명 *"   value={form.drugName}    onChange={v => setForm(p => ({ ...p, drugName: v }))} placeholder="예: 오구멘틴 듀오 정" />
       <Field label="성분명"     value={form.genericName} onChange={v => setForm(p => ({ ...p, genericName: v }))} placeholder="예: amoxicillin/clavulanate" />
+      <Field label="동일성분 시판 상품 (쉼표 구분)" value={form.koreanBrands} onChange={v => setForm(p => ({ ...p, koreanBrands: v }))} placeholder="예: 오구멘틴, 크라목신, 아모크라" />
       <Field label="대분류 (계통)">
         <select value={form.systemCategory} onChange={e => setForm(p => ({ ...p, systemCategory: e.target.value }))}
           style={{ width: '100%', padding: '10px 13px', borderRadius: 9, border: '1.5px solid #e5e7eb', fontSize: 13.5, fontFamily: 'inherit', outline: 'none', background: '#fff' }}>
@@ -365,6 +382,8 @@ export default function DrugCardTab() {
       <Field label="간기능 보정" value={form.hepaticAdjust} onChange={v => setForm(p => ({ ...p, hepaticAdjust: v }))} multiline />
       <Field label="출처 (쉼표 구분 URL/문헌)" value={form.sourceRefs} onChange={v => setForm(p => ({ ...p, sourceRefs: v }))} multiline />
       <Field label="내 임상 메모" value={form.userMemo} onChange={v => setForm(p => ({ ...p, userMemo: v }))} multiline />
+      <Field label="Claude 검증·보강 메모 (편집 가능)" value={form.claudeRefineNote} onChange={v => setForm(p => ({ ...p, claudeRefineNote: v }))} multiline />
+      <Field label="Claude 비교 메모 (소스 간 차이)" value={form.claudeComparisonNote} onChange={v => setForm(p => ({ ...p, claudeComparisonNote: v }))} multiline />
     </>
   )
 
@@ -410,32 +429,67 @@ export default function DrugCardTab() {
   )
 
   // ── Add Sheet ─────────────────────────────────────────
+  const closeAddSheet = () => {
+    setShowAdd(false); setForm(EMPTY); setPasteMode(false)
+    setSources([{ label: 'Gemini', text: '' }, { label: 'ChatGPT', text: '' }])
+    setClaudeNote(''); setRefineError('')
+  }
+  const activeSourceCount = sources.filter(s => s.text && s.text.trim()).length
+  const isMultiActive = activeSourceCount >= 2
+
   const AddSheet = showAdd && (
-    <Sheet title="약물 카드 추가" onClose={() => { setShowAdd(false); setForm(EMPTY); setPasteMode(false); setPasteText(''); setClaudeNote(''); setRefineError('') }}>
+    <Sheet title="약물 카드 추가" onClose={closeAddSheet}>
       {pasteMode ? (
         <>
-          <div style={{ background: '#EDE9FE', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#5B21B6', lineHeight: 1.6 }}>
-            🤖 Gemini가 보낸 약물 정보(1개~여러 개) 텍스트를 그대로 붙여넣으면, Claude가 다음을 수행합니다:
+          <div style={{ background: '#FFF7ED', borderRadius: 10, padding: '12px 14px', marginBottom: 12, fontSize: 12.5, color: '#9A3412', lineHeight: 1.6, border: '1px solid #FED7AA' }}>
+            🤖 Gemini · ChatGPT 등에서 받은 약물 정보를 각각의 칸에 붙여넣어 보세요.
             <ul style={{ margin: '6px 0 0 18px', padding: 0 }}>
               <li>약물별로 분리해 스키마 필드별로 정리</li>
-              <li>누락된 임산부/소아/노인/금기 정보 보강</li>
-              <li>의심스러운 상병코드는 "후보" 처리 + 심평원 재확인 안내</li>
-              <li>출처 추가, 보강·수정 사항을 별도로 표시</li>
+              <li>누락된 임산부/소아/노인/금기·상호작용 보강</li>
+              <li>상병코드는 "후보" 처리 + 심평원 재확인 안내 자동 추가</li>
+              <li>한국 시판 상품명·출처 강화</li>
             </ul>
-            <div style={{ marginTop: 6, fontSize: 11.5, opacity: 0.8 }}>
-              💡 1개면 폼에 채워져 검토 후 저장. 2개 이상이면 모두 <b>검토 대기</b>로 저장돼 하나씩 승인합니다.
+            <div style={{ marginTop: 8, fontSize: 12, fontWeight: 700, color: isMultiActive ? '#C2410C' : '#9A3412' }}>
+              {isMultiActive
+                ? `🔍 ${activeSourceCount}개 소스를 비교·병합합니다 (일치·불일치 항목을 자동 메모)`
+                : '💡 1개 소스만 채워도 동작합니다. 2개 이상이면 자동 비교·병합.'}
             </div>
           </div>
-          <textarea value={pasteText} onChange={e => setPasteText(e.target.value)}
-            placeholder="Gemini 응답 전체를 그대로 붙여넣기..."
-            style={{ width: '100%', minHeight: 200, padding: '10px 12px', borderRadius: 9, border: '1.5px solid #e5e7eb', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical', boxSizing: 'border-box', marginBottom: 12 }} />
+
+          {sources.map((s, i) => (
+            <div key={i} style={{ marginBottom: 10, background: '#FAF7F1', border: '1px solid #F3EFE7', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>소스 {i + 1}</span>
+                <input value={s.label} onChange={e => setSources(p => p.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))}
+                  placeholder="라벨 (Gemini, ChatGPT, ...)"
+                  style={{ flex: 1, padding: '5px 9px', borderRadius: 6, border: '1px solid #e5e7eb', fontSize: 12, fontFamily: 'inherit', outline: 'none', background: '#fff' }} />
+                {sources.length > 1 && (
+                  <button onClick={() => setSources(p => p.filter((_, idx) => idx !== i))}
+                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 14, padding: '2px 6px' }}>×</button>
+                )}
+              </div>
+              <textarea value={s.text} onChange={e => setSources(p => p.map((x, idx) => idx === i ? { ...x, text: e.target.value } : x))}
+                placeholder={`${s.label || '이 소스'}에서 받은 약물 정보 전체를 그대로 붙여넣기...`}
+                style={{ width: '100%', minHeight: 130, padding: '9px 11px', borderRadius: 8, border: '1.5px solid #e5e7eb', fontSize: 13, fontFamily: 'inherit', outline: 'none', resize: 'vertical', boxSizing: 'border-box', background: '#fff' }} />
+            </div>
+          ))}
+
+          {sources.length < 4 && (
+            <button onClick={() => setSources(p => [...p, { label: '소스 ' + (p.length + 1), text: '' }])}
+              style={{ width: '100%', padding: '8px', borderRadius: 9, border: '1.5px dashed #FED7AA', background: '#FFF7ED', color: '#9A3412', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginBottom: 10 }}>
+              + 소스 추가
+            </button>
+          )}
+
           {refineError && (
             <div style={{ background: '#FEE2E2', color: '#991B1B', borderRadius: 8, padding: '8px 12px', fontSize: 12, marginBottom: 10 }}>{refineError}</div>
           )}
-          <PrimaryButton onClick={refineFromText} disabled={refining || !pasteText.trim()}>
-            {refining ? '정리 중…' : '✨ Claude로 정리'}
+          <PrimaryButton onClick={refineFromText} disabled={refining || activeSourceCount === 0}>
+            {refining
+              ? (isMultiActive ? '비교·병합 정리 중…' : '정리 중…')
+              : (isMultiActive ? `✨ Claude로 ${activeSourceCount}개 소스 통합 정리` : '✨ Claude로 정리')}
           </PrimaryButton>
-          <button onClick={() => { setPasteMode(false); setPasteText(''); setRefineError('') }} style={{
+          <button onClick={() => { setPasteMode(false); setRefineError('') }} style={{
             width: '100%', padding: '11px', borderRadius: 10, marginTop: 8,
             background: 'none', border: '1.5px solid #e5e7eb',
             color: '#374151', cursor: 'pointer', fontFamily: 'inherit',
@@ -446,14 +500,14 @@ export default function DrugCardTab() {
         <>
           <button onClick={() => setPasteMode(true)} style={{
             width: '100%', padding: '11px', borderRadius: 10, marginBottom: 14,
-            background: '#EDE9FE', border: '1.5px solid #C4B5FD',
-            color: '#5B21B6', cursor: 'pointer', fontFamily: 'inherit',
+            background: '#FFF7ED', border: '1.5px solid #FED7AA',
+            color: '#9A3412', cursor: 'pointer', fontFamily: 'inherit',
             fontSize: 13.5, fontWeight: 700,
-          }}>📋 Gemini 텍스트 붙여넣어 Claude로 자동 정리</button>
+          }}>📋 Gemini · ChatGPT 텍스트 붙여넣어 Claude로 정리·병합</button>
           {claudeNote && (
-            <div style={{ background: '#FEF3C7', borderRadius: 10, padding: '11px 14px', marginBottom: 14, border: '1px solid #FBBF24' }}>
-              <div style={{ fontSize: 11, color: '#92400E', fontWeight: 700, marginBottom: 4 }}>🔍 Claude 검증·보강 메모</div>
-              <div style={{ fontSize: 12.5, color: '#78350F', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{claudeNote}</div>
+            <div style={{ background: '#FAF7F1', borderRadius: 10, padding: '11px 14px', marginBottom: 14, border: '1px solid #F3EFE7' }}>
+              <div style={{ fontSize: 11, color: '#9A3412', fontWeight: 700, marginBottom: 4 }}>🔍 Claude 검증·보강 메모</div>
+              <div style={{ fontSize: 12.5, color: '#1C1917', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{claudeNote}</div>
             </div>
           )}
           {FormFields}
@@ -487,7 +541,7 @@ export default function DrugCardTab() {
   // ── Card grid item ────────────────────────────────────
   const Card = ({ card }) => {
     const isPending = card.status === 'pending'
-    const borderColor = isPending ? '#FBBF24' : (card.source === 'claude-daily' ? '#8B5CF6' : '#00C07F')
+    const borderColor = isPending ? '#FBBF24' : (card.source === 'multi-ai' ? '#1d4ed8' : (card.source === 'claude-daily' ? '#8B5CF6' : '#C2410C'))
     return (
       <div onClick={() => openDetail(card)}
         style={{
@@ -507,9 +561,9 @@ export default function DrugCardTab() {
           {card.genericName && <span style={{ fontSize: 11, color: '#9ca3af' }}>{card.genericName}</span>}
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 6 }}>
-          {card.systemCategory && <span style={chipStyle('#DCFCE7', '#166534')}>📂 {card.systemCategory}</span>}
+          {card.systemCategory && <span style={chipStyle('#FFEDD5', '#9A3412')}>📂 {card.systemCategory}</span>}
           {(card.subCategories || []).slice(0, 3).map(s => (
-            <span key={s} style={chipStyle('#F5F3FF', '#7c3aed')}>{s}</span>
+            <span key={s} style={chipStyle('#FEF7F0', '#C2410C')}>{s}</span>
           ))}
         </div>
         {card.indication && (
@@ -517,8 +571,11 @@ export default function DrugCardTab() {
         )}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
           {isPending && <span style={chipStyle('#FEF3C7', '#92400E')}>검토 대기</span>}
+          {card.source === 'multi-ai' && <span style={chipStyle('#EFF6FF', '#1D4ED8')}>🔀 통합</span>}
           {card.source === 'claude-daily' && <span style={chipStyle('#EDE9FE', '#6D28D9')}>Claude</span>}
           {card.source === 'gemini-daily' && <span style={chipStyle('#DBEAFE', '#1E40AF')}>Gemini</span>}
+          {card.source === 'chatgpt-daily' && <span style={chipStyle('#DCFCE7', '#166534')}>ChatGPT</span>}
+          {!!(card.claudeComparisonNote && String(card.claudeComparisonNote).trim()) && <span style={chipStyle('#EFF6FF', '#1D4ED8')} title="소스 간 차이 메모 있음">⚖</span>}
         </div>
       </div>
     )
@@ -706,51 +763,150 @@ export default function DrugCardTab() {
 
 // ── Detail readonly view ──────────────────────────────
 function DetailView({ card, onToggleStar }) {
-  const Section = ({ label, value, color = '#F8F9FB', textColor = '#0D1117' }) => {
-    if (!value || (Array.isArray(value) && value.length === 0)) return null
-    const text = Array.isArray(value) ? value.join(', ') : value
+  // 표준 cream/orange 톤. 위험 정보(금기·상호작용)만 빨강 alert.
+  const hasValue = (v) => v && (Array.isArray(v) ? v.length > 0 : String(v).trim().length > 0)
+  const asText = (v) => Array.isArray(v) ? v.join(', ') : (v || '')
+
+  const Section = ({ icon, label, value }) => {
+    if (!hasValue(value)) return null
     return (
-      <div style={{ background: color, borderRadius: 10, padding: '11px 14px', marginBottom: 8 }}>
-        <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 4, fontWeight: 600 }}>{label}</div>
-        <div style={{ fontSize: 13.5, color: textColor, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{text}</div>
+      <div style={{ background: '#FAF7F1', border: '1px solid #F3EFE7', borderRadius: 10, padding: '11px 14px', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: '#9A3412', marginBottom: 4, fontWeight: 700 }}>{icon} {label}</div>
+        <div style={{ fontSize: 13.5, color: '#1C1917', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{asText(value)}</div>
       </div>
     )
   }
+
+  const QuadCell = ({ label, value }) => (
+    <div style={{ background: '#FAF7F1', border: '1px solid #F3EFE7', borderRadius: 8, padding: '9px 10px', minHeight: 56 }}>
+      <div style={{ fontSize: 10, color: '#9ca3af', marginBottom: 3, fontWeight: 600 }}>{label}</div>
+      <div style={{ fontSize: 12.5, color: '#1C1917', lineHeight: 1.5, fontWeight: 600 }}>{asText(value) || '—'}</div>
+    </div>
+  )
+
+  const hasRisk = hasValue(card.contraindications) || hasValue(card.interactions)
+  const hasSpecial = hasValue(card.pregnancy) || hasValue(card.pediatric) || hasValue(card.geriatric) || hasValue(card.renalAdjust) || hasValue(card.hepaticAdjust)
+  const hasInsurance = hasValue(card.kcdCodes) || hasValue(card.insuranceNote)
+  const koreanBrands = Array.isArray(card.koreanBrands) ? card.koreanBrands : []
+
   return (
     <>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 4 }}>
-          <span style={{ fontSize: 20, fontWeight: 700 }}>{card.drugName}</span>
+      {/* ── 헤더 ── */}
+      <div style={{ marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid #F3EFE7' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 6 }}>
+          <span style={{ fontSize: 20, fontWeight: 700, color: '#1C1917', letterSpacing: '-0.3px' }}>{card.drugName}</span>
           <button onClick={onToggleStar} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 22, color: card.starred ? '#F59E0B' : '#D1D5DB' }}>★</button>
         </div>
-        {card.genericName && <div style={{ fontSize: 13, color: '#6b7280' }}>{card.genericName}</div>}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
-          {card.systemCategory && <span style={chipStyle('#DCFCE7', '#166534')}>📂 {card.systemCategory}</span>}
+        {card.genericName && <div style={{ fontSize: 13, color: '#6b7280', marginBottom: 2 }}>{card.genericName}</div>}
+        {card.drugClass && <div style={{ fontSize: 11.5, color: '#9ca3af' }}>{card.drugClass}</div>}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 10 }}>
+          {card.systemCategory && <span style={chipStyle('#FFEDD5', '#9A3412')}>📂 {card.systemCategory}</span>}
           {(card.subCategories || []).map(s => (
-            <span key={s} style={chipStyle('#F5F3FF', '#7c3aed')}>{s}</span>
+            <span key={s} style={chipStyle('#FEF7F0', '#C2410C')}>{s}</span>
           ))}
-          {card.drugClass && <span style={chipStyle('#F4F6F9', '#6b7280')}>{card.drugClass}</span>}
         </div>
-        {card.scenarioGroup && <div style={{ fontSize: 12, color: '#7c3aed', marginTop: 6 }}>🏥 {card.scenarioGroup}</div>}
+        {koreanBrands.length > 0 && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 10, color: '#9ca3af', fontWeight: 600, marginBottom: 4 }}>동일성분 시판</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {koreanBrands.map(b => <span key={b} style={chipStyle('#F4F6F9', '#374151')}>{b}</span>)}
+            </div>
+          </div>
+        )}
+        {card.scenarioGroup && <div style={{ fontSize: 11.5, color: '#C2410C', marginTop: 8 }}>🏥 {card.scenarioGroup}</div>}
       </div>
-      <Section label="💊 적응증"     value={card.indication} />
-      <Section label="용량"           value={card.dosage} />
-      <Section label="용법"           value={card.usage} />
-      <Section label="처방일수"       value={card.duration} />
-      <Section label="🏥 상병코드 후보 (심평원 재확인 필요)" value={card.kcdCodes} color="#FEF3C7" textColor="#92400E" />
-      <Section label="보험 메모"      value={card.insuranceNote} color="#FEF3C7" textColor="#92400E" />
-      <Section label="🗣 환자 설명"   value={card.patientCounseling} />
-      <Section label="부작용"         value={card.sideEffects} />
-      <Section label="⚠ 약물 상호작용" value={card.interactions} color="#FEE2E2" textColor="#991B1B" />
-      <Section label="🚫 금기"        value={card.contraindications} color="#FEE2E2" textColor="#991B1B" />
-      <Section label="🤰 임산부"      value={card.pregnancy} color="#FCE7F3" textColor="#9D174D" />
-      <Section label="👶 소아"        value={card.pediatric} color="#FCE7F3" textColor="#9D174D" />
-      <Section label="👴 노인"        value={card.geriatric} color="#FCE7F3" textColor="#9D174D" />
-      <Section label="신기능 보정"    value={card.renalAdjust} />
-      <Section label="간기능 보정"    value={card.hepaticAdjust} />
-      <Section label="📚 출처"        value={card.sourceRefs} />
-      <Section label="🔍 Claude 검증·보강 메모" value={card.claudeRefineNote} color="#FEF3C7" textColor="#78350F" />
-      <Section label="📝 내 메모"     value={card.userMemo} color="#FAEEDA" textColor="#412402" />
+
+      {/* ── ⚡ 한눈에 (적응증·용량·용법·일수) ── */}
+      {(hasValue(card.indication) || hasValue(card.dosage) || hasValue(card.usage) || hasValue(card.duration)) && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: '#9A3412', fontWeight: 700, marginBottom: 6 }}>⚡ 한눈에</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <QuadCell label="적응증" value={card.indication} />
+            <QuadCell label="용량"   value={card.dosage} />
+            <QuadCell label="용법"   value={card.usage} />
+            <QuadCell label="일수"   value={card.duration} />
+          </div>
+        </div>
+      )}
+
+      {/* ── 🚨 위험·금기 (위험 정보만 빨강 alert) ── */}
+      {hasRisk && (
+        <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 10, padding: '11px 14px', marginBottom: 14 }}>
+          <div style={{ fontSize: 11, color: '#991B1B', fontWeight: 700, marginBottom: 6 }}>🚨 위험·주의</div>
+          {hasValue(card.contraindications) && (
+            <div style={{ marginBottom: hasValue(card.interactions) ? 6 : 0 }}>
+              <div style={{ fontSize: 10.5, color: '#991B1B', fontWeight: 700, marginBottom: 2 }}>🚫 금기</div>
+              <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{asText(card.contraindications)}</div>
+            </div>
+          )}
+          {hasValue(card.interactions) && (
+            <div>
+              <div style={{ fontSize: 10.5, color: '#991B1B', fontWeight: 700, marginBottom: 2 }}>⚠ 약물 상호작용</div>
+              <div style={{ fontSize: 13, color: '#7F1D1D', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{asText(card.interactions)}</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <Section icon="🗣" label="환자 설명" value={card.patientCounseling} />
+      <Section icon="💢" label="부작용" value={card.sideEffects} />
+
+      {/* ── 🤰 특수집단 (접기/펼치기) ── */}
+      {hasSpecial && (
+        <details style={{ background: '#FAF7F1', border: '1px solid #F3EFE7', borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
+          <summary style={{ fontSize: 11.5, color: '#9A3412', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}>🤰 특수집단 (임산부·소아·노인·신/간기능)</summary>
+          <div style={{ marginTop: 10 }}>
+            <Section icon="🤰" label="임산부" value={card.pregnancy} />
+            <Section icon="👶" label="소아" value={card.pediatric} />
+            <Section icon="👴" label="노인" value={card.geriatric} />
+            <Section icon="🫘" label="신기능 보정" value={card.renalAdjust} />
+            <Section icon="🫀" label="간기능 보정" value={card.hepaticAdjust} />
+          </div>
+        </details>
+      )}
+
+      {/* ── 🏥 보험 ── */}
+      {hasInsurance && (
+        <div style={{ background: '#FAF7F1', border: '1px solid #F3EFE7', borderRadius: 10, padding: '11px 14px', marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: '#9A3412', fontWeight: 700, marginBottom: 6 }}>🏥 보험 (심평원 고시 재확인 필수)</div>
+          {hasValue(card.kcdCodes) && (
+            <div style={{ marginBottom: hasValue(card.insuranceNote) ? 8 : 0 }}>
+              <div style={{ fontSize: 10.5, color: '#9ca3af', fontWeight: 600, marginBottom: 4 }}>상병코드 후보</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {(card.kcdCodes || []).map(k => <span key={k} style={chipStyle('#FFEDD5', '#9A3412')}>{k}</span>)}
+              </div>
+            </div>
+          )}
+          {hasValue(card.insuranceNote) && (
+            <div style={{ fontSize: 12.5, color: '#1C1917', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{card.insuranceNote}</div>
+          )}
+        </div>
+      )}
+
+      {/* ── Claude 메모 ── */}
+      <Section icon="🔍" label="Claude 검증·보강 메모" value={card.claudeRefineNote} />
+      {hasValue(card.claudeComparisonNote) && (
+        <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '11px 14px', marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: '#1D4ED8', fontWeight: 700, marginBottom: 4 }}>🔀 Claude 소스 비교 메모</div>
+          <div style={{ fontSize: 13, color: '#1E3A8A', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{card.claudeComparisonNote}</div>
+        </div>
+      )}
+      <Section icon="📝" label="내 임상 메모" value={card.userMemo} />
+
+      {/* ── 출처 chips ── */}
+      {hasValue(card.sourceRefs) && (
+        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px dashed #F3EFE7' }}>
+          <div style={{ fontSize: 10, color: '#9ca3af', fontWeight: 600, marginBottom: 4 }}>📚 출처</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {(card.sourceRefs || []).map((s, i) => {
+              const isUrl = /^https?:\/\//i.test(s)
+              return isUrl
+                ? <a key={i} href={s} target="_blank" rel="noopener noreferrer" style={{ ...chipStyle('#F4F6F9', '#1d4ed8'), textDecoration: 'none' }}>{s.replace(/^https?:\/\//, '').slice(0, 40)}</a>
+                : <span key={i} style={chipStyle('#F4F6F9', '#374151')}>{s}</span>
+            })}
+          </div>
+        </div>
+      )}
     </>
   )
 }
