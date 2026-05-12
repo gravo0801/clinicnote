@@ -420,6 +420,80 @@ JSON만 출력:
     }
   }
 
+  // refine_caution_notes: Gemini/ChatGPT 등에서 받은 "주의 처방" 텍스트를 cautionNotes 스키마로 정리
+  if (type === 'refine_caution_notes') {
+    let sources = []
+    if (Array.isArray(caseData?.sources)) {
+      sources = caseData.sources
+        .filter(s => s && typeof s.text === 'string' && s.text.trim())
+        .map(s => ({ label: String(s.label || '원문').slice(0, 30), text: s.text }))
+    } else if (caseData?.rawText && caseData.rawText.trim()) {
+      sources = [{ label: '원문', text: caseData.rawText }]
+    }
+    if (sources.length === 0) return res.status(400).json({ error: 'rawText 또는 sources 필요' })
+    const isMulti = sources.length >= 2
+
+    const combinedText = sources.map(s => `=== 소스 [${s.label}] ===\n${s.text.slice(0, 8000)}`).join('\n\n')
+
+    const cautionPrompt = `JSON 객체 1개만 출력. 첫 글자는 반드시 "{". 마크다운/설명 금지.
+
+당신은 한국 1차 의료 임상약학 전문가입니다. 아래 텍스트에서 "처방 시 특별히 주의해야 할 케이스"들을 추출하여 정리하세요.
+
+카테고리 (정확히 하나):
+- "pregnancy": 임산부·수유부 주의·금기
+- "elderly": 노인 (Beers 기준 등) 주의·기피
+- "disease": 특정질환에서 금기·주의 (예: 녹내장-항콜린제, BPH-항콜린제, 파킨슨-도파민길항제, 천식-비선택성 β차단제)
+- "interaction": 약물-약물 상호작용 주의 (예: 와파린+NSAIDs, MAOI+SSRI)
+
+각 케이스는 별개의 noteCase 항목으로:
+
+스키마:
+{
+  "notes": [
+    {
+      "category": "pregnancy|elderly|disease|interaction",
+      "title": "한 줄 요약 (예: 파킨슨 환자에서 metoclopramide 금기)",
+      "scenario": "어떤 상황·환자군인지 (1~2문장)",
+      "drugs": [{"name": "한국 시판 상품명 (성분명)"}],
+      "severity": "absolute|major|caution",
+      "mechanism": "왜 위험한가 — 약리 기전 짧게",
+      "action": "임상에서 어떻게 대처할 것인가 (회피·대체·모니터링)",
+      "alternatives": "대체약·우회 처방 (한국 시판명 우선, 없으면 빈 문자열)",
+      "sourceRefs": [출처 URL 또는 문헌명 — 식약처/약학정보원/심평원/UpToDate/Beers 등],
+      "claudeNote": "사용자가 검증해야 할 의문점 1~3가지${isMulti ? ' (소스 간 차이가 있으면 명시)' : ''}"
+    }
+  ]
+}
+
+규칙:
+- 한국 임상 현실 기준 (한국 시판 상품명, 식약처 기준)
+- 단정 금지 부분은 "재확인 권고" 명시
+- 정보 없으면 빈 문자열 ("" 또는 [])
+- 약물명은 가능한 한 "상품명 (성분명)" 형식
+
+원문:
+"""
+${combinedText.slice(0, 16000)}
+"""`
+
+    try {
+      const data = await callAnthropic(apiKey, cautionPrompt, { max_tokens: 6000 })
+      if (data.error) return res.status(500).json({ error: 'API: ' + JSON.stringify(data.error) })
+      const text = data.content?.[0]?.text || ''
+      const stop = data.stop_reason || ''
+      let parsed
+      try { parsed = extractJSON(text) }
+      catch (e) {
+        return res.status(500).json({ error: `JSON 파싱 실패: ${e.message} | stop=${stop} | 본문: ${text.slice(0, 200)}` })
+      }
+      const notes = Array.isArray(parsed.notes) ? parsed.notes : []
+      if (notes.length === 0) return res.status(500).json({ error: '추출된 주의 케이스 없음' })
+      return res.status(200).json({ notes, sourceLabels: sources.map(s => s.label) })
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+
   // classify_drug_cards: 기존 카드 일괄 자동 분류 (systemCategory + subCategories)
   if (type === 'classify_drug_cards') {
     const items = caseData?.items || []

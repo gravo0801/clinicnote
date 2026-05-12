@@ -8,7 +8,6 @@ import { Sheet, Field, PrimaryButton, DangerButton, Spinner, useIsMobile } from 
 import CaseStudyTab from './CaseStudyTab'
 import PresetRxTab from './PresetRxTab'
 import DrugCardTab from './DrugCardTab'
-import ScenarioTab from './ScenarioTab'
 
 export default function RxTab() {
   const isMobile = useIsMobile()
@@ -84,12 +83,12 @@ export default function RxTab() {
   // ── 서브탭 바 ────────────────────────────────────────────
   const SubTabBar = ({ style = {} }) => (
     <div style={{ display: 'flex', gap: 4, padding: 4, borderRadius: 10, background: '#F3EFE7', ...style }}>
-      {[['notes', '🏥 케이스'], ['drugs', '💊 약물 카드'], ['scenario', '🎯 시나리오'], ['preset', '📋 약속처방']].map(([k, l]) => (
+      {[['notes', '🏥 케이스'], ['drugs', '💊 약물 카드'], ['preset', '📋 약속처방']].map(([k, l]) => (
         <button key={k} onClick={() => setSubTab(k)}
           style={{
             flex: 1, padding: '7px 0', borderRadius: 7, border: 'none',
             background: subTab === k ? '#fff' : 'transparent',
-            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : k === 'scenario' ? '#0EA5E9' : '#C2410C') : '#9ca3af',
+            color: subTab === k ? (k === 'notes' ? '#7c3aed' : k === 'preset' ? '#d97706' : '#C2410C') : '#9ca3af',
             fontSize: 13, fontWeight: subTab === k ? 700 : 400, cursor: 'pointer',
             boxShadow: subTab === k ? '0 1px 3px rgba(0,0,0,0.07)' : 'none',
             transition: 'all 0.15s',
@@ -205,8 +204,6 @@ export default function RxTab() {
           ? <CaseStudyTab drugSuggestions={drugSuggestions} />
           : subTab === 'preset'
           ? <PresetRxTab />
-          : subTab === 'scenario'
-          ? <ScenarioTab />
           : <DrugCardTab />
         }
       </div>
@@ -228,10 +225,6 @@ export default function RxTab() {
         : subTab === 'preset'
         ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto', background: '#F9F6F1' }}>
             <PresetRxTab />
-          </div>
-        : subTab === 'scenario'
-        ? <div style={{ flex: 1, overflow: 'hidden', overflowY: 'auto' }}>
-            <ScenarioTab />
           </div>
         : <DrugCardTab />
       }

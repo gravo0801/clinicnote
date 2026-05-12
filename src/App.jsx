@@ -6,6 +6,7 @@ import RxTab from './components/RxTab'
 import DiseaseNoteTab from './components/DiseaseNoteTab'
 import UltrasoundTab from './components/UltrasoundTab'
 import OpsTab from './components/OpsTab'
+import CautionTab from './components/CautionTab'
 import BackupTab from './components/BackupTab'
 import { useIsMobile } from './components/ui'
 
@@ -18,6 +19,7 @@ const ICON_PATHS = {
   wave:     '<path d="M2 12c2 0 2-4 4-4s2 8 4 8 2-12 4-12 2 16 4 16 2-4 4-4"/>',
   briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
   cloud:    '<path d="M17.5 19a4.5 4.5 0 1 0-1.4-8.78A6 6 0 1 0 6 14"/><path d="M12 12v9"/><polyline points="8 17 12 21 16 17"/>',
+  alert:    '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
 }
 
 function Ic({ name, s = 16, c = 'currentColor', w = 1.75 }) {
@@ -32,8 +34,9 @@ function Ic({ name, s = 16, c = 'currentColor', w = 1.75 }) {
 
 const NAV = [
   { key: 'adult',  icon: 'book',      label: '성인 Daily', short: '성인' },
-  { key: 'rx',     icon: 'pill',      label: '처방 노하우', short: '처방' },
-  { key: 'notes',  icon: 'book',      label: '질환 노트',   short: '질환' },
+  { key: 'rx',      icon: 'pill',      label: '처방 노하우', short: '처방' },
+  { key: 'caution', icon: 'alert',     label: '주의 처방',   short: '주의' },
+  { key: 'notes',   icon: 'book',      label: '질환 노트',   short: '질환' },
   { key: 'family', icon: 'users',     label: '가족 건강',   short: '가족' },
   { key: 'us',     icon: 'wave',      label: '초음파',      short: '초음파' },
   { key: 'ops',    icon: 'briefcase', label: '운영 노하우', short: '운영' },
@@ -44,6 +47,7 @@ function ActiveTab({ tab }) {
   if (tab === 'adult') return <AdultDailyTab />
   if (tab === 'family') return <FamilyTab />
   if (tab === 'notes') return <DiseaseNoteTab />
+  if (tab === 'caution') return <CautionTab />
   if (tab === 'us') return <UltrasoundTab />
   if (tab === 'ops') return <OpsTab />
   if (tab === 'backup') return <BackupTab />
