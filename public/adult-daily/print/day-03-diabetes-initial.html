@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Day 03 당뇨 초진</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.5px; }
+    h1 { font-size: 24px; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 22px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #c2410c; color: #9a330a; }
+    h3 { font-size: 13px; margin: 14px 0 6px; }
+    ul, ol { margin: 6px 0 8px 20px; padding: 0; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 11.5px; }
+    th, td { border: 1px solid #e7e2d7; padding: 6px 7px; vertical-align: top; }
+    th { background: #fff7ed; color: #9a330a; text-align: left; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .pill { display: inline-block; border: 1px solid #fed7aa; background: #ffedd5; color: #9a330a; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
+    .box { border: 1px solid #e7e2d7; background: #faf7f1; border-radius: 8px; padding: 10px 12px; margin: 8px 0 12px; }
+    .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
+    .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
+    .script { border-left: 4px solid #c2410c; background: #fff7ed; padding: 9px 12px; margin: 7px 0; }
+    .small { color: #78716c; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1>성인 Daily Day 03 — 당뇨 초진</h1>
+  <div class="meta">
+    <span class="pill">1차진료</span>
+    <span class="pill">만성질환</span>
+    <span class="pill">KCD E11 / R73</span>
+    <span class="pill">v2026.05.21</span>
+    <span class="pill">작성일 2026-05-21</span>
+  </div>
+
+  <div class="box">
+    <strong>오늘의 목표</strong><br>
+    첫 방문에서 위험한 고혈당을 가르고, 당뇨 진단을 확인하며, metformin 시작 가능성과 합병증 스크리닝 계획을 정한다.
+  </div>
+
+  <h2>1. 당일 의뢰 또는 응급실</h2>
+  <div class="box danger">
+    케톤산증 의심, 심한 탈수/의식 변화, 구토/복통, 체중감소를 동반한 심한 고혈당, A1c 10% 초과 또는 혈당 300 mg/dL 이상이면 인슐린 필요성까지 보고 빠르게 의뢰한다.
+  </div>
+
+  <h2>2. 진단 기준</h2>
+  <table>
+    <thead><tr><th>검사</th><th>당뇨 기준</th><th>실전 포인트</th></tr></thead>
+    <tbody>
+      <tr><td>HbA1c</td><td>6.5% 이상</td><td>빈혈, CKD, 최근 수혈 등에서 혈당과 불일치 가능.</td></tr>
+      <tr><td>공복혈당</td><td>126 mg/dL 이상</td><td>무증상이면 재확인.</td></tr>
+      <tr><td>75 g OGTT 2시간</td><td>200 mg/dL 이상</td><td>경계 사례에서 활용.</td></tr>
+      <tr><td>무작위혈당</td><td>전형 증상 + 200 mg/dL 이상</td><td>다뇨, 다음, 체중감소, 고혈당 위기 동반 시.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. 첫 방문 루틴</h2>
+  <ol>
+    <li>다뇨, 다음, 체중감소, 시야흐림, 반복 감염, 흉통/호흡곤란, 탈수 확인.</li>
+    <li>약물과 배경: 스테로이드, 항정신병약, 임신성 당뇨, 췌장질환, 가족력, 음주.</li>
+    <li>동반질환: ASCVD, 심부전, CKD, 말초동맥질환, 뇌졸중.</li>
+    <li>검사: eGFR/Cr, AST/ALT, 지질, 소변 ACR, 요검사, 혈압, BMI/허리둘레.</li>
+    <li>오늘 처방, 생활요법, 합병증 스크리닝, 2-4주 추적 계획을 정리.</li>
+  </ol>
+
+  <h2>4. Metformin 시작</h2>
+  <table>
+    <thead><tr><th>상황</th><th>선택</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td>일반 초진, eGFR 45 이상</td><td>Metformin 500 mg qd 또는 bid, 식후 시작</td><td>위장관 부작용 설명, 1-2주 간격 증량.</td></tr>
+      <tr><td>eGFR 30-44</td><td>새 시작은 신중</td><td>전문의 판단 또는 감량/모니터링 고려.</td></tr>
+      <tr><td>eGFR 30 미만</td><td>금기</td><td>대체 약제 및 의뢰 고려.</td></tr>
+      <tr><td>탈수, 저산소증, 중증감염, 조영제 검사 전후</td><td>일시 중지 고려</td><td>젖산산증 위험 상황을 설명.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. 동반질환별 약제 선택</h2>
+  <ul>
+    <li>ASCVD, 심부전, CKD가 있으면 SGLT2 inhibitor 또는 GLP-1 receptor agonist 계열의 장기 이득을 우선 검토한다.</li>
+    <li>A1c가 진단 시점부터 많이 높으면 초기 병합요법을 고려한다.</li>
+    <li>A1c 10% 초과, 혈당 300 mg/dL 이상, catabolic 증상이 있으면 인슐린 포함 치료 평가가 필요하다.</li>
+  </ul>
+
+  <h2>6. 합병증 스크리닝</h2>
+  <table>
+    <thead><tr><th>영역</th><th>초진에서 할 일</th></tr></thead>
+    <tbody>
+      <tr><td>신장</td><td>eGFR/Cr, 소변 albumin/creatinine ratio. 단백뇨 또는 eGFR 저하 시 ACEi/ARB와 의뢰 기준 검토.</td></tr>
+      <tr><td>눈</td><td>제2형 당뇨는 진단 시점부터 안저/안과 의뢰.</td></tr>
+      <tr><td>발/신경</td><td>감각저하, 저림, 궤양, 발 변형, 말초맥박 확인. 발관리 교육.</td></tr>
+      <tr><td>심혈관</td><td>혈압, 지질, 흡연, ASCVD 병력 확인. statin 필요성 검토.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7. KCD와 추적</h2>
+  <ul>
+    <li>E11.9: 합병증을 동반하지 않은 제2형 당뇨병. 합병증 확인 시 세부코드 조정.</li>
+    <li>R73.x: 당뇨 확진 전 고혈당 또는 전당뇨 평가 단계.</li>
+    <li>약 시작 후 2-4주에 부작용, 복약, 증상 확인. HbA1c는 보통 3개월 간격.</li>
+  </ul>
+
+  <h2>8. 환자 설명</h2>
+  <div class="script">당뇨 치료는 혈당 숫자만 낮추는 것이 아니라 눈, 콩팥, 신경, 심혈관 합병증을 줄이는 치료입니다.</div>
+  <div class="script">Metformin은 식사와 함께 낮은 용량으로 시작하면 속 불편감을 줄일 수 있습니다.</div>
+  <div class="script">심한 설사, 탈수, 심한 감염, 조영제 검사가 있으면 약을 계속 먹어도 되는지 연락 주세요.</div>
+
+  <h2>참고 출처</h2>
+  <p class="small">
+    ADA Standards of Care 2026: https://professional.diabetes.org/standards-of-care<br>
+    ADA Diagnosis and Classification 2026: https://diabetesjournals.org/care/article/49/Supplement_1/S27/163926/2-Diagnosis-and-Classification-of-Diabetes<br>
+    ADA Pharmacologic Approaches 2026: https://diabetesjournals.org/care/article/49/Supplement_1/S183/163934/9-Pharmacologic-Approaches-to-Glycemic-Treatment<br>
+    KDA 2025 guideline: https://pubmed.ncbi.nlm.nih.gov/40631460/
+  </p>
+</body>
+</html>
