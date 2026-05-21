@@ -6,58 +6,194 @@
   <style>
     @page { size: A4; margin: 14mm; }
     * { box-sizing: border-box; }
-    body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.5px; }
-    h1 { font-size: 24px; margin: 0 0 8px; }
-    h2 { font-size: 16px; margin: 22px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #c2410c; color: #9a330a; }
-    table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 11.5px; }
-    th, td { border: 1px solid #e7e2d7; padding: 6px 7px; vertical-align: top; }
-    th { background: #fff7ed; color: #9a330a; text-align: left; }
-    ul, ol { margin: 6px 0 8px 20px; padding: 0; }
-    .pill { display:inline-block; border:1px solid #fed7aa; background:#ffedd5; color:#9a330a; border-radius:999px; padding:3px 9px; font-size:11px; font-weight:700; margin-right:4px; }
-    .box { border:1px solid #e7e2d7; background:#faf7f1; border-radius:8px; padding:10px 12px; margin:8px 0 12px; }
-    .danger { border-color:#fecaca; background:#fef2f2; color:#7f1d1d; }
-    .small { color:#78716c; font-size:11px; }
+    body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.64; font-size: 12.5px; }
+    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
+    h2 { font-size: 16px; margin: 22px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #0f766e; color: #115e59; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
+    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.5px; }
+    th, td { border: 1px solid #d9e5df; padding: 6px 7px; vertical-align: top; }
+    th { background: #ecfdf5; color: #115e59; text-align: left; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .pill { display: inline-block; border: 1px solid #99f6e4; background: #ccfbf1; color: #115e59; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
+    .box { border: 1px solid #d9e5df; background: #f6faf8; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
+    .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
+    .script { border-left: 4px solid #0f766e; background: #f0fdfa; padding: 9px 12px; margin: 8px 0; }
+    .small { color: #57534e; font-size: 11px; }
   </style>
 </head>
 <body>
   <h1>성인 Daily Day 02 — 고혈압 추적</h1>
-  <div><span class="pill">1차진료</span><span class="pill">고혈압</span><span class="pill">작성일 2026-05-13</span></div>
-  <div class="box"><strong>오늘의 목표</strong><br>첫 약 시작 후 혈압이 충분히 내려가는지, 부작용은 없는지, 증량·병합·의뢰 중 무엇이 필요한지 결정한다.</div>
+  <div class="meta">
+    <span class="pill">1차진료</span>
+    <span class="pill">만성질환 추적</span>
+    <span class="pill">KCD I10</span>
+    <span class="pill">작성일 2026-05-13</span>
+  </div>
 
-  <h2>1. 먼저 확인할 위험 신호</h2>
-  <div class="box danger">흉통, 호흡곤란, 신경학적 결손, 의식 변화, 시야장애, 폐부종, 급성 신손상 의심이 있으면 혈압 숫자만 보지 말고 당일 의뢰/응급실을 우선한다.</div>
+  <div class="box">
+    <strong>오늘의 목표</strong><br>
+    재진에서 약을 올릴지, 다른 계열을 붙일지, 부작용 때문에 바꿀지, 상급병원으로 보낼지 결정한다.
+    핵심은 가정혈압 평균, 실제 복약, 부작용, 신기능/전해질이다.
+  </div>
 
-  <h2>2. 재진 5분 루틴</h2>
+  <h2>1. 배경지식</h2>
+  <p>
+    고혈압 추적 진료는 로컬 의원 만성질환 관리의 가장 흔한 반복 업무다. 실패 원인은 약제가 약해서라기보다
+    가정혈압 확인 부족, 복약 누락, 염분/음주, NSAID·감기약·스테로이드, 수면무호흡, 부작용으로 인한 임의 중단이 많다.
+  </p>
+  <p>
+    기본 목표는 진료실 혈압 140/90 mmHg 미만, 가정혈압 135/85 mmHg 미만이다. 다만 고령, 기립저혈압,
+    frailty, CKD, 당뇨, 심혈관질환 동반 여부에 따라 목표와 속도를 개별화한다.
+  </p>
+  <div class="box">
+    단독요법으로 목표에 도달하지 못하면 같은 약을 무리하게 최대용량까지 밀기보다 서로 다른 계열의 저용량 병합이 실용적이다.
+    RAS blocker, CCB, thiazide/thiazide-like diuretic 조합이 추적 진료의 기본 축이다.
+  </div>
+
+  <h2>2. 첫 3분 Triage</h2>
+  <div class="box danger">
+    <strong>즉시 ER</strong>: 180/120 mmHg 전후 이상 + 흉통, 호흡곤란, 신경학적 결손, 의식 변화, 시야장애,
+    폐부종, 급성 신손상 의심. 대동맥박리, ACS, stroke/TIA, 임신/산후 중증 고혈압도 기다리지 않는다.
+  </div>
   <ol>
-    <li>진료실 혈압을 안정 후 재측정하고, 가정혈압 기록과 비교한다.</li>
-    <li>복약 순응도: 빠뜨린 횟수, 복용 시간, 비용, 이해도 확인.</li>
-    <li>생활요인: 염분, 음주, NSAID/감기약, 수면무호흡, 체중 변화를 확인.</li>
-    <li>부작용: CCB 부종/홍조, ARB/ACEi 기침·Cr/K 변화, 이뇨제 전해질·요산.</li>
-    <li>오늘 결정: 유지, 증량, 병합, 검사 재확인, 의뢰.</li>
+    <li>가정혈압 기록을 먼저 본다. 없으면 오늘 수치만으로 과격하게 조정하지 않는다.</li>
+    <li>흉통, 숨참, 신경증상, 시야장애, 의식 변화, 심한 두통을 확인한다.</li>
+    <li>약 이름, 복용 시간, 빠뜨린 횟수, 부작용, 약국 대체 여부를 확인한다.</li>
+    <li>ARB/ACEi, thiazide, spironolactone 사용자는 Cr/eGFR, K, Na 추적 필요성을 확인한다.</li>
+    <li>오늘 결론을 증량, 병합, 변경, 의뢰 중 하나로 정한다.</li>
   </ol>
 
-  <h2>3. 증량/병합 판단</h2>
+  <h2>3. 핵심 문진 5문항</h2>
+  <ol>
+    <li>집 혈압은 아침·저녁 평균이 얼마였는가?</li>
+    <li>약을 일주일에 몇 번 빠뜨렸고, 언제 복용하는가?</li>
+    <li>어지럼, 실신 느낌, 발목부종, 마른기침, 근육경련, 성기능 저하가 있었는가?</li>
+    <li>진통제, 감기약, 스테로이드, 한약/보충제, 다이어트약, 피임약을 새로 시작했는가?</li>
+    <li>염분 많은 식사, 음주, 코골이/수면무호흡, 체중 증가가 있었는가?</li>
+  </ol>
+
+  <h2>4. 꼭 해야 할 Physical Exam</h2>
+  <ul>
+    <li>혈압 재측정: 5분 안정 후 같은 팔·같은 자세. 양팔 차이가 컸다면 높은 쪽 기준.</li>
+    <li>기립혈압: 고령, 어지럼, 낙상, 당뇨 자율신경병증, 다약제 환자에서 확인.</li>
+    <li>맥박수와 리듬: 서맥, 빈맥, 불규칙 맥박. beta-blocker 조정과 AF 단서.</li>
+    <li>체중, 발목부종: CCB 부종, 심부전, 신장질환, 염분 섭취 평가.</li>
+    <li>심폐청진, 말초맥박, 복부 bruit: 심부전·판막질환·혈관질환 단서.</li>
+  </ul>
+
+  <h2>5. 검사</h2>
   <table>
-    <thead><tr><th>상황</th><th>판단</th></tr></thead>
+    <thead><tr><th>상황</th><th>검사</th><th>해석/행동</th></tr></thead>
     <tbody>
-      <tr><td>복약 잘 하고 가정혈압도 목표 초과</td><td>단일제 증량 또는 다른 계열 병합.</td></tr>
-      <tr><td>목표보다 20/10 이상 높음</td><td>초기부터 ARB/CCB 등 병합을 적극 고려.</td></tr>
-      <tr><td>부작용으로 순응도 저하</td><td>증량보다 계열 변경 또는 용량 조절.</td></tr>
-      <tr><td>3제 이상에도 조절 불량</td><td>순응도·측정·2차성 고혈압 확인 후 의뢰 고려.</td></tr>
+      <tr><td>ARB/ACEi 시작 또는 증량</td><td>Cr/eGFR, K</td><td>2-4주 내 확인. Cr 30% 이상 상승 또는 K 상승이면 원인 확인·감량/중단 고려.</td></tr>
+      <tr><td>Thiazide 사용</td><td>Na, K, Cr/eGFR, uric acid</td><td>저Na/저K, 탈수, 통풍 악화 확인.</td></tr>
+      <tr><td>Spironolactone 고려</td><td>Cr/eGFR, K</td><td>eGFR 낮거나 K 높으면 시작 금물 또는 전문의 상의.</td></tr>
+      <tr><td>조절 불량 지속</td><td>UA, urine ACR, HbA1c, lipid, ECG</td><td>CKD/당뇨/표적장기손상 확인.</td></tr>
+      <tr><td>두근거림/불규칙 맥</td><td>ECG</td><td>AF, 빈맥, 서맥 확인.</td></tr>
+    </tbody>
+  </table>
+  <p>
+    상급병원 검사는 심초음파, 신장초음파/신동맥 평가, renin/aldosterone, 수면다원검사, 24시간 활동혈압검사를 상황별로 의뢰한다.
+  </p>
+
+  <h2>6. KCD 코드</h2>
+  <table>
+    <thead><tr><th>코드</th><th>상황</th></tr></thead>
+    <tbody>
+      <tr><td>I10</td><td>본태성 고혈압. 추적·약물 조정의 주상병.</td></tr>
+      <tr><td>I11.x</td><td>고혈압성 심장병. 심부전/좌심실비대 등 근거가 있을 때.</td></tr>
+      <tr><td>I12.x</td><td>고혈압성 신장병. CKD와 고혈압의 관련성이 기록될 때.</td></tr>
+      <tr><td>I13.x</td><td>고혈압성 심장 및 신장병. 심장·신장 침범이 함께 명확할 때.</td></tr>
+      <tr><td>N18.x / E78.x / E11.x</td><td>CKD, 이상지질혈증, 당뇨 동반 시 부상병 후보.</td></tr>
+      <tr><td>R60.0 / R42</td><td>부종 또는 어지럼 평가가 필요한 경우.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">상병코드는 실무 후보이며, 최종 청구는 실제 진단 근거, 검사 결과, 차팅 내용에 맞춰 조정한다.</p>
+
+  <h2>7. 처방 Regimen</h2>
+  <h3>목표 미달 시 기본 알고리즘</h3>
+  <ol>
+    <li>가정혈압 평균과 복약 순응도를 확인한다.</li>
+    <li>NSAID, 감기약, 스테로이드, 과음, 염분, 체중 증가, 수면무호흡을 교정한다.</li>
+    <li>단독 저용량이면 표준용량으로 증량하거나 다른 계열을 병합한다.</li>
+    <li>2제 병합에도 목표 미달이면 RAS blocker + CCB + thiazide/thiazide-like 3제를 고려한다.</li>
+    <li>이뇨제 포함 3제에도 조절이 안 되면 resistant HTN 가능성을 보고 의뢰 또는 4제 조정을 검토한다.</li>
+  </ol>
+  <table>
+    <thead><tr><th>현재 처방</th><th>목표 미달 시</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td>Amlodipine 5 mg qd</td><td>10 mg qd 또는 ARB 추가</td><td>부종 있으면 증량보다 ARB 병합/CCB 감량.</td></tr>
+      <tr><td>Losartan 50 mg qd</td><td>100 mg qd 또는 amlodipine 5 mg 추가</td><td>K/Cr, 임신 가능성 확인.</td></tr>
+      <tr><td>Telmisartan 40 mg qd</td><td>80 mg qd 또는 CCB 추가</td><td>K/Cr, 어지럼 확인.</td></tr>
+      <tr><td>ARB/CCB 저용량 복합제</td><td>각 성분 증량 또는 thiazide 계열 추가</td><td>eGFR, Na/K, 요산 확인.</td></tr>
+      <tr><td>2제 표준용량에도 미달</td><td>ARB + CCB + thiazide-like 3제</td><td>저Na/저K, 탈수, 통풍, CKD 주의.</td></tr>
     </tbody>
   </table>
 
-  <h2>4. 추적 검사</h2>
+  <h3>약제별 부작용 대응</h3>
+  <table>
+    <thead><tr><th>약제</th><th>흔한 문제</th><th>의원 대응</th></tr></thead>
+    <tbody>
+      <tr><td>CCB</td><td>발목부종, 홍조, 두근거림</td><td>심부전/신장질환 배제. 용량 감량, ARB 병합, 계열 변경.</td></tr>
+      <tr><td>ACEi</td><td>마른기침, 혈관부종, Cr/K 상승</td><td>기침 지속 시 ARB 전환. 혈관부종은 중단·응급 평가.</td></tr>
+      <tr><td>ARB</td><td>Cr/K 상승, 어지럼</td><td>NSAID/탈수/CKD 확인. 임신 가능성 있으면 금기.</td></tr>
+      <tr><td>Thiazide</td><td>저Na/저K, 고요산혈증, 탈수</td><td>고령·저체중·통풍·eGFR 저하에서 주의.</td></tr>
+      <tr><td>Beta-blocker</td><td>서맥, 피로, 성기능 저하, 기관지수축</td><td>천식/COPD, HR 낮은 환자 주의. 적응증 있을 때 선택.</td></tr>
+      <tr><td>Spironolactone</td><td>고K, 여성형유방, Cr 상승</td><td>Resistant HTN 4제 후보. eGFR/K 확인 후 신중히.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    안전 체크: eGFR, K, Na, 임신 가능성, 고령/frailty, 항응고제, NSAID, PPI 장기복용, BZD, quinolone, steroid 사용을 확인한다.
+    ARB/ACEi/이뇨제/spironolactone 조정 후에는 신기능과 전해질 추적 일정을 차팅한다.
+  </div>
+
+  <h2>8. Follow-up</h2>
   <ul>
-    <li>ACEi/ARB/이뇨제 시작·증량 후 Cr/eGFR, K 확인.</li>
-    <li>이뇨제 사용 시 Na/K, 요산, 탈수 증상 확인.</li>
-    <li>당뇨, CKD, 단백뇨 동반 시 urine ACR/eGFR 추적.</li>
+    <li>약 시작 또는 증량 후: 2-4주 뒤 혈압, 부작용, 순응도 확인.</li>
+    <li>ARB/ACEi/이뇨제/spironolactone 조정 후: 2-4주 내 Cr/eGFR, K, Na 확인.</li>
+    <li>안정화 후: 1-3개월 간격, 이후 조절 안정·순응도 좋으면 3개월 단위.</li>
+    <li>고령, CKD, 전해질 이상, 다약제: 더 짧게 추적.</li>
+  </ul>
+  <p>
+    치료 실패는 가정혈압 평균 135/85 이상 반복, 진료실 140/90 이상 2회 이상 지속, 2제 이상 표준용량에도 목표 미달,
+    이뇨제 포함 3제에도 조절 불량, 또는 검사 이상으로 일반 증량이 어려운 경우로 본다.
+  </p>
+
+  <h2>9. Refer 기준</h2>
+  <ul>
+    <li>응급: 표적장기손상 증상 동반, ACS/stroke/TIA/대동맥박리/급성 심부전 의심, K 6.0 이상, 급성 신손상, 임신/산후 중증 고혈압.</li>
+    <li>빠른 외래: Cr/eGFR 급격 악화, 단백뇨/혈뇨, 반복 저칼륨혈증, 30세 이전 중증 고혈압, resistant HTN.</li>
+    <li>계획 의뢰: 수면무호흡, 활동혈압검사 필요, 2차성 고혈압 평가, 표준 병합치료 유지가 어려운 부작용.</li>
   </ul>
 
-  <h2>5. 환자 설명</h2>
-  <div class="box">혈압약은 한 번에 딱 맞는 약을 찾기보다, 효과와 부작용을 보면서 용량과 조합을 맞춰가는 치료입니다. 집 혈압 기록이 가장 좋은 조정 근거가 됩니다.</div>
+  <h2>10. 환자 설명 스크립트</h2>
+  <div class="script">오늘 혈압이 높다고 바로 약을 많이 올리지는 않겠습니다. 집에서 잰 평균과 실제 복용 여부를 같이 봐야 과하게 떨어뜨리는 일을 피할 수 있습니다.</div>
+  <div class="script">한 가지 약을 끝까지 세게 쓰는 것보다, 서로 다른 약을 낮은 용량으로 같이 쓰는 편이 혈압은 더 잘 잡히고 부작용은 줄어드는 경우가 많습니다.</div>
+  <div class="script">발목이 붓거나 어지럽거나 기침이 생기는 것은 참으면서 드실 문제가 아닙니다. 약을 바꾸거나 용량을 조정할 수 있으니 먼저 알려주셔야 합니다.</div>
+  <div class="script">진통소염제, 감기약, 스테로이드, 술, 짠 음식, 수면무호흡이 혈압을 올릴 수 있습니다. 약을 늘리기 전에 이런 원인을 같이 줄여야 합니다.</div>
+  <div class="script">가슴통증, 숨참, 한쪽 마비, 말 어눌함, 갑자기 심한 두통, 시야장애가 있으면 혈압약을 추가로 먹고 기다리지 말고 응급실로 가셔야 합니다.</div>
+
+  <h2>11. 자가체크</h2>
+  <ol>
+    <li>고혈압 재진에서 약 증량 전 반드시 확인할 3가지는?</li>
+    <li>Amlodipine 복용 후 발목부종이 생긴 환자에서 가능한 대응은?</li>
+    <li>ARB 증량 후 확인해야 할 검사와 위험 소견은?</li>
+    <li>Resistant hypertension의 실무적 정의와 의뢰 기준은?</li>
+    <li>혈압 조절을 방해하는 흔한 약물/생활요인 5가지는?</li>
+  </ol>
 
   <h2>참고 출처</h2>
-  <p class="small">Korean Society of Hypertension focused update, home BP position statement, 2023 ESH hypertension guideline summary.</p>
+  <p class="small">
+    Korean Society of Hypertension 2022 focused update:
+    https://clinicalhypertension.biomedcentral.com/articles/10.1186/s40885-023-00234-9<br>
+    KSH Resistant hypertension consensus:
+    https://clinicalhypertension.biomedcentral.com/articles/10.1186/s40885-023-00255-4<br>
+    2024 ESC Guidelines for elevated BP and hypertension:
+    https://academic.oup.com/eurheartj/article/45/38/3912/7741010
+  </p>
 </body>
 </html>

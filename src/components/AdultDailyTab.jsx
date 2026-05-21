@@ -1,21 +1,15 @@
 import { useMemo, useState } from 'react'
 import { adultCurriculum, adultDailyTemplate } from '../data/adultCurriculum'
 import { adultDailyContent } from '../data/adultDailyContent'
-import { adultDailyDay03 } from '../data/adultDailyDay03'
 import { useIsMobile } from './ui'
 
-const ADULT_DAILY_VERSION = 'v2026.05.21'
+const ADULT_DAILY_VERSION = 'v2026.05.21-full'
 const ADULT_DAILY_UPDATED_AT = '2026-05-21'
-
-const adultDailyItems = [
-  ...adultDailyContent,
-  adultDailyDay03,
-]
 
 const planSummary = [
   { label: '목표', value: '개원 전 성인 1차진료 반복 질환을 진료실 루틴으로 만들기' },
   { label: '속도', value: '하루 1주제, 가벼운 주제는 하루 2주제까지 묶음' },
-  { label: '산출물', value: 'master 원본 + A4 출력본 + 앱 카드' },
+  { label: '산출물', value: 'master 원본 + A4 HTML + iPad용 PDF + 앱 카드' },
   { label: '검토 기준', value: '증상 접근, KCD, 처방, 추적, refer, 환자 설명' },
   { label: '버전', value: `${ADULT_DAILY_VERSION} · 업데이트 ${ADULT_DAILY_UPDATED_AT}` },
 ]
@@ -66,11 +60,7 @@ const S = {
 export default function AdultDailyTab() {
   const isMobile = useIsMobile()
   const topics = useMemo(flattenCurriculum, [])
-  const contentByDay = useMemo(() => {
-    const merged = new Map()
-    adultDailyItems.forEach(item => merged.set(item.day, item))
-    return merged
-  }, [])
+  const contentByDay = useMemo(() => new Map(adultDailyContent.map(item => [item.day, item])), [])
   const [selectedDay, setSelectedDay] = useState(1)
   const [doneUntil, setDoneUntil] = useState(() => Number(localStorage.getItem('adult_daily_completed') || 0))
   const selected = topics.find(t => t.day === selectedDay) || topics[0]
@@ -90,7 +80,7 @@ export default function AdultDailyTab() {
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
             <div>
               <div style={{ ...S.pill, marginBottom: 10 }}>Adult Primary Care Daily</div>
-              <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 28, lineHeight: 1.25 }}>성인 1차진료 학습</h1>
+              <h1 style={{ margin: 0, fontSize: isMobile ? 22 : 28, lineHeight: 1.25, letterSpacing: '-0.4px' }}>성인 1차진료 학습</h1>
               <p style={{ margin: '8px 0 0', color: '#78716C', fontSize: 14, lineHeight: 1.7 }}>
                 동네 의원에서 자주 보는 성인 증상, 만성질환, 비급여 상담 영역을 진료실에서 바로 쓰는 단위로 누적합니다.
               </p>
@@ -175,7 +165,7 @@ export default function AdultDailyTab() {
                     {content ? '자료 업로드됨' : '업로드 대기'}
                   </span>
                 </div>
-                <h2 style={{ margin: 0, fontSize: isMobile ? 21 : 25, lineHeight: 1.3 }}>{selected.topic}</h2>
+                <h2 style={{ margin: 0, fontSize: isMobile ? 21 : 25, lineHeight: 1.3, letterSpacing: '-0.3px' }}>{selected.topic}</h2>
                 {content?.date && <div style={{ fontSize: 12, color: '#78716C', marginTop: 6 }}>작성일 {content.date}</div>}
               </div>
               <button onClick={markDone} style={{
@@ -197,10 +187,13 @@ export default function AdultDailyTab() {
                     <div style={{ fontSize: 13, fontWeight: 900, color: '#1C1917' }}>오늘의 진료 카드</div>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {content.printPath && (
-                        <a href={content.printPath} target="_blank" rel="noopener noreferrer" style={{ ...S.actionLink, color: '#2563EB', background: '#EFF6FF', border: '1px solid #BFDBFE' }}>A4 출력본 열기</a>
+                        <a href={content.printPath} target="_blank" rel="noopener noreferrer" style={{ ...S.actionLink, color: '#2563EB', background: '#EFF6FF', border: '1px solid #BFDBFE' }}>A4 HTML 열기</a>
+                      )}
+                      {content.pdfPath && (
+                        <a href={content.pdfPath} target="_blank" rel="noopener noreferrer" style={{ ...S.actionLink, color: '#166534', background: '#F0FDF4', border: '1px solid #BBF7D0' }}>PDF 다운로드</a>
                       )}
                       {content.masterPath && (
-                        <a href={content.masterPath} target="_blank" rel="noopener noreferrer" style={{ ...S.actionLink, color: '#166534', background: '#F0FDF4', border: '1px solid #BBF7D0' }}>master 원본</a>
+                        <a href={content.masterPath} target="_blank" rel="noopener noreferrer" style={{ ...S.actionLink, color: '#7C2D12', background: '#FFF7ED', border: '1px solid #FED7AA' }}>master 원본</a>
                       )}
                     </div>
                   </div>
@@ -238,9 +231,10 @@ export default function AdultDailyTab() {
             )}
 
             <div style={{ marginTop: 18, border: '1px solid #FED7AA', background: '#FFFBEB', borderRadius: 12, padding: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 900, color: '#92400E', marginBottom: 6 }}>운영 메모</div>
+              <div style={{ fontSize: 13, fontWeight: 900, color: '#92400E', marginBottom: 6 }}>다음 구현 단계</div>
               <div style={{ fontSize: 13, color: '#633806', lineHeight: 1.8 }}>
-                자료별 업데이트 이력과 작성일을 남겨, 이후 주제 추가나 수정 시 어느 버전에서 바뀌었는지 바로 확인할 수 있습니다.
+                현재는 커리큘럼 차례표입니다. 다음 단계에서 매일 생성한 master/A4/app 카드 파일을 연결하면,
+                오늘의 자료와 누적 아카이브가 자동으로 채워지도록 만들 수 있습니다.
               </div>
             </div>
           </main>
