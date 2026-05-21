@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Day 02 고혈압 추적</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.5px; }
+    h1 { font-size: 24px; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 22px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #c2410c; color: #9a330a; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 11.5px; }
+    th, td { border: 1px solid #e7e2d7; padding: 6px 7px; vertical-align: top; }
+    th { background: #fff7ed; color: #9a330a; text-align: left; }
+    ul, ol { margin: 6px 0 8px 20px; padding: 0; }
+    .pill { display:inline-block; border:1px solid #fed7aa; background:#ffedd5; color:#9a330a; border-radius:999px; padding:3px 9px; font-size:11px; font-weight:700; margin-right:4px; }
+    .box { border:1px solid #e7e2d7; background:#faf7f1; border-radius:8px; padding:10px 12px; margin:8px 0 12px; }
+    .danger { border-color:#fecaca; background:#fef2f2; color:#7f1d1d; }
+    .small { color:#78716c; font-size:11px; }
+  </style>
+</head>
+<body>
+  <h1>성인 Daily Day 02 — 고혈압 추적</h1>
+  <div><span class="pill">1차진료</span><span class="pill">고혈압</span><span class="pill">작성일 2026-05-13</span></div>
+  <div class="box"><strong>오늘의 목표</strong><br>첫 약 시작 후 혈압이 충분히 내려가는지, 부작용은 없는지, 증량·병합·의뢰 중 무엇이 필요한지 결정한다.</div>
+
+  <h2>1. 먼저 확인할 위험 신호</h2>
+  <div class="box danger">흉통, 호흡곤란, 신경학적 결손, 의식 변화, 시야장애, 폐부종, 급성 신손상 의심이 있으면 혈압 숫자만 보지 말고 당일 의뢰/응급실을 우선한다.</div>
+
+  <h2>2. 재진 5분 루틴</h2>
+  <ol>
+    <li>진료실 혈압을 안정 후 재측정하고, 가정혈압 기록과 비교한다.</li>
+    <li>복약 순응도: 빠뜨린 횟수, 복용 시간, 비용, 이해도 확인.</li>
+    <li>생활요인: 염분, 음주, NSAID/감기약, 수면무호흡, 체중 변화를 확인.</li>
+    <li>부작용: CCB 부종/홍조, ARB/ACEi 기침·Cr/K 변화, 이뇨제 전해질·요산.</li>
+    <li>오늘 결정: 유지, 증량, 병합, 검사 재확인, 의뢰.</li>
+  </ol>
+
+  <h2>3. 증량/병합 판단</h2>
+  <table>
+    <thead><tr><th>상황</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>복약 잘 하고 가정혈압도 목표 초과</td><td>단일제 증량 또는 다른 계열 병합.</td></tr>
+      <tr><td>목표보다 20/10 이상 높음</td><td>초기부터 ARB/CCB 등 병합을 적극 고려.</td></tr>
+      <tr><td>부작용으로 순응도 저하</td><td>증량보다 계열 변경 또는 용량 조절.</td></tr>
+      <tr><td>3제 이상에도 조절 불량</td><td>순응도·측정·2차성 고혈압 확인 후 의뢰 고려.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. 추적 검사</h2>
+  <ul>
+    <li>ACEi/ARB/이뇨제 시작·증량 후 Cr/eGFR, K 확인.</li>
+    <li>이뇨제 사용 시 Na/K, 요산, 탈수 증상 확인.</li>
+    <li>당뇨, CKD, 단백뇨 동반 시 urine ACR/eGFR 추적.</li>
+  </ul>
+
+  <h2>5. 환자 설명</h2>
+  <div class="box">혈압약은 한 번에 딱 맞는 약을 찾기보다, 효과와 부작용을 보면서 용량과 조합을 맞춰가는 치료입니다. 집 혈압 기록이 가장 좋은 조정 근거가 됩니다.</div>
+
+  <h2>참고 출처</h2>
+  <p class="small">Korean Society of Hypertension focused update, home BP position statement, 2023 ESH hypertension guideline summary.</p>
+</body>
+</html>
