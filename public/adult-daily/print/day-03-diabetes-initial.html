@@ -2,194 +2,225 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>Day 03 당뇨 초진</title>
+  <title>Day 03 당뇨 초진 v2</title>
   <style>
-    @page { size: A4; margin: 14mm; }
+    @page { size: A4; margin: 12mm; }
     * { box-sizing: border-box; }
-    body { font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
-    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
-    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #047857; color: #065f46; }
-    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
-    ul, ol { margin: 6px 0 11px 20px; padding: 0; }
+    body {
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color: #1c1917;
+      line-height: 1.58;
+      font-size: 11.8px;
+    }
+    h1 { font-size: 23px; margin: 0 0 6px; letter-spacing: 0; }
+    h2 { font-size: 15px; margin: 18px 0 7px; padding-bottom: 5px; border-bottom: 2px solid #047857; color: #065f46; }
+    h3 { font-size: 12.5px; margin: 12px 0 5px; color: #1c1917; }
+    p { margin: 6px 0 10px; }
+    ul, ol { margin: 5px 0 10px 19px; padding: 0; }
     li { margin: 2px 0; }
-    table { width: 100%; border-collapse: collapse; margin: 9px 0 15px; font-size: 11.4px; }
-    th, td { border: 1px solid #cfe4da; padding: 6px 7px; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 13px; font-size: 10.8px; }
+    th, td { border: 1px solid #cfe4da; padding: 5px 6px; vertical-align: top; }
     th { background: #ecfdf5; color: #065f46; text-align: left; }
-    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-    .pill { display: inline-block; border: 1px solid #a7f3d0; background: #d1fae5; color: #065f46; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
-    .box { border: 1px solid #cfe4da; background: #f3faf6; border-radius: 8px; padding: 10px 12px; margin: 8px 0 14px; }
+    pre {
+      white-space: pre-wrap;
+      border: 1px solid #cfe4da;
+      background: #f8faf9;
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-size: 10.8px;
+      line-height: 1.6;
+    }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .pill { display: inline-block; border: 1px solid #a7f3d0; background: #d1fae5; color: #065f46; border-radius: 999px; padding: 3px 9px; font-size: 10.5px; font-weight: 800; }
+    .box { border: 1px solid #cfe4da; background: #f3faf6; border-radius: 8px; padding: 9px 11px; margin: 7px 0 12px; }
     .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
     .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
-    .script { border-left: 4px solid #047857; background: #ecfdf5; padding: 9px 12px; margin: 8px 0 10px; }
-    .small { color: #57534e; font-size: 11px; }
+    .script { border-left: 4px solid #047857; background: #ecfdf5; padding: 9px 11px; margin: 7px 0 10px; }
+    .small { color: #57534e; font-size: 10.5px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    @media print {
+      .page-break { break-before: page; }
+    }
   </style>
 </head>
 <body>
-  <h1>성인 Daily Day 03 - 당뇨 초진</h1>
+  <div class="small">ClinicNote · 성인 Daily 진료 완성하기 &gt; D. 내분비/대사</div>
+  <h1>D03. 당뇨 초진</h1>
   <div class="meta">
     <span class="pill">1차진료</span>
     <span class="pill">검진 이상</span>
     <span class="pill">KCD E11.x</span>
-    <span class="pill">작성일 2026-05-18</span>
+    <span class="pill">v2 · 2026.05</span>
   </div>
 
   <div class="box">
-    <strong>오늘의 목표</strong><br>
-    검진 HbA1c 상승 또는 고혈당 초진에서 응급/의뢰 환자를 먼저 가르고, 진단 확인, metformin 시작 가능 여부,
-    합병증 스크리닝, 3개월 추적 계획을 정한다.
+    <strong>1줄 요약</strong>: 당뇨 초진 = 확진 + 응급 배제 + 병형 감별 + 합병증 스크리닝 + 치료/교육 + 추적예약
   </div>
+  <p class="small">교육용 초안입니다. 실제 처방/청구는 환자 상태, 병원 프로토콜, 최신 진료지침, 심평/EDI 기준을 확인하세요.</p>
 
-  <h2>1. 배경지식</h2>
-  <p>
-    성인 당뇨 초진은 로컬 의원 검진 상담의 핵심 반복 업무다. 대부분은 무증상 HbA1c 6.5-8%대의 2형당뇨병이지만,
-    급성 대사위기, 1형당뇨/LADA, 임신, 중증 감염, 진행된 신장·심혈관 합병증을 놓치면 위험하다.
-  </p>
-  <p>
-    진단 기준은 HbA1c 6.5% 이상, 공복혈당 126 mg/dL 이상, OGTT 2시간 200 mg/dL 이상, 또는 고혈당 전형 증상과
-    무작위혈당 200 mg/dL 이상이다. 무증상자는 원칙적으로 반복검사로 확인한다. 빈혈, 최근 수혈/출혈, CKD, 간질환,
-    임신, 혈색소 이상에서는 HbA1c가 실제 평균혈당과 어긋날 수 있다.
-  </p>
-  <div class="box">
-    2025 대한당뇨병학회 지침은 동반질환과 환자 특성에 따른 개별화 약제 선택을 강조한다.
-    한국 의원 실무에서는 금기가 없고 eGFR이 허용되면 metformin이 흔한 출발점이지만, ASCVD/HF/CKD/비만이 뚜렷하면
-    SGLT2 inhibitor 또는 GLP-1RA 계열을 초기부터 같이 고려한다.
-  </div>
-
-  <h2>2. 첫 3분 Triage</h2>
-  <div class="box danger">
-    <strong>30초 응급/당일 의뢰</strong>: 의식 저하, 심한 탈수, 반복 구토/복통, Kussmaul 호흡, ketone 양성,
-    혈당 300-400 mg/dL 이상에서 전신상태 불량, 마른 체형 급격한 체중감소, 임신, 흉통/신경학적 결손, 감염성 당뇨발.
-  </div>
-  <ol>
-    <li>의식, 탈수, 구토, 복통, 호흡, 감염, ketone으로 급성 대사위기를 배제한다.</li>
-    <li>HbA1c와 혈당을 진단 기준에 맞춰 해석하고, 무증상이면 확인검사 계획을 세운다.</li>
-    <li>체중감소, 다갈/다뇨, ketone, 마른 체형으로 1형/LADA 가능성을 확인한다.</li>
-    <li>eGFR, 간기능, 임신 가능성, 음주, hypoxia/심부전, 급성질환을 보고 metformin 가능 여부를 판단한다.</li>
-    <li>오늘 결론을 생활요법+재검, metformin 시작, 초기 병합/의뢰, 응급 의뢰 중 하나로 정한다.</li>
-  </ol>
-
-  <h2>3. 핵심 문진 5문항</h2>
-  <ol>
-    <li>다갈, 다뇨, 야뇨, 피로, 시야흐림, 최근 체중감소가 있었는가?</li>
-    <li>이번 결과가 처음인지, 예전 공복혈당/HbA1c/임신성당뇨 병력이 있는가?</li>
-    <li>부모·형제 당뇨, 심근경색/뇌졸중, CKD, 지방간, 수면무호흡이 있는가?</li>
-    <li>스테로이드, 항정신병약, HIV 약, 면역억제제, 이뇨제, 한약/보충제, 술을 쓰는가?</li>
-    <li>임신 가능성, 수유, eGFR 저하, 간질환, 심부전/저산소증, 반복 구토/탈수가 있는가?</li>
-  </ol>
-
-  <h2>4. 꼭 해야 할 Physical Exam</h2>
-  <ul>
-    <li>활력징후와 전신상태: 탈수, 발열, 빈맥, 저혈압, 의식 변화.</li>
-    <li>키/체중/BMI/허리둘레: 비만, 복부비만, 약제 선택, 생활요법 목표.</li>
-    <li>혈압: 당뇨 초진의 심혈관·신장 위험 층화 핵심.</li>
-    <li>피부/복부/갑상선: acanthosis, 칸디다/피부감염, 간비대, 갑상선질환 단서.</li>
-    <li>심혈관/말초혈관: 심잡음, 부종, 말초맥박, 족부 냉감.</li>
-    <li>발 진찰: 궤양, callus, 무좀, 피부균열, 발톱, 말초맥박, monofilament 가능하면 시행.</li>
-  </ul>
-
-  <h2>5. 검사</h2>
+  <h2>1. 초진에서 먼저 가르는 4가지 질문</h2>
   <table>
-    <thead><tr><th>목적</th><th>검사</th><th>해석/행동</th></tr></thead>
+    <thead><tr><th>질문</th><th>핵심 판단</th></tr></thead>
     <tbody>
-      <tr><td>진단 확인</td><td>HbA1c, fasting plasma glucose</td><td>무증상자는 반복/확인. HbA1c 6.5% 이상 또는 FPG 126 이상이면 당뇨 기준.</td></tr>
-      <tr><td>급성 위험</td><td>Random glucose, urine ketone, UA</td><td>증상 있거나 혈당 높으면 ketone 확인. ketone 양성+전신상태 불량은 의뢰.</td></tr>
-      <tr><td>약제 안전</td><td>BUN/Cr/eGFR, AST/ALT</td><td>Metformin, SGLT2i, statin, ACEi/ARB 선택 기준.</td></tr>
-      <tr><td>합병증</td><td>Urine ACR, urinalysis, eGFR</td><td>당뇨 신장질환 초기 선별. ACR 양성은 재확인.</td></tr>
-      <tr><td>동반 위험</td><td>Lipid profile, BP, BMI/허리둘레</td><td>Statin, 혈압약, 체중치료 필요성 평가.</td></tr>
-      <tr><td>선택</td><td>CBC, TSH, vitamin B12</td><td>HbA1c 신뢰도, 피로/체중 변화, metformin 장기 사용 기준값.</td></tr>
+      <tr><td><strong>Q1. 당뇨가 맞나?</strong></td><td>진단기준 충족 여부와 재확인 필요성을 판단한다.</td></tr>
+      <tr><td><strong>Q2. 오늘 응급인가?</strong></td><td>DKA/HHS, 탈수, 의식변화, 감염, 급성 심혈관 사건을 먼저 배제한다.</td></tr>
+      <tr><td><strong>Q3. 2형으로 봐도 되나?</strong></td><td>1형/LADA, 췌장질환, 약제성, 내분비 질환을 감별한다.</td></tr>
+      <tr><td><strong>Q4. 이미 손상된 장기가 있나?</strong></td><td>눈, 콩팥, 신경/발, 심혈관 합병증을 초진부터 스크리닝한다.</td></tr>
     </tbody>
   </table>
-  <p>
-    상급병원 검사는 C-peptide/GAD Ab, 안저검사, 신장내과 평가, 심장 평가, 영양·당뇨교육을 상황별로 의뢰한다.
-  </p>
-
-  <h2>6. KCD 코드</h2>
-  <table>
-    <tbody>
-      <tr><td><strong>E11.9</strong></td><td>합병증을 동반하지 않은 2형당뇨병. 초진·초기치료 주상병 후보.</td></tr>
-      <tr><td><strong>E11.65/E11.6 계열</strong></td><td>고혈당/조절불량을 명확히 기록하는 상황에서 기관 청구 체계에 맞춰 후보.</td></tr>
-      <tr><td><strong>E11.2/E11.3/E11.4</strong></td><td>신장/눈/신경 합병증 근거가 있을 때.</td></tr>
-      <tr><td><strong>R73.0/R73.9</strong></td><td>당뇨 확진 전 공복혈당장애, 내당능장애, 고혈당 소견.</td></tr>
-      <tr><td><strong>E66.x/I10/E78.x/K76.0/N18.x</strong></td><td>비만, 고혈압, 이상지질혈증, 지방간, CKD 동반 부상병 후보.</td></tr>
-    </tbody>
-  </table>
-  <p class="small">상병코드는 실무 후보이며, 최종 청구는 실제 진단 근거, 검사 결과, 합병증 확인, 차팅 내용에 맞춰 조정한다.</p>
-
-  <h2>7. 처방 Regimen</h2>
-  <table>
-    <thead><tr><th>상황</th><th>의원 접근</th></tr></thead>
-    <tbody>
-      <tr><td>HbA1c 6.5-7.4%, 무증상</td><td>생활요법+metformin 시작 또는 1-3개월 집중 생활요법 후 재평가.</td></tr>
-      <tr><td>HbA1c 7.5-9.0%</td><td>Metformin 시작. 비만/CKD/HF/ASCVD 있으면 SGLT2i 또는 GLP-1RA 병합 검토.</td></tr>
-      <tr><td>HbA1c 9.0% 이상</td><td>초기 병합, 전문의 의뢰, 자가혈당 교육 고려.</td></tr>
-      <tr><td>HbA1c 10% 이상 또는 혈당 300 이상+증상</td><td>Insulin 포함 치료 가능성. ketone/탈수 있으면 응급.</td></tr>
-      <tr><td>ASCVD/HF/CKD</td><td>HbA1c와 무관하게 SGLT2i/GLP-1RA 중 근거 있는 약제 고려.</td></tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead><tr><th>Metformin</th><th>증량</th><th>메모</th></tr></thead>
-    <tbody>
-      <tr><td>IR 500 mg 저녁 식후 qd</td><td>1-2주 뒤 500 mg bid, 이후 1500-2000 mg/day</td><td>설사/복부불편 흔함. 식후 복용.</td></tr>
-      <tr><td>XR 500 mg 저녁 식후 qd</td><td>1-2주 간격으로 500 mg씩</td><td>GI 부작용 또는 순응도 문제 때 유리.</td></tr>
-      <tr><td>고령/저체중/식사 불규칙</td><td>500 mg qd로 천천히</td><td>탈수, 신기능, 식사량을 더 자주 확인.</td></tr>
-    </tbody>
-  </table>
-
-  <table>
-    <thead><tr><th>eGFR</th><th>Metformin 실무 결정</th></tr></thead>
-    <tbody>
-      <tr><td>60 이상</td><td>일반 시작 가능.</td></tr>
-      <tr><td>45-59</td><td>시작 가능하나 고령/탈수/심부전/간질환이면 낮게 시작, 3-6개월 추적.</td></tr>
-      <tr><td>30-44</td><td>새로 시작은 가급적 피하거나 전문의 상의. 복용 중이면 500-1000 mg/day 감량 검토.</td></tr>
-      <tr><td>30 미만</td><td>금기. 중단하고 대안 선택/의뢰.</td></tr>
-    </tbody>
-  </table>
-
   <div class="box warn">
-    안전 체크: eGFR, 간기능/음주, 임신 가능성, 고령/frailty, 항응고제, NSAID, PPI 장기복용, BZD, quinolone, steroid를 확인한다.
-    탈수, 급성감염, 조영제 검사, 큰 수술/금식 때는 metformin 또는 SGLT2i 일시 중단이 필요할 수 있다.
+    검진표 HbA1c 6.6%만 보고 "약만 시작"하지 않는다. 증상, 이전 수치, 빈혈/CKD/수혈, 약제, 체중 변화, 케톤/탈수까지 확인한다.
   </div>
 
-  <h2>8. Follow-up</h2>
-  <ul>
-    <li>확인검사만 계획: 1-2주 내 결과 확인 또는 늦어도 4주 내.</li>
-    <li>Metformin 시작 후: 2-4주에 GI 부작용, 복약, 증상, 자가혈당 필요성 확인.</li>
-    <li>HbA1c 재검: 약제 시작/변경 후 3개월.</li>
-    <li>eGFR 45-59, 고령, 탈수 위험, ACEi/ARB/이뇨제/SGLT2i 병용: 1-3개월 내 신기능 재확인.</li>
-    <li>치료 실패: 3개월 뒤 HbA1c 목표보다 1%p 이상 높음, metformin 내약 용량에도 목표 미달, ketone/체중감소로 1형 가능성.</li>
-  </ul>
-
-  <h2>9. Refer 기준</h2>
-  <ul>
-    <li>응급: DKA/HHS 의심, 혈당 300-400 이상+전신상태 불량, 흉통/stroke/심부전/패혈증, 감염성 당뇨발.</li>
-    <li>빠른 의뢰: 1형/LADA 의심, 임신, HbA1c 10% 이상 또는 혈당 300 이상+증상, eGFR 30 미만, ACR 300 이상 반복.</li>
-    <li>계획 의뢰: 초기 병합요법 결정이 어렵거나 3-6개월 치료에도 목표 미달, 영양·당뇨교육 필요.</li>
-  </ul>
-
-  <h2>10. 환자 설명 스크립트</h2>
-  <div class="script">당화혈색소는 최근 2-3개월 평균 혈당입니다. 6.5% 이상이면 당뇨 기준이지만, 증상이 없으면 한 번 더 확인해서 확정하겠습니다.</div>
-  <div class="script">구토, 심한 갈증과 탈수, 복통, 숨이 깊고 빨라짐, 의식이 멍해지는 증상이 있으면 바로 응급실로 가야 합니다.</div>
-  <div class="script">Metformin은 오래 써 온 기본 약입니다. 처음에는 속이 불편하거나 설사가 있을 수 있어 저녁 식후 낮은 용량으로 시작하고 천천히 올리겠습니다.</div>
-  <div class="script">신장기능이 떨어지거나 탈수, 심한 감염, 조영제 검사, 큰 수술이 있을 때는 약을 잠시 쉬어야 할 수 있습니다.</div>
-  <div class="script">당뇨 치료는 혈당뿐 아니라 콩팥, 눈, 발, 심장과 뇌혈관을 같이 지키는 치료입니다.</div>
-
-  <h2>11. 자가체크</h2>
+  <h2>2. 진단 기준 & 한국 국가검진 흐름</h2>
+  <table>
+    <thead><tr><th>검사</th><th>당뇨 기준</th><th>해석 포인트</th></tr></thead>
+    <tbody>
+      <tr><td>HbA1c</td><td>6.5% 이상</td><td>NGSP 표준화. 빈혈/용혈/수혈/CKD에서 실제 혈당과 어긋날 수 있다.</td></tr>
+      <tr><td>공복혈당(FPG)</td><td>126 mg/dL 이상</td><td>8시간 이상 금식 후 정맥혈. 검진 전날 야식/음주 확인.</td></tr>
+      <tr><td>OGTT 2시간</td><td>200 mg/dL 이상</td><td>임신/경계 등 특수상황에서 선택적으로 고려.</td></tr>
+      <tr><td>무작위혈당 + 증상</td><td>200 mg/dL 이상 + 다뇨/다음/체중감소</td><td>탈수/의식변화 동반 시 당일 응급 평가 우선.</td></tr>
+    </tbody>
+  </table>
   <ol>
-    <li>무증상 HbA1c 6.7% 초진에서 진단 확정을 위해 필요한 원칙은?</li>
-    <li>당뇨 초진에서 즉시 응급실로 보내야 할 DKA/HHS 단서는?</li>
-    <li>Metformin 시작 전 반드시 확인할 금기/감량 요소 5가지는?</li>
-    <li>새 2형당뇨 진단 시점에 시행할 합병증 스크리닝 검사는?</li>
-    <li>ASCVD/HF/CKD가 있는 당뇨 초진에서 metformin만 생각하면 안 되는 이유는?</li>
+    <li>국가검진 공복혈당 100+ 또는 회사검진 HbA1c 이상 소견이면 우리 병원에서 FPG+HbA1c 재확인.</li>
+    <li>HbA1c 5.7-6.4% + FPG 100-125이면 당뇨전단계: 생활중재 + 3-6개월 추적.</li>
+    <li>HbA1c 6.5% 또는 FPG 126 이상이면 명백한 고혈당 증상이 없는 경우 다른 날 재확인 원칙.</li>
+    <li>다뇨/다음/체중감소가 명백하면 당일 확진 가능. 단, 급성 위험 배제 후 치료 시작.</li>
   </ol>
 
-  <h2>참고 출처</h2>
-  <p class="small">
-    ADA Standards of Care 2026 resources: https://professional.diabetes.org/standards-of-care<br>
-    ADA Diabetes Diagnosis & Tests: https://diabetes.org/about-diabetes/diagnosis<br>
-    2025 Clinical Practice Guidelines for Diabetes Management in Korea: https://doi.org/10.4093/dmj.2025.0469<br>
-    ADA-KDIGO Consensus Report on Diabetes Management in CKD:
-    https://kdigo.org/wp-content/uploads/2018/03/ADA-KDIGO-Consensus-Report-Diabetes-CKD-Diabetes-Care-2022.pdf
-  </p>
+  <h2>3. 레드 플래그 — 당일 놓치면 안 되는 위험 신호</h2>
+  <table>
+    <thead><tr><th>범주</th><th>의심 단서</th><th>당일 행동</th></tr></thead>
+    <tbody>
+      <tr><td>DKA / HHS</td><td>오심/구토/복통, 탈수, Kussmaul 호흡, 의식저하, 매우 높은 혈당</td><td>케톤+전해질+산증 확인 → 응급실</td></tr>
+      <tr><td>1형/LADA 의심</td><td>마른 체형, 빠른 체중감소, 케톤, 젊은 발병, 자가면역질환 병력</td><td>C-peptide/GAD항체 → 내분비 의뢰</td></tr>
+      <tr><td>심한 감염/발 병변</td><td>발 궤양, 봉와직염, 괴사, 말초혈관질환 의심</td><td>항생제/영상/혈관평가 → 응급/상급 의뢰</td></tr>
+      <tr><td>급성 심혈관/신경</td><td>흉통, 호흡곤란, 신경학적 결손, 실신</td><td>당뇨 평가보다 응급 평가 우선</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. 초진 오더 세트</h2>
+  <table>
+    <thead><tr><th>목적</th><th>검사</th><th>메모</th></tr></thead>
+    <tbody>
+      <tr><td>진단 확인</td><td>HbA1c, FPG 또는 무작위혈당</td><td>검진표 날짜, 검사기관, 공복 여부 확인.</td></tr>
+      <tr><td>약제 안전성</td><td>Cr/eGFR, AST/ALT, 전해질, CBC</td><td>Metformin/SGLT2i 시작 전 기준 확보.</td></tr>
+      <tr><td>심혈관 위험</td><td>지질(TC/LDL/HDL/TG), 혈압, BMI</td><td>스타틴·혈압 관리 계획 동시 수립.</td></tr>
+      <tr><td>신장 합병증</td><td>소변 ACR, eGFR, 요검사</td><td>ACR 단회 이상 시 반복 확인 필요.</td></tr>
+      <tr><td>급성 위험(해당 시)</td><td>소변/혈중 케톤, bicarbonate</td><td>심한 고혈당, 체중감소, 구토/탈수 때.</td></tr>
+      <tr><td>합병증 의뢰</td><td>안과 의뢰, 발(10g monofilament), ECG</td><td>"나중에"가 아니라 초진 루틴으로 넣어 누락 방지.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. 첫 치료 결정 로드맵</h2>
+  <table>
+    <thead><tr><th>단계</th><th>판단</th></tr></thead>
+    <tbody>
+      <tr><td>0. 응급 여부</td><td>케톤/산증/탈수/의식저하/흉통 → 외래 처방 전 응급 평가.</td></tr>
+      <tr><td>1. 병형 확인</td><td>전형적 2형 vs 1형/LADA/췌장성/약제성 감별.</td></tr>
+      <tr><td>2. A1c + 증상</td><td>A1c·혈당·증상·체중감소·케톤 → 단독/병합/주사 결정.</td></tr>
+      <tr><td>3. 동반질환</td><td>ASCVD/HF/CKD/비만/고령/저혈당위험/비용 반영.</td></tr>
+      <tr><td>4. 추적 예약</td><td>1-4주(부작용/혈당) + 3개월(HbA1c)을 초진 당일 예약.</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>상황</th><th>초기 접근</th></tr></thead>
+    <tbody>
+      <tr><td>HbA1c 목표 근접, 무증상</td><td>생활중재 4주 관찰 후 Metformin(다이아벡스엑스알 500mg bid) 시작.</td></tr>
+      <tr><td>HbA1c 7.5-9%</td><td>초기 병합요법 고려. 선호·비용·저혈당 위험·체중 목표 반영.</td></tr>
+      <tr><td>HbA1c ≥10% 또는 혈당 ≥300, 케톤/증상</td><td>인슐린 필요성 평가. DKA/HHS 의심 시 응급실.</td></tr>
+      <tr><td>ASCVD 고위험/확진</td><td>GLP-1 RA 또는 SGLT2i 우선 고려.</td></tr>
+      <tr><td>심부전 또는 CKD</td><td>SGLT2i 적응증·신장기능·급여 확인. 진행 CKD는 신장내과 협진.</td></tr>
+      <tr><td>고령/frailty/저혈당 위험</td><td>과도한 목표 회피. SU/인슐린 시 저혈당 교육 + 완화 목표.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>6. 약제별 포인트 — 한국 상품명 포함</h2>
+  <table>
+    <thead><tr><th>약제군</th><th>주요 상품명(한국)</th><th>좋은 상황</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td>Metformin</td><td>다이아벡스엑스알, 글루코다운OR정</td><td>전형적 2형, 비용 부담, 체중 유지</td><td>위장 부작용 → XR 제형 변경. eGFR &lt;30 금기. B12 결핍 장기 추적.</td></tr>
+      <tr><td>SGLT2i</td><td>포시가 10mg, 자디앙 10/25mg, 슈글렛정</td><td>HF, CKD, ASCVD, 체중/혈압 이득</td><td>생식기 감염, euglycemic DKA, 수술/금식/급성질환 시 중지. 급여 기준 확인.</td></tr>
+      <tr><td>GLP-1 RA</td><td>트루리시티, 오젬픽, 위고비, 마운자로</td><td>비만, ASCVD 위험, 강한 A1c/체중 감소</td><td>오심/구토, 췌장염/담낭 병력. 갑상샘 수질암/MEN2 금기. 비급여 시 비용 상담 필수.</td></tr>
+      <tr><td>DPP-4i</td><td>자누비아, 트라젠타, 가브스</td><td>고령, 저혈당 회피, 주사 거부</td><td>신기능별 용량 조정(리나글립틴 불필요). GLP-1 RA와 병용 이득 부족. 삭사글립틴: 심부전 주의.</td></tr>
+      <tr><td>SU</td><td>아마릴, 다이아미크롱MR</td><td>비용 제한, 빠른 혈당 강하</td><td>저혈당·체중 증가. 고령/불규칙 식사/CKD 주의. 글리벤클라마이드(다오닐) 노인 금기.</td></tr>
+      <tr><td>Insulin</td><td>란투스/트레시바, 노보래피드/휴마로그</td><td>증상성 고혈당, 케톤, A1c 매우 높음, 1형 의심</td><td>자가혈당, 저혈당 대처, 주사 교육 필수. 용량조절 계획 수립.</td></tr>
+    </tbody>
+  </table>
+  <div class="box warn">
+    <strong>SGLT2i 급여 핵심</strong>: Metformin 실패 후 병용은 급여. 심부전(HFrEF/HFpEF) 적응증은 혈당 무관 단독 급여(포시가·자디앙). CKD 적응증은 eGFR 기준 확인. GLP-1 RA 급여는 제한적이므로 처방 전 확인.
+  </div>
+
+  <h2>7. 의뢰 기준 (Refer)</h2>
+  <table>
+    <thead><tr><th>의뢰처</th><th>기준</th></tr></thead>
+    <tbody>
+      <tr><td>응급실</td><td>DKA/HHS, 의식변화, 심한 탈수/구토, 급성 흉통/뇌졸중, 중증 감염/괴사성 발 병변.</td></tr>
+      <tr><td>내분비내과</td><td>1형/LADA 의심, 반복 케톤, A1c 높고 조절 불량, 복잡한 인슐린 시작, 이차성 당뇨 의심.</td></tr>
+      <tr><td>안과</td><td>2형 당뇨 진단 시 안저 평가. 시력저하/비문증/망막병증 의심 시 빠르게.</td></tr>
+      <tr><td>신장내과</td><td>eGFR 감소 진행, ACR 지속 상승, 혈뇨/비전형 신장질환, 조절 어려운 고혈압.</td></tr>
+      <tr><td>혈관/정형/상처</td><td>발 궤양, 감염, 말초동맥질환, Charcot 의심, 감각저하+변형 동반.</td></tr>
+      <tr><td>영양/당뇨교육</td><td>식사 조절 실패, 저혈당 반복, 인슐린/SU 사용, 건강문해력 낮음.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>8. 생활교육 핵심 + 환자 설명 스크립트</h2>
+  <table>
+    <thead><tr><th>항목</th><th>첫날 핵심 메시지</th></tr></thead>
+    <tbody>
+      <tr><td>식사</td><td>단 음료/주스/믹스커피/야식부터 줄이기. 밥·면·빵·과일은 금지보다 양과 시간 규칙.</td></tr>
+      <tr><td>운동</td><td>식후 10-20분 걷기부터 시작. 목표: 주 150분 유산소 + 주 2-3회 근력.</td></tr>
+      <tr><td>체중</td><td>5-10% 감량만으로 혈당·혈압·지방간·지질 함께 개선 가능.</td></tr>
+      <tr><td>저혈당 대처</td><td>식은땀/떨림/두근거림 → 당 15g + 15분 후 재측정.</td></tr>
+      <tr><td>자가혈당</td><td>인슐린/SU 사용, 증상성 고혈당, 약 조정 중이면 시간대별 기록 교육.</td></tr>
+      <tr><td>Sick day</td><td>구토/탈수/식사 불가 시 SGLT2i·Metformin 임시 중단 + 의료기관 연락.</td></tr>
+    </tbody>
+  </table>
+  <div class="script">
+    "당뇨는 단 음식 때문에 생긴 병이 아니라, 몸이 혈당을 처리하는 능력이 떨어진 상태입니다. 치료 목표는 숫자를 낮추는 것뿐 아니라 눈·콩팥·심장·발을 오래 지키는 것입니다. 처음 3개월은 약이 맞는지, 식사/운동이 지속 가능한지, 합병증 검사가 빠지지 않았는지 같이 조정하는 기간입니다. 약 드시다가 속이 불편하거나 혈당이 낮아지는 느낌이 있으면 다음 예약 전이라도 연락 주세요."
+  </div>
+
+  <h2>9. 미니 케이스 — 한국 1차 진료 실전</h2>
+  <table>
+    <thead><tr><th>케이스</th><th>상황</th><th>핵심 접근</th></tr></thead>
+    <tbody>
+      <tr><td>Case 1</td><td>40대 직장인, 회사검진 HbA1c 6.8%, 무증상</td><td>검진일/공복 확인 → FPG+HbA1c 재확인 → eGFR/지질/ACR/발/안저 계획 → 생활중재 4주 → 다이아벡스엑스알 500mg bid 시작 → 3개월 재평가.</td></tr>
+      <tr><td>Case 2</td><td>HbA1c 10.8%, 6kg 감소, 구갈/야간뇨, BMI 21</td><td>2형 단정 금지 → 케톤/전해질/산증 당일 평가 → C-peptide/GAD항체 → 인슐린 필요성 평가 → 내분비내과 의뢰.</td></tr>
+      <tr><td>Case 3</td><td>HbA1c 8.2%, eGFR 55, ACR 상승, HFrEF 병력</td><td>포시가 10mg 또는 자디앙 10mg. 심부전 적응증 급여 가능 → ACR 반복 확인 → 신장내과 협진 고려.</td></tr>
+      <tr><td>Case 4</td><td>60대, 혈압약 복용, HbA1c 7.2%, 혈압 148/92</td><td>ARB+SGLT2i로 혈압·신장·혈당 동시 이득 고려 → statin 필요성 → Metformin + 트라젠타 병합 옵션.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>10. 복사해서 쓰는 EMR 템플릿 (D03)</h2>
+  <pre>[D03 당뇨 초진 EMR 템플릿]
+CC/방문이유: 검진결과/증상/타원의뢰 —
+진단근거: HbA1c __% (검사일: __, 기관: __) / FPG __ mg/dL / 증상 (해당: ) / 재확인 여부:
+급성위험: 구토/복통/탈수/의식변화/케톤: __ / 당일 응급 여부:
+병형 감별: 2형 가능성 / 1형/LADA/이차성 의심 단서: __ / 추가검사(C-peptide/GAD/IA-2):
+동반질환: BP __ / BMI __ / 흡연: __ / ASCVD/HF/CKD/HTN/DLP/지방간:
+합병증: 눈(안과의뢰 __) / 신장(eGFR __ / urine ACR __) / 발(피부/궤양/맥박/monofilament/진동감각 __)
+초진 검사: HbA1c, glucose, CMP(Cr/eGFR/AST/ALT/electrolyte), lipid, CBC / urine ACR, UA+ketone
+치료: 생활교육(식사/운동/체중/음주/흡연) / 약제: __(선택이유: __) / 저혈당/부작용/sick day 교육:
+추적: 1-4주(부작용/혈당) / 3개월(HbA1c) / 의뢰(안과/내분비/신장/영양):</pre>
+  <p class="small">심평/차팅 Tip: "당뇨 교육함" 한 줄 대신 진단 근거, 검사 계획, 합병증 스크리닝, 약제 선택 이유, 부작용/저혈당 교육, 추적 계획을 구체적으로. KCD는 합병증 확인 시 E11.2(신장)/E11.3(눈)/E11.4(신경) 세부 코드 반영.</p>
+
+  <h2>11. 심플 총정리</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>진단</strong></td><td>HbA1c/FPG 기준 알고 명백하지 않으면 재확인. 회사검진 수치 그대로 믿지 말기.</td></tr>
+      <tr><td><strong>위험</strong></td><td>케톤·탈수·의식변화·체중감소·구토/복통 → 당일 평가.</td></tr>
+      <tr><td><strong>검사</strong></td><td>A1c만 보지 말고 eGFR·ACR·지질·간기능·발·안저를 초진 세트로.</td></tr>
+      <tr><td><strong>약제</strong></td><td>Metformin 자동 대신 ASCVD/HF/CKD/비만/저혈당 위험 반영. 상품명 확인.</td></tr>
+      <tr><td><strong>급여</strong></td><td>SGLT2i: Metformin 실패 후 병용 또는 HF/CKD 적응증. GLP-1 RA 급여 제한적.</td></tr>
+      <tr><td><strong>교육</strong></td><td>단 음료, 식후 걷기, 저혈당 대처, sick day, 발 관리부터 반복.</td></tr>
+      <tr><td><strong>추적</strong></td><td>초진 당일 1-4주 + 3개월 예약까지 완료.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>참고</h2>
+  <p class="small">ADA Standards of Care 2026 · 대한당뇨병학회 진료지침 · 심평원 요양급여기준 · 병원 EDI 코드 확인 필수</p>
+  <p class="small">교육용 자료 (초안) · ClinicNote D03 당뇨 초진 · 2026.05</p>
 </body>
 </html>
