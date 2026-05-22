@@ -85,16 +85,16 @@ export default function AdultDailyTab() {
                 동네 의원에서 자주 보는 성인 증상, 만성질환, 비급여 상담 영역을 진료실에서 바로 쓰는 단위로 누적합니다.
               </p>
             </div>
-            <button onClick={() => window.print()} style={{
-              border: '1px solid #D6D0C2',
-              background: '#fff',
-              color: '#44403C',
+            <div style={{
+              border: '1px solid #E7E2D7',
+              background: '#FAF7F1',
+              color: '#78716C',
               borderRadius: 9,
-              padding: '9px 14px',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}>A4 인쇄</button>
+              padding: '9px 12px',
+              fontSize: 12.5,
+              lineHeight: 1.45,
+              maxWidth: 280,
+            }}>출력은 각 단원 카드의 A4 HTML 열기에서 진행합니다.</div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(5, minmax(0, 1fr))', gap: 10, marginTop: 18 }}>

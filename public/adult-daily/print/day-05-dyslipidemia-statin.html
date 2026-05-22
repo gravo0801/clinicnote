@@ -22,9 +22,72 @@
     .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
     .script { border-left: 4px solid #4338ca; background: #eef2ff; padding: 9px 12px; margin: 8px 0; }
     .small { color: #57534e; font-size: 11px; }
+  
+
+    html { background: #f5f3ef; }
+    body {
+      max-width: 186mm;
+      margin: 0 auto;
+      padding: 16px;
+      background: #fff;
+      overflow-x: hidden;
+    }
+    table {
+      table-layout: fixed;
+      page-break-inside: auto;
+      break-inside: auto;
+    }
+    th, td {
+      overflow-wrap: anywhere;
+      word-break: keep-all;
+    }
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .print-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin: -4px -4px 12px;
+      padding: 8px 4px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid #eee7db;
+    }
+    .print-toolbar button {
+      border: none;
+      border-radius: 8px;
+      background: #047857;
+      color: #fff;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    @media screen and (max-width: 720px) {
+      body { max-width: none; padding: 12px; }
+      table { font-size: 10.4px; }
+      th, td { padding: 4px 5px; }
+    }
+    @media print {
+      html, body { background: #fff !important; }
+      body { max-width: none; margin: 0; padding: 0; overflow: visible; }
+      .print-toolbar { display: none !important; }
+      a { color: inherit; text-decoration: none; }
+    }
+
   </style>
 </head>
 <body>
+  <div class="print-toolbar">
+    <button type="button" onclick="window.print()">A4 인쇄</button>
+  </div>
+
   <h1>성인 Daily Day 05 - 이상지질혈증</h1>
   <div class="meta">
     <span class="pill">1차진료</span>
