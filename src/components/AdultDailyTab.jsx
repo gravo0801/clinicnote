@@ -3,8 +3,8 @@ import { adultCurriculum, adultDailyTemplate } from '../data/adultCurriculum'
 import { adultDailyContent } from '../data/adultDailyContent'
 import { useIsMobile } from './ui'
 
-const ADULT_DAILY_VERSION = 'v2026.05.21-full'
-const ADULT_DAILY_UPDATED_AT = '2026-05-21'
+const ADULT_DAILY_VERSION = 'v2026.07.05-day7-10'
+const ADULT_DAILY_UPDATED_AT = '2026-07-05'
 
 const planSummary = [
   { label: '목표', value: '개원 전 성인 1차진료 반복 질환을 진료실 루틴으로 만들기' },

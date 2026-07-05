@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Day 07 비만주사 기본</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    html { background: #f5f3ef; }
+    body { max-width: 186mm; margin: 0 auto; padding: 16px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
+    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
+    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #0f766e; color: #115e59; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
+    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.4px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
+    th, td { border: 1px solid #ccfbf1; padding: 6px 7px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
+    th { background: #f0fdfa; color: #115e59; text-align: left; }
+    tr { page-break-inside: avoid; break-inside: avoid; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .pill { display: inline-block; border: 1px solid #99f6e4; background: #f0fdfa; color: #115e59; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
+    .box { border: 1px solid #99f6e4; background: #f0fdfa; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
+    .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
+    .script { border-left: 4px solid #0f766e; background: #f0fdfa; padding: 9px 12px; margin: 8px 0; }
+    .small { color: #57534e; font-size: 11px; }
+    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 12px; padding: 8px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
+    .print-toolbar button { border: none; border-radius: 8px; background: #047857; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } table { font-size: 10.4px; } th, td { padding: 4px 5px; } }
+    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } }
+  </style>
+</head>
+<body>
+  <div class="print-toolbar">
+    <button type="button" onclick="window.print()">A4 인쇄</button>
+  </div>
+
+  <h1>성인 Daily Day 07 - 비만주사 기본</h1>
+  <div class="meta">
+    <span class="pill">비만 클리닉</span>
+    <span class="pill">GLP-1/GIP</span>
+    <span class="pill">KCD E66.x</span>
+    <span class="pill">작성일 2026-07-05</span>
+  </div>
+
+  <div class="box">
+    <strong>오늘의 목표</strong><br>
+    위고비, 삭센다, 마운자로 등 비만 주사 상담에서 적응증, 금기, 시작 전 검사,
+    부작용 설명, 유지 용량 후 중단 기준을 정한다. 제품명과 적응증은 국내 허가사항을 매번 확인한다.
+  </div>
+
+  <h2>1. 첫 3분 Triage</h2>
+  <div class="box danger">
+    <strong>중단/의뢰 신호</strong>: 심한 지속 상복부 통증 또는 등으로 뻗는 통증, 반복 구토,
+    우상복부 통증/황달/발열, 탈수와 소변 감소, 임신, serious hypersensitivity.
+  </div>
+  <ol>
+    <li>BMI, 허리둘레, 당뇨/고혈압/지질/지방간/수면무호흡 동반 여부를 확인한다.</li>
+    <li>임신 가능성, 수유, MTC/MEN2, pancreatitis, 담낭질환, severe GI disease 병력을 묻는다.</li>
+    <li>insulin/sulfonylurea 병용 여부와 저혈당 위험을 확인한다.</li>
+    <li>비용, 장기치료, 중단 시 체중 재증가 가능성을 설명한다.</li>
+  </ol>
+
+  <h2>2. 핵심 문진/PE</h2>
+  <table>
+    <thead><tr><th>문진 5개</th><th>Physical exam</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>BMI/체중 변화, 대사질환, 임신/수유, 췌장염/담석/위마비, MTC/MEN2/약물 알레르기</td>
+        <td>체중, BMI, 허리둘레, BP/HR, 복부 압통/RUQ 압통, 갑상선/경부, 근감소 위험</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. 검사</h2>
+  <table>
+    <thead><tr><th>상황</th><th>검사</th><th>해석/행동</th></tr></thead>
+    <tbody>
+      <tr><td>시작 전</td><td>HbA1c/FBS, lipid, AST/ALT, Cr/eGFR</td><td>대사위험 기준값, 당뇨 약 조정.</td></tr>
+      <tr><td>임신 가능성</td><td>hCG</td><td>임신 중 비만 약물치료는 피한다.</td></tr>
+      <tr><td>복통/구토</td><td>lipase/amylase, LFT, 영상 고려</td><td>췌장염/담낭질환 의심 시 중단/의뢰.</td></tr>
+      <tr><td>추적</td><td>체중, 허리둘레, BP, GI 부작용</td><td>증량 가능성과 효과 판정.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. 약제별 Regimen</h2>
+  <table>
+    <thead><tr><th>약제</th><th>시작/증량</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td>Liraglutide</td><td>0.6 mg sc qd 시작, 주 단위 증량</td><td>매일 주사, GI 부작용/담낭/임신 주의.</td></tr>
+      <tr><td>Semaglutide</td><td>0.25 mg sc weekly 시작, 보통 4주 간격 증량</td><td>오심/구토, 담낭질환, pancreatitis 경고.</td></tr>
+      <tr><td>Tirzepatide</td><td>2.5 mg sc weekly 시작, 4주 이상 간격 증량</td><td>국내 적응증 확인, GI/담낭/췌장 위험.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    <strong>금기/주의</strong>: MTC/MEN2, serious hypersensitivity, 임신/수유, pancreatitis 병력,
+    severe gastroparesis, active gallbladder disease, insulin/SU 병용 저혈당 위험.
+  </div>
+
+  <h2>5. KCD / 중단 기준</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>E66.x</strong></td><td>비만. BMI와 동반질환, 상담 내용 기록.</td></tr>
+      <tr><td><strong>R63.5</strong></td><td>비정상 체중 증가 평가 단계.</td></tr>
+      <tr><td><strong>E11.x/I10/E78.x/K76.0</strong></td><td>당뇨, 고혈압, 이상지질혈증, 지방간 동반 시.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>유지 용량 도달 후 3개월 안에 체중 5% 이상 감량이 없으면 중단/변경 검토.</li>
+    <li>심한 GI 부작용, 탈수, 췌장염/담낭염 의심, 임신, hypersensitivity면 즉시 중단.</li>
+    <li>감량 중 근손실 예방을 위해 단백질과 저항운동 계획을 같이 세운다.</li>
+  </ul>
+
+  <h2>6. 환자 설명 스크립트</h2>
+  <div class="script">비만 주사는 식욕을 줄이고 포만감을 오래가게 해서 생활요법을 지속하기 쉽게 만드는 치료입니다.</div>
+  <div class="script">심한 복통이 등으로 뻗거나 계속 토하고 물도 못 마시면 약을 더 맞지 말고 바로 연락해야 합니다.</div>
+  <div class="script">체중이 빠질 때 근육도 줄 수 있어 단백질 섭취와 근력운동을 같이 해야 결과가 오래 갑니다.</div>
+
+  <h2>7. 자가체크</h2>
+  <ol>
+    <li>GLP-1/GIP 비만주사 시작 전 확인할 암 가족력은?</li>
+    <li>췌장염 의심 증상은 어떻게 설명하나?</li>
+    <li>insulin/SU 병용 환자에서 추가로 볼 위험은?</li>
+    <li>유지 용량 후 3개월 효과 판정 기준은?</li>
+    <li>근손실 예방 상담 문장은?</li>
+  </ol>
+
+  <h2>참고 출처</h2>
+  <p class="small">
+    KSSO 2024 Obesity Guideline: https://www.jomes.org/journal/view.html?doi=10.7570/jomes25042<br>
+    FDA Wegovy/Saxenda/Zepbound/Mounjaro labels, 2026.
+  </p>
+</body>
+</html>
+

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Day 10 갑상선 기능 이상</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    html { background: #f5f3ef; }
+    body { max-width: 186mm; margin: 0 auto; padding: 16px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
+    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
+    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #7c3aed; color: #6d28d9; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
+    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.4px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
+    th, td { border: 1px solid #ddd6fe; padding: 6px 7px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
+    th { background: #f5f3ff; color: #6d28d9; text-align: left; }
+    tr { page-break-inside: avoid; break-inside: avoid; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .pill { display: inline-block; border: 1px solid #ddd6fe; background: #f5f3ff; color: #6d28d9; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
+    .box { border: 1px solid #ddd6fe; background: #f5f3ff; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
+    .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
+    .script { border-left: 4px solid #7c3aed; background: #f5f3ff; padding: 9px 12px; margin: 8px 0; }
+    .small { color: #57534e; font-size: 11px; }
+    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 12px; padding: 8px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
+    .print-toolbar button { border: none; border-radius: 8px; background: #047857; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } table { font-size: 10.4px; } th, td { padding: 4px 5px; } }
+    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } }
+  </style>
+</head>
+<body>
+  <div class="print-toolbar">
+    <button type="button" onclick="window.print()">A4 인쇄</button>
+  </div>
+
+  <h1>성인 Daily Day 10 - 갑상선 기능 이상</h1>
+  <div class="meta">
+    <span class="pill">TSH 패턴</span>
+    <span class="pill">Hypo/Hyper</span>
+    <span class="pill">KCD R94.6</span>
+    <span class="pill">작성일 2026-07-05</span>
+  </div>
+
+  <div class="box">
+    <strong>오늘의 목표</strong><br>
+    TSH, free T4, T3 조합으로 갑상선저하증, 무증상 저하증, 갑상선중독증, 무증상 항진증을 나누고
+    재검, 치료, 의뢰 기준을 정한다.
+  </div>
+
+  <h2>1. 첫 3분 Triage</h2>
+  <div class="box danger">
+    <strong>당일 의뢰</strong>: 고열/심한 빈맥/의식 변화, 저체온/서맥/의식저하,
+    새 AF/심부전/협심증 악화, 임신 중 overt 기능 이상, 시력저하/복시 동반 안병증.
+  </div>
+  <ol>
+    <li>TSH와 FT4가 같은 방향인지, 서로 맞지 않는지 본다.</li>
+    <li>biotin, amiodarone, lithium, steroid, dopamine, 조영제, 산후/임신을 묻는다.</li>
+    <li>증상과 심혈관 위험이 있으면 재검만 기다리지 않는다.</li>
+  </ol>
+
+  <h2>2. 핵심 문진/PE</h2>
+  <table>
+    <thead><tr><th>문진 5개</th><th>Physical exam</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>체중/더위/추위/두근거림, 목통증/산후/요오드, biotin/약물, 임신, 가족력/수술/방사선</td>
+        <td>HR/BP/체온, tremor/reflex, 부종/서맥, 갑상선 크기/압통/bruit, 안병증</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. 검사 패턴</h2>
+  <table>
+    <thead><tr><th>패턴</th><th>의미</th><th>행동</th></tr></thead>
+    <tbody>
+      <tr><td>TSH high + FT4 low</td><td>overt hypothyroidism</td><td>Levothyroxine 시작, TPOAb.</td></tr>
+      <tr><td>TSH high + FT4 normal</td><td>subclinical hypothyroidism</td><td>반복 확인, TPOAb, TSH >=10이면 치료 고려 강함.</td></tr>
+      <tr><td>TSH low + FT4/T3 high</td><td>overt hyperthyroidism</td><td>T3/TRAb, CBC/LFT, beta-blocker, 의뢰.</td></tr>
+      <tr><td>TSH low + FT4/T3 normal</td><td>subclinical hyperthyroidism</td><td>반복 확인, AF/골다공증 위험 평가.</td></tr>
+      <tr><td>TSH low/normal + FT4 low</td><td>central hypothyroidism 가능</td><td>pituitary 평가 의뢰.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. 처방 Regimen</h2>
+  <table>
+    <thead><tr><th>상황</th><th>접근</th><th>주의</th></tr></thead>
+    <tbody>
+      <tr><td>젊고 심장질환 없는 overt hypo</td><td>Levothyroxine 약 1.6 mcg/kg/day 또는 보수적 시작</td><td>6-8주 뒤 TSH.</td></tr>
+      <tr><td>고령/CAD 위험</td><td>12.5-25 mcg qd 시작</td><td>협심증/부정맥 주의.</td></tr>
+      <tr><td>Subclinical hypo</td><td>TSH >=10 치료 고려, 4.5-10은 선택</td><td>증상, TPOAb+, 임신 계획, CVD risk.</td></tr>
+      <tr><td>Hyper 증상성 빈맥</td><td>Propranolol 등 beta-blocker</td><td>천식/COPD, 서맥 주의.</td></tr>
+      <tr><td>Overt hyper</td><td>TRAb, CBC/LFT 후 methimazole 중심 의뢰</td><td>임신 1삼분기 등은 PTU 맥락.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box warn">
+    항갑상선제 복용 중 발열, 인후통, 구내염은 agranulocytosis 가능성을 설명한다.
+    황달, 진한 소변, 심한 가려움은 간독성 평가가 필요하다.
+  </div>
+
+  <h2>5. KCD / Follow-up</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>E03.9/E02</strong></td><td>갑상선기능저하증/잠재성 저하증.</td></tr>
+      <tr><td><strong>E05.x</strong></td><td>갑상선중독증/갑상선기능항진증.</td></tr>
+      <tr><td><strong>E06.3/E06.1</strong></td><td>Hashimoto thyroiditis, subacute thyroiditis 근거가 있을 때.</td></tr>
+      <tr><td><strong>R94.6</strong></td><td>갑상선 기능검사 이상 소견.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>Levothyroxine 시작/변경 후 6-8주 뒤 TSH/FT4.</li>
+    <li>경도 subclinical 이상은 3개월 전후 재검.</li>
+    <li>임신/임신 계획, central pattern, 안병증, overt hyper는 의뢰.</li>
+  </ul>
+
+  <h2>6. 환자 설명 스크립트</h2>
+  <div class="script">TSH는 갑상선을 조절하는 신호이고 free T4는 실제 갑상선 호르몬입니다. 두 값을 같이 봐야 합니다.</div>
+  <div class="script">수치가 살짝 벗어나면 약물, 영양제, 최근 몸 상태를 확인하고 다시 검사하는 것이 더 정확합니다.</div>
+  <div class="script">항진증 약을 먹는 중 열과 목아픔이 갑자기 생기면 감기라고 넘기지 말고 바로 연락해야 합니다.</div>
+
+  <h2>7. 자가체크</h2>
+  <ol>
+    <li>TSH high + FT4 normal은 무엇인가?</li>
+    <li>TSH low + FT4 normal에서 추가 확인할 검사는?</li>
+    <li>고령/CAD 환자에서 levothyroxine을 낮게 시작하는 이유는?</li>
+    <li>항갑상선제 시작 전 기본 검사는?</li>
+    <li>검사 간섭 요인은?</li>
+  </ol>
+
+  <h2>참고 출처</h2>
+  <p class="small">
+    ATA Professional Guidelines; 2016 ATA Hyperthyroidism Guideline; ATA subclinical hypothyroidism summary; NCBI Bookshelf Subclinical Hypothyroidism.
+  </p>
+</body>
+</html>
+

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>Day 09 간수치 상승</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    * { box-sizing: border-box; }
+    html { background: #f5f3ef; }
+    body { max-width: 186mm; margin: 0 auto; padding: 16px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
+    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
+    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #15803d; color: #166534; }
+    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
+    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
+    li { margin: 2px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.4px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
+    th, td { border: 1px solid #bbf7d0; padding: 6px 7px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
+    th { background: #f0fdf4; color: #166534; text-align: left; }
+    tr { page-break-inside: avoid; break-inside: avoid; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .pill { display: inline-block; border: 1px solid #bbf7d0; background: #f0fdf4; color: #166534; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
+    .box { border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
+    .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
+    .script { border-left: 4px solid #15803d; background: #f0fdf4; padding: 9px 12px; margin: 8px 0; }
+    .small { color: #57534e; font-size: 11px; }
+    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 12px; padding: 8px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
+    .print-toolbar button { border: none; border-radius: 8px; background: #047857; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } table { font-size: 10.4px; } th, td { padding: 4px 5px; } }
+    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } }
+  </style>
+</head>
+<body>
+  <div class="print-toolbar">
+    <button type="button" onclick="window.print()">A4 인쇄</button>
+  </div>
+
+  <h1>성인 Daily Day 09 - 간수치 상승</h1>
+  <div class="meta">
+    <span class="pill">검진 이상</span>
+    <span class="pill">MASLD/FIB-4</span>
+    <span class="pill">KCD R94.5</span>
+    <span class="pill">작성일 2026-07-05</span>
+  </div>
+
+  <div class="box">
+    <strong>오늘의 목표</strong><br>
+    AST/ALT, ALP/GGT, bilirubin 패턴을 나누고 지방간, 바이러스간염, 약물성, 담도질환을 단계적으로 평가한다.
+    MASLD 의심 환자는 FIB-4로 섬유화 위험을 나눈다.
+  </div>
+
+  <h2>1. 첫 3분 Triage</h2>
+  <div class="box danger">
+    <strong>당일 의뢰</strong>: 황달 + 의식 변화/출혈 경향, AST/ALT 1000 전후 이상,
+    bilirubin 상승과 RUQ pain/발열, acetaminophen 과량, 임신 중 간수치 상승.
+  </div>
+  <ol>
+    <li>간세포 손상형(AST/ALT)인지 담즙정체형(ALP/GGT/bilirubin)인지 나눈다.</li>
+    <li>음주, 약/보충제, 대사위험, viral hepatitis 위험, 담도 증상을 묻는다.</li>
+    <li>지방간 의심이면 FIB-4로 의뢰 필요성을 판단한다.</li>
+  </ol>
+
+  <h2>2. 핵심 문진/PE</h2>
+  <table>
+    <thead><tr><th>문진 5개</th><th>Physical exam</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>술, 새 약/한약/보충제, 황달/회색변/RUQ pain, 비만/당뇨/지질, B/C형간염 위험</td>
+        <td>공막황달, RUQ 압통, 간비대, 복수/부종, BMI/허리둘레, 만성간질환 소견</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. 검사 루틴</h2>
+  <table>
+    <thead><tr><th>패턴</th><th>1차 검사</th><th>행동</th></tr></thead>
+    <tbody>
+      <tr><td>AST/ALT 중심</td><td>repeat LFT, bilirubin, ALP/GGT, CBC/platelet, albumin, PT/INR 가능 시</td><td>중증도와 기능 확인.</td></tr>
+      <tr><td>MASLD 의심</td><td>HbA1c, lipid, FIB-4, 복부초음파</td><td>섬유화 위험 분류.</td></tr>
+      <tr><td>viral hepatitis</td><td>HBsAg, anti-HBs, anti-HBc, anti-HCV</td><td>양성이면 활동성 평가/의뢰.</td></tr>
+      <tr><td>약물성</td><td>약/보충제 timeline, acetaminophen 사용량</td><td>의심 약 중단, 중증이면 의뢰.</td></tr>
+      <tr><td>담즙정체형</td><td>ALP/GGT, bilirubin, 복부초음파</td><td>담도확장/담석 확인.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>4. FIB-4</h2>
+  <table>
+    <thead><tr><th>FIB-4</th><th>해석</th><th>행동</th></tr></thead>
+    <tbody>
+      <tr><td>&lt;1.3</td><td>낮은 위험</td><td>의원 추적. 대사위험 높으면 1-2년 재평가.</td></tr>
+      <tr><td>1.3-2.67</td><td>중간 위험</td><td>VCTE/ELF 등 2차검사 또는 의뢰.</td></tr>
+      <tr><td>&gt;2.67</td><td>높은 위험</td><td>간섬유화 고위험으로 의뢰.</td></tr>
+      <tr><td>65세 이상</td><td>cutoff 조정</td><td>2.0 이상부터 의미 있게 본다.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>5. KCD / Follow-up</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>R94.5</strong></td><td>간기능검사 이상 소견.</td></tr>
+      <tr><td><strong>K76.0</strong></td><td>지방간/MASLD 근거가 있을 때.</td></tr>
+      <tr><td><strong>B18.x/K71.x/K80.x</strong></td><td>만성간염, 약물성, 담도질환 근거가 있을 때.</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>경도 상승은 원인 제거 후 2-4주 재검.</li>
+    <li>3개월 이상 반복 상승이면 원인검사 확장, 6개월 이상 지속이면 의뢰 고려.</li>
+    <li>ALT 정상화만 보고 fibrosis risk를 잊지 않는다.</li>
+  </ul>
+
+  <h2>6. 환자 설명 스크립트</h2>
+  <div class="script">간수치는 간세포 손상인지 담즙길 문제인지 간 기능 저하인지 나눠서 봐야 합니다.</div>
+  <div class="script">건강보조제와 한약도 간에 부담이 될 수 있어 최근 3개월 안에 시작한 것은 모두 알려주셔야 합니다.</div>
+  <div class="script">지방간에서 중요한 것은 지방 자체보다 간섬유화 위험입니다. FIB-4로 추적과 의뢰를 나누겠습니다.</div>
+
+  <h2>7. 자가체크</h2>
+  <ol>
+    <li>간세포 손상형과 담즙정체형은 어떻게 구분하나?</li>
+    <li>즉시 의뢰해야 할 red flag는?</li>
+    <li>FIB-4 1.3-2.67이면 다음 단계는?</li>
+    <li>약물성 간손상 문진 범주는?</li>
+    <li>ALT 정상화 후에도 다시 봐야 할 위험은?</li>
+  </ol>
+
+  <h2>참고 출처</h2>
+  <p class="small">
+    AASLD NAFLD/MASLD Practice Guidance 2023; ACG Abnormal Liver Chemistries Guideline; AACE NAFLD Primary Care Guideline.
+  </p>
+</body>
+</html>
+

@@ -374,4 +374,314 @@ export const adultDailyContent = [
       '2026-05-15: 최초 작성. 한국지질동맥경화학회 2022 지침, ACC/AHA cholesterol guideline, statin monitoring 자료 반영.',
     ],
   },
+  {
+    day: 7,
+    date: '2026-07-05',
+    slug: 'obesity-injection-basics',
+    topic: '비만주사 기본: 위고비/삭센다/마운자로 상담, 금기, 중단 기준',
+    printPath: '/adult-daily/print/day-07-obesity-injection-basics.html',
+    pdfPath: '/adult-daily/pdf/day-07-obesity-injection-basics.pdf',
+    masterPath: '/adult-daily/master/day-07-obesity-injection-basics.md',
+    appHtml: `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:14px">
+        <div style="border:1px solid #fecaca;background:#fef2f2;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#991b1b;margin-bottom:6px">중단/의뢰</div>
+          <div>심한 지속 상복부 통증, 반복 구토, RUQ pain/황달/발열, 탈수/소변감소, 임신, serious hypersensitivity는 약을 더 맞지 말고 평가.</div>
+        </div>
+        <div style="border:1px solid #99f6e4;background:#f0fdfa;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#115e59;margin-bottom:6px">3분 상담</div>
+          <div>BMI/동반질환, 임신·수유, MTC/MEN2, 췌장염/담낭질환, severe GI disease, insulin/SU 병용과 비용·장기치료 이해도를 확인.</div>
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>문진 5개</b><br>
+          BMI/체중변화, 대사질환, 임신/수유, 췌장염/담석/위마비, MTC/MEN2/약물 알레르기.
+        </div>
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>PE</b><br>
+          체중, BMI, 허리둘레, BP/HR, 복부압통/RUQ 압통, 갑상선/경부, 근감소 위험.
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">검사</h3>
+      <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#faf7f1">
+        시작 전 HbA1c/FBS, lipid, AST/ALT, Cr/eGFR. 임신 가능성이 있으면 hCG. 복통/구토가 심하면 lipase/amylase, LFT, 영상 평가를 고려.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">KCD</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">E66.x</td><td style="border:1px solid #e7e2d7;padding:7px">비만. BMI와 동반질환, 상담 내용 기록.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">R63.5</td><td style="border:1px solid #e7e2d7;padding:7px">비정상 체중 증가 평가 단계.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">E11.x/I10/E78.x/K76.0</td><td style="border:1px solid #e7e2d7;padding:7px">당뇨, 고혈압, 이상지질혈증, 지방간 동반 시.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">처방 Regimen</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdfa">약제</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdfa">시작/증량</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdfa">주의</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Liraglutide</td><td style="border:1px solid #e7e2d7;padding:7px">0.6 mg sc qd 시작, 주 단위 증량</td><td style="border:1px solid #e7e2d7;padding:7px">GI/담낭/임신</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Semaglutide</td><td style="border:1px solid #e7e2d7;padding:7px">0.25 mg sc weekly 시작, 보통 4주 간격 증량</td><td style="border:1px solid #e7e2d7;padding:7px">GI, 담낭, pancreatitis 경고</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Tirzepatide</td><td style="border:1px solid #e7e2d7;padding:7px">2.5 mg sc weekly 시작, 4주 이상 간격 증량</td><td style="border:1px solid #e7e2d7;padding:7px">국내 적응증 확인</td></tr>
+        </tbody>
+      </table>
+
+      <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:10px 12px;margin-top:10px">
+        MTC/MEN2, serious hypersensitivity, 임신/수유, pancreatitis 병력, severe gastroparesis, active gallbladder disease, insulin/SU 병용 저혈당 위험을 확인.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">Follow-up / 중단 기준</h3>
+      <ul style="margin:0 0 12px 20px;padding:0;line-height:1.8">
+        <li>2-4주마다 GI 부작용, 주사법, 탈수, 비용 부담, 증량 가능성 확인.</li>
+        <li>유지 용량 도달 후 3개월 안에 체중 5% 이상 감량이 없으면 중단/변경 검토.</li>
+        <li>근손실 예방을 위해 단백질과 저항운동을 같이 계획.</li>
+      </ul>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">환자 설명 멘트</h3>
+      <div style="border-left:4px solid #0f766e;background:#f0fdfa;padding:10px 12px;border-radius:8px">
+        비만 주사는 식욕을 줄이고 포만감을 오래가게 해서 생활요법을 지속하기 쉽게 만드는 치료입니다.
+        심한 복통이 등으로 뻗거나 계속 토하고 물도 못 마시면 약을 더 맞지 말고 바로 연락해야 합니다.
+      </div>
+    `,
+    revisions: [
+      '2026-07-05: 최초 작성. 대한비만학회 2024 진료지침, FDA Wegovy/Saxenda/Zepbound/Mounjaro label 반영.',
+    ],
+  },
+  {
+    day: 8,
+    date: '2026-07-05',
+    slug: 'gout-hyperuricemia',
+    topic: '고요산혈증/통풍: 급성기 처방, ULT 시작 기준',
+    printPath: '/adult-daily/print/day-08-gout-hyperuricemia.html',
+    pdfPath: '/adult-daily/pdf/day-08-gout-hyperuricemia.pdf',
+    masterPath: '/adult-daily/master/day-08-gout-hyperuricemia.md',
+    appHtml: `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:14px">
+        <div style="border:1px solid #fecaca;background:#fef2f2;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#991b1b;margin-bottom:6px">Septic joint 배제</div>
+          <div>발열/오한, 면역저하, prosthetic joint, 최근 관절주사/수술, 외상, 통풍 병력 불확실한 심한 단관절염은 의뢰.</div>
+        </div>
+        <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#92400e;margin-bottom:6px">급성기와 장기약 분리</div>
+          <div>오늘은 염증을 끄고, 재발성 통풍·tophi·CKD·결석·요산 9 이상이면 ULT를 treat-to-target으로 설계.</div>
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>문진 5개</b><br>
+          반복 발작, 발열/외상/상처, CKD/GI/심부전/항응고제, 음주/탈수/과식, ULT 복용/발진 병력.
+        </div>
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>PE</b><br>
+          관절 열감/발적/종창, 상처/봉와직염, tophi, 체온/맥박, 다관절 침범.
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">검사</h3>
+      <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#faf7f1">
+        급성기 CBC/CRP 선택, Cr/eGFR, AST/ALT, uric acid. 요산은 급성기에 정상일 수 있다. 감염 의심 시 관절천자/배양 의뢰.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">KCD</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">M10.x</td><td style="border:1px solid #e7e2d7;padding:7px">통풍. 부위와 원인에 따라 세부 코드 조정.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">E79.0</td><td style="border:1px solid #e7e2d7;padding:7px">증상 없는 고요산혈증 또는 평가 단계.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">N20.x/N18.x</td><td style="border:1px solid #e7e2d7;padding:7px">요로결석, CKD 동반 시 근거에 따라.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">급성기 처방</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="border:1px solid #e7e2d7;padding:7px;background:#fffbeb">선택</th><th style="border:1px solid #e7e2d7;padding:7px;background:#fffbeb">예시</th><th style="border:1px solid #e7e2d7;padding:7px;background:#fffbeb">피해야 할 상황</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">NSAID</td><td style="border:1px solid #e7e2d7;padding:7px">Naproxen 250-500 mg bid 등</td><td style="border:1px solid #e7e2d7;padding:7px">eGFR 저하, GI bleeding, 항응고제, 심부전</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Colchicine</td><td style="border:1px solid #e7e2d7;padding:7px">1.2 mg 후 1시간 뒤 0.6 mg</td><td style="border:1px solid #e7e2d7;padding:7px">eGFR 저하, CYP3A4/P-gp inhibitor, 설사</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Steroid</td><td style="border:1px solid #e7e2d7;padding:7px">Prednisolone 20-30 mg qd 3-5일</td><td style="border:1px solid #e7e2d7;padding:7px">감염 배제 안 됨, 혈당 조절 불량</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">ULT</h3>
+      <div style="border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;padding:10px 12px">
+        1년 2회 이상 발작, tophi, 영상 손상, CKD stage 3 이상, 결석, uric acid &gt;9면 시작 고려. Allopurinol 100 mg qd 이하로 시작해 목표 &lt;6 mg/dL까지 증량.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">Follow-up / Refer</h3>
+      <ul style="margin:0 0 12px 20px;padding:0;line-height:1.8">
+        <li>급성기 3-7일 내 반응 확인. 악화/발열/다관절이면 재평가.</li>
+        <li>ULT 시작 후 2-5주마다 요산 확인, flare prophylaxis 최소 3-6개월.</li>
+        <li>감염 감별, CKD 진행, 결석 반복, 약제 과민반응, tophi 기능장애는 의뢰.</li>
+      </ul>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">환자 설명 멘트</h3>
+      <div style="border-left:4px solid #b45309;background:#fffbeb;padding:10px 12px;border-radius:8px">
+        통풍약은 급성기 염증을 끄는 약과 요산을 낮추는 장기약이 다릅니다.
+        Allopurinol 시작 뒤 발진, 입안 헐음, 열이 나면 바로 중단하고 연락해야 합니다.
+      </div>
+    `,
+    revisions: [
+      '2026-07-05: 최초 작성. 2020 ACR gout guideline, colchicine/allopurinol label 반영.',
+    ],
+  },
+  {
+    day: 9,
+    date: '2026-07-05',
+    slug: 'elevated-liver-enzymes',
+    topic: '간수치 상승: 지방간 vs 간염 vs 약물성, 검사 루틴',
+    printPath: '/adult-daily/print/day-09-elevated-liver-enzymes.html',
+    pdfPath: '/adult-daily/pdf/day-09-elevated-liver-enzymes.pdf',
+    masterPath: '/adult-daily/master/day-09-elevated-liver-enzymes.md',
+    appHtml: `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:14px">
+        <div style="border:1px solid #fecaca;background:#fef2f2;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#991b1b;margin-bottom:6px">당일 의뢰</div>
+          <div>황달+의식변화/출혈, AST/ALT 1000 전후 이상, bilirubin 상승+RUQ pain/발열, acetaminophen 과량, 임신 중 간수치 상승.</div>
+        </div>
+        <div style="border:1px solid #bbf7d0;background:#f0fdf4;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#166534;margin-bottom:6px">패턴 먼저</div>
+          <div>AST/ALT 중심인지 ALP/GGT/bilirubin 중심인지 나누고, 음주·약물·대사위험·viral hepatitis·담도 증상을 확인.</div>
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>문진 5개</b><br>
+          술, 새 약/한약/보충제, 황달/회색변/RUQ pain, 비만/당뇨/지질, B/C형간염 위험.
+        </div>
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>PE</b><br>
+          공막황달, RUQ 압통, 간비대, 복수/부종, BMI/허리둘레, 만성간질환 소견.
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">검사 루틴</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdf4">패턴</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdf4">1차 검사</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f0fdf4">행동</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">AST/ALT 중심</td><td style="border:1px solid #e7e2d7;padding:7px">repeat LFT, bilirubin, ALP/GGT, CBC/platelet, albumin, PT/INR 가능 시</td><td style="border:1px solid #e7e2d7;padding:7px">중증도와 기능 확인</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">MASLD 의심</td><td style="border:1px solid #e7e2d7;padding:7px">HbA1c, lipid, FIB-4, 복부초음파</td><td style="border:1px solid #e7e2d7;padding:7px">섬유화 위험 분류</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">viral hepatitis</td><td style="border:1px solid #e7e2d7;padding:7px">HBsAg, anti-HBs, anti-HBc, anti-HCV</td><td style="border:1px solid #e7e2d7;padding:7px">양성이면 활동성 평가/의뢰</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">담즙정체형</td><td style="border:1px solid #e7e2d7;padding:7px">ALP/GGT, bilirubin, 복부초음파</td><td style="border:1px solid #e7e2d7;padding:7px">담도확장/담석 확인</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">FIB-4</h3>
+      <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:10px 12px">
+        &lt;1.3 낮은 위험, 1.3-2.67 중간 위험으로 2차검사/의뢰, &gt;2.67 높은 위험으로 간 의뢰. 65세 이상은 2.0 이상부터 의미 있게 본다.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">KCD</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">R94.5</td><td style="border:1px solid #e7e2d7;padding:7px">간기능검사 이상 소견.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">K76.0</td><td style="border:1px solid #e7e2d7;padding:7px">지방간/MASLD 근거가 있을 때.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">B18.x/K71.x/K80.x</td><td style="border:1px solid #e7e2d7;padding:7px">만성간염, 약물성, 담도질환 근거가 있을 때.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">Follow-up / Refer</h3>
+      <ul style="margin:0 0 12px 20px;padding:0;line-height:1.8">
+        <li>경도 상승은 음주/약물/격한 운동 등 원인 제거 후 2-4주 재검.</li>
+        <li>3개월 이상 반복 상승이면 원인검사 확장, 6개월 이상 지속이면 의뢰 고려.</li>
+        <li>ALT 정상화만 보고 fibrosis risk를 잊지 않는다.</li>
+      </ul>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">환자 설명 멘트</h3>
+      <div style="border-left:4px solid #15803d;background:#f0fdf4;padding:10px 12px;border-radius:8px">
+        간수치는 간세포 손상인지 담즙길 문제인지 간 기능 저하인지 나눠서 봐야 합니다.
+        지방간에서 중요한 것은 지방 자체보다 간섬유화 위험입니다.
+      </div>
+    `,
+    revisions: [
+      '2026-07-05: 최초 작성. AASLD 2023 NAFLD/MASLD guidance, ACG abnormal liver chemistries guideline 반영.',
+    ],
+  },
+  {
+    day: 10,
+    date: '2026-07-05',
+    slug: 'thyroid-function-patterns',
+    topic: '갑상선 기능 이상: TSH 패턴, 추적/치료/의뢰 기준',
+    printPath: '/adult-daily/print/day-10-thyroid-function-patterns.html',
+    pdfPath: '/adult-daily/pdf/day-10-thyroid-function-patterns.pdf',
+    masterPath: '/adult-daily/master/day-10-thyroid-function-patterns.md',
+    appHtml: `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:14px">
+        <div style="border:1px solid #fecaca;background:#fef2f2;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#991b1b;margin-bottom:6px">당일 의뢰</div>
+          <div>고열/심한 빈맥/의식변화, 저체온/서맥/의식저하, 새 AF/심부전/협심증 악화, 임신 중 overt 기능 이상, 시력저하/복시.</div>
+        </div>
+        <div style="border:1px solid #ddd6fe;background:#f5f3ff;border-radius:10px;padding:12px">
+          <div style="font-weight:900;color:#6d28d9;margin-bottom:6px">TSH + FT4 패턴</div>
+          <div>TSH high/low와 FT4/T3를 같이 보고 hypo, subclinical hypo, hyper, subclinical hyper, central pattern을 나눈다.</div>
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>문진 5개</b><br>
+          체중/더위/추위/두근거림, 목통증/산후/요오드, biotin/약물, 임신, 가족력/수술/방사선.
+        </div>
+        <div style="border:1px solid #e7e2d7;border-radius:10px;padding:12px;background:#fff">
+          <b>PE</b><br>
+          HR/BP/체온, tremor/reflex, 부종/서맥, 갑상선 크기/압통/bruit, 안병증.
+        </div>
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">검사 패턴</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">패턴</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">의미</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">행동</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">TSH high + FT4 low</td><td style="border:1px solid #e7e2d7;padding:7px">overt hypothyroidism</td><td style="border:1px solid #e7e2d7;padding:7px">levothyroxine 시작, TPOAb</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">TSH high + FT4 normal</td><td style="border:1px solid #e7e2d7;padding:7px">subclinical hypothyroidism</td><td style="border:1px solid #e7e2d7;padding:7px">반복 확인, TPOAb, TSH 10 이상 치료 고려</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">TSH low + FT4/T3 high</td><td style="border:1px solid #e7e2d7;padding:7px">overt hyperthyroidism</td><td style="border:1px solid #e7e2d7;padding:7px">T3/TRAb, CBC/LFT, beta-blocker, 의뢰</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">TSH low + FT4/T3 normal</td><td style="border:1px solid #e7e2d7;padding:7px">subclinical hyperthyroidism</td><td style="border:1px solid #e7e2d7;padding:7px">반복 확인, AF/골다공증 위험 평가</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">처방 Regimen</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">상황</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">접근</th><th style="border:1px solid #e7e2d7;padding:7px;background:#f5f3ff">주의</th></tr></thead>
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">젊고 심장질환 없는 overt hypo</td><td style="border:1px solid #e7e2d7;padding:7px">Levothyroxine 약 1.6 mcg/kg/day 또는 보수적 시작</td><td style="border:1px solid #e7e2d7;padding:7px">6-8주 뒤 TSH</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">고령/CAD 위험</td><td style="border:1px solid #e7e2d7;padding:7px">12.5-25 mcg qd 시작</td><td style="border:1px solid #e7e2d7;padding:7px">협심증/부정맥 주의</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px">Hyper 증상성 빈맥</td><td style="border:1px solid #e7e2d7;padding:7px">Propranolol 등 beta-blocker</td><td style="border:1px solid #e7e2d7;padding:7px">천식/COPD, 서맥 주의</td></tr>
+        </tbody>
+      </table>
+
+      <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:10px 12px">
+        항갑상선제 복용 중 발열, 인후통, 구내염은 agranulocytosis 가능성. 황달, 진한 소변, 심한 가려움은 간독성 평가.
+      </div>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">KCD / Follow-up</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tbody>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">E03.9/E02</td><td style="border:1px solid #e7e2d7;padding:7px">갑상선기능저하증/잠재성 저하증.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">E05.x</td><td style="border:1px solid #e7e2d7;padding:7px">갑상선중독증/갑상선기능항진증.</td></tr>
+          <tr><td style="border:1px solid #e7e2d7;padding:7px;font-weight:800">R94.6</td><td style="border:1px solid #e7e2d7;padding:7px">갑상선 기능검사 이상 소견.</td></tr>
+        </tbody>
+      </table>
+      <ul style="margin:0 0 12px 20px;padding:0;line-height:1.8">
+        <li>Levothyroxine 시작/변경 후 6-8주 뒤 TSH/FT4.</li>
+        <li>경도 subclinical 이상은 3개월 전후 재검.</li>
+        <li>임신/임신 계획, central pattern, 안병증, overt hyper는 의뢰.</li>
+      </ul>
+
+      <h3 style="margin:14px 0 7px;font-size:15px">환자 설명 멘트</h3>
+      <div style="border-left:4px solid #7c3aed;background:#f5f3ff;padding:10px 12px;border-radius:8px">
+        TSH는 갑상선을 조절하는 신호이고 free T4는 실제 갑상선 호르몬입니다. 두 값을 같이 봐야 합니다.
+        항진증 약을 먹는 중 열과 목아픔이 갑자기 생기면 바로 연락해야 합니다.
+      </div>
+    `,
+    revisions: [
+      '2026-07-05: 최초 작성. ATA hyperthyroidism guideline, subclinical hypothyroidism 자료 반영.',
+    ],
+  },
 ]
