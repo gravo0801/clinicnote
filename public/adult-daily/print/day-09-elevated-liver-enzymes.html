@@ -2,32 +2,36 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>Day 09 간수치 상승</title>
+  <title>Day 09 간수치 상승 실전 보강판</title>
   <style>
-    @page { size: A4; margin: 14mm; }
+    @page { size: A4; margin: 12mm; }
     * { box-sizing: border-box; }
     html { background: #f5f3ef; }
-    body { max-width: 186mm; margin: 0 auto; padding: 16px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
-    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
-    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #15803d; color: #166534; }
-    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
-    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
-    li { margin: 2px 0; }
-    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.4px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
-    th, td { border: 1px solid #bbf7d0; padding: 6px 7px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
-    th { background: #f0fdf4; color: #166534; text-align: left; }
+    body { max-width: 186mm; margin: 0 auto; padding: 14px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.46; font-size: 11.2px; }
+    h1 { font-size: 21px; margin: 0 0 7px; letter-spacing: 0; }
+    h2 { font-size: 14px; margin: 16px 0 7px; padding-bottom: 4px; border-bottom: 2px solid #4d7c0f; color: #3f6212; }
+    h3 { font-size: 12px; margin: 11px 0 5px; color: #1c1917; }
+    p { margin: 5px 0 8px; }
+    ul, ol { margin: 5px 0 8px 18px; padding: 0; }
+    li { margin: 1px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 7px 0 10px; font-size: 10.3px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
+    th, td { border: 1px solid #d9f99d; padding: 5px 6px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
+    th { background: #f7fee7; color: #3f6212; text-align: left; }
     tr { page-break-inside: avoid; break-inside: avoid; }
-    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-    .pill { display: inline-block; border: 1px solid #bbf7d0; background: #f0fdf4; color: #166534; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
-    .box { border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    a { color: #4d7c0f; }
+    .meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .pill { display: inline-block; border: 1px solid #bef264; background: #f7fee7; color: #3f6212; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 800; }
+    .box { border: 1px solid #bef264; background: #f7fee7; border-radius: 8px; padding: 8px 10px; margin: 6px 0 9px; }
     .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
     .warn { border-color: #fde68a; background: #fffbeb; color: #78350f; }
-    .script { border-left: 4px solid #15803d; background: #f0fdf4; padding: 9px 12px; margin: 8px 0; }
-    .small { color: #57534e; font-size: 11px; }
-    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 12px; padding: 8px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
-    .print-toolbar button { border: none; border-radius: 8px; background: #047857; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
-    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } table { font-size: 10.4px; } th, td { padding: 4px 5px; } }
-    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } }
+    .neutral { border-color: #e7e5e4; background: #fafaf9; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .script { border-left: 4px solid #4d7c0f; background: #f7fee7; padding: 7px 9px; margin: 6px 0; }
+    .small { color: #57534e; font-size: 10px; }
+    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 10px; padding: 7px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
+    .print-toolbar button { border: none; border-radius: 8px; background: #4d7c0f; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } .grid { grid-template-columns: 1fr; } table { font-size: 10px; } th, td { padding: 4px 5px; } }
+    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } .page-break { break-before: page; page-break-before: always; } .no-break { break-inside: avoid; page-break-inside: avoid; } }
   </style>
 </head>
 <body>
@@ -35,97 +39,210 @@
     <button type="button" onclick="window.print()">A4 인쇄</button>
   </div>
 
-  <h1>성인 Daily Day 09 - 간수치 상승</h1>
+  <h1>성인 Daily Day 09 - 간수치 상승 실전 보강판</h1>
   <div class="meta">
-    <span class="pill">검진 이상</span>
-    <span class="pill">MASLD/FIB-4</span>
-    <span class="pill">KCD R94.5</span>
-    <span class="pill">작성일 2026-07-05</span>
+    <span class="pill">AST/ALT</span>
+    <span class="pill">MASLD</span>
+    <span class="pill">FIB-4</span>
+    <span class="pill">KCD K76.0/R74.x</span>
+    <span class="pill">업데이트 2026-07-05</span>
   </div>
 
   <div class="box">
     <strong>오늘의 목표</strong><br>
-    AST/ALT, ALP/GGT, bilirubin 패턴을 나누고 지방간, 바이러스간염, 약물성, 담도질환을 단계적으로 평가한다.
-    MASLD 의심 환자는 FIB-4로 섬유화 위험을 나눈다.
+    건강검진 간수치 상승을 반복 재검만 하지 않고, hepatocellular/cholestatic pattern을 나누고,
+    바이러스/음주/약물/지방간/담도질환을 선별한 뒤 FIB-4로 섬유화 위험을 나눠 재진과 의뢰를 결정한다.
   </div>
 
-  <h2>1. 첫 3분 Triage</h2>
-  <div class="box danger">
-    <strong>당일 의뢰</strong>: 황달 + 의식 변화/출혈 경향, AST/ALT 1000 전후 이상,
-    bilirubin 상승과 RUQ pain/발열, acetaminophen 과량, 임신 중 간수치 상승.
-  </div>
-  <ol>
-    <li>간세포 손상형(AST/ALT)인지 담즙정체형(ALP/GGT/bilirubin)인지 나눈다.</li>
-    <li>음주, 약/보충제, 대사위험, viral hepatitis 위험, 담도 증상을 묻는다.</li>
-    <li>지방간 의심이면 FIB-4로 의뢰 필요성을 판단한다.</li>
-  </ol>
-
-  <h2>2. 핵심 문진/PE</h2>
-  <table>
-    <thead><tr><th>문진 5개</th><th>Physical exam</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>술, 새 약/한약/보충제, 황달/회색변/RUQ pain, 비만/당뇨/지질, B/C형간염 위험</td>
-        <td>공막황달, RUQ 압통, 간비대, 복수/부종, BMI/허리둘레, 만성간질환 소견</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>3. 검사 루틴</h2>
-  <table>
-    <thead><tr><th>패턴</th><th>1차 검사</th><th>행동</th></tr></thead>
-    <tbody>
-      <tr><td>AST/ALT 중심</td><td>repeat LFT, bilirubin, ALP/GGT, CBC/platelet, albumin, PT/INR 가능 시</td><td>중증도와 기능 확인.</td></tr>
-      <tr><td>MASLD 의심</td><td>HbA1c, lipid, FIB-4, 복부초음파</td><td>섬유화 위험 분류.</td></tr>
-      <tr><td>viral hepatitis</td><td>HBsAg, anti-HBs, anti-HBc, anti-HCV</td><td>양성이면 활동성 평가/의뢰.</td></tr>
-      <tr><td>약물성</td><td>약/보충제 timeline, acetaminophen 사용량</td><td>의심 약 중단, 중증이면 의뢰.</td></tr>
-      <tr><td>담즙정체형</td><td>ALP/GGT, bilirubin, 복부초음파</td><td>담도확장/담석 확인.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>4. FIB-4</h2>
-  <table>
-    <thead><tr><th>FIB-4</th><th>해석</th><th>행동</th></tr></thead>
-    <tbody>
-      <tr><td>&lt;1.3</td><td>낮은 위험</td><td>의원 추적. 대사위험 높으면 1-2년 재평가.</td></tr>
-      <tr><td>1.3-2.67</td><td>중간 위험</td><td>VCTE/ELF 등 2차검사 또는 의뢰.</td></tr>
-      <tr><td>&gt;2.67</td><td>높은 위험</td><td>간섬유화 고위험으로 의뢰.</td></tr>
-      <tr><td>65세 이상</td><td>cutoff 조정</td><td>2.0 이상부터 의미 있게 본다.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>5. KCD / Follow-up</h2>
-  <table>
-    <tbody>
-      <tr><td><strong>R94.5</strong></td><td>간기능검사 이상 소견.</td></tr>
-      <tr><td><strong>K76.0</strong></td><td>지방간/MASLD 근거가 있을 때.</td></tr>
-      <tr><td><strong>B18.x/K71.x/K80.x</strong></td><td>만성간염, 약물성, 담도질환 근거가 있을 때.</td></tr>
-    </tbody>
-  </table>
-  <ul>
-    <li>경도 상승은 원인 제거 후 2-4주 재검.</li>
-    <li>3개월 이상 반복 상승이면 원인검사 확장, 6개월 이상 지속이면 의뢰 고려.</li>
-    <li>ALT 정상화만 보고 fibrosis risk를 잊지 않는다.</li>
-  </ul>
-
-  <h2>6. 환자 설명 스크립트</h2>
-  <div class="script">간수치는 간세포 손상인지 담즙길 문제인지 간 기능 저하인지 나눠서 봐야 합니다.</div>
-  <div class="script">건강보조제와 한약도 간에 부담이 될 수 있어 최근 3개월 안에 시작한 것은 모두 알려주셔야 합니다.</div>
-  <div class="script">지방간에서 중요한 것은 지방 자체보다 간섬유화 위험입니다. FIB-4로 추적과 의뢰를 나누겠습니다.</div>
-
-  <h2>7. 자가체크</h2>
-  <ol>
-    <li>간세포 손상형과 담즙정체형은 어떻게 구분하나?</li>
-    <li>즉시 의뢰해야 할 red flag는?</li>
-    <li>FIB-4 1.3-2.67이면 다음 단계는?</li>
-    <li>약물성 간손상 문진 범주는?</li>
-    <li>ALT 정상화 후에도 다시 봐야 할 위험은?</li>
-  </ol>
-
-  <h2>참고 출처</h2>
-  <p class="small">
-    AASLD NAFLD/MASLD Practice Guidance 2023; ACG Abnormal Liver Chemistries Guideline; AACE NAFLD Primary Care Guideline.
+  <h2>1. 교과서적 개요와 병태생리</h2>
+  <p>
+    AST/ALT 상승은 간세포 손상 신호이고 ALP/GGT/bilirubin 상승은 담즙정체 또는 담도질환 쪽 단서를 준다.
+    실제 개원가에서는 MASLD, 음주, 약물/건기식, 바이러스 간염, 담석/담도질환, 근육손상, 갑상선질환,
+    혈색소침착/자가면역간염 같은 원인이 섞인다. "간수치가 높다"는 말만으로는 질환명이 아니므로
+    pattern, 정도, 지속기간, 위험인자, 증상을 함께 봐야 한다.
   </p>
+  <p>
+    MASLD는 metabolic dysfunction-associated steatotic liver disease의 개념으로, 지방간을 단순 영상 소견이 아니라
+    비만, 당뇨, 고혈압, 이상지질혈증, 인슐린 저항성과 연결된 전신 대사질환으로 본다. 중요한 예후 결정자는
+    ALT 숫자 자체보다 섬유화 정도다. 그래서 1차의원에서는 FIB-4 같은 비침습 점수로 저위험 환자는 관리하고,
+    중간/고위험 환자는 elastography 또는 간전문 진료로 연결하는 구조가 실전적이다.
+  </p>
+
+  <div class="grid">
+    <div class="box no-break">
+      <strong>증상과 문진 단서</strong>
+      <ul>
+        <li>대부분 무증상. 피로, 우상복부 불편감, 소화불량은 비특이적.</li>
+        <li>황달, 짙은 소변, 회색변, 소양감, 발열, 체중감소는 위험 신호.</li>
+        <li>음주량, 최근 약/한약/보충제, 헬스보충제, 항생제, statin, 진통제, 여행/성접촉/수혈을 묻는다.</li>
+      </ul>
+    </div>
+    <div class="box danger no-break">
+      <strong>당일 의뢰/응급 평가</strong>
+      <ul>
+        <li>황달, PT/INR 상승, 의식 변화, 복수, 토혈/흑변</li>
+        <li>AST/ALT 수백~수천 단위, bilirubin 상승, 발열+RUQ 통증</li>
+        <li>임신 중 간수치 상승, 급성 바이러스/약물성 간손상 의심</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>2. 첫 방문 알고리즘</h2>
+  <ol>
+    <li>검진표를 그대로 믿지 말고 AST, ALT, ALP, GGT, bilirubin, albumin, platelet, PT/INR 유무를 확인한다.</li>
+    <li>상승 정도를 나눈다: 경도(&lt;2~3배), 중등도(3~5배), 고도(5배 이상), bilirubin/INR 동반 여부.</li>
+    <li>hepatocellular pattern인지 cholestatic pattern인지 분류한다.</li>
+    <li>약물/건기식/음주/바이러스 위험, 대사위험, 담도 증상, 근육운동/CK 상승 가능성을 문진한다.</li>
+    <li>위험 신호가 없으면 2~4주 또는 1~3개월 재검 계획을 정하고, 원인별 기본검사를 진행한다.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th>패턴</th><th>흔한 원인</th><th>개원가 행동</th></tr></thead>
+    <tbody>
+      <tr><td>ALT/AST 우세</td><td>MASLD, 음주, 바이러스, 약물/건기식, 자가면역, 근육손상</td><td>HBsAg/anti-HCV, 음주/약물 중단, 대사검사, CK 고려, 재검.</td></tr>
+      <tr><td>ALP/GGT/bilirubin 우세</td><td>담석/담도폐쇄, 담관염, PBC/PSC, 약물성 담즙정체</td><td>복부초음파, bilirubin/발열/RUQ 통증 있으면 의뢰.</td></tr>
+      <tr><td>AST가 ALT보다 높음</td><td>음주, 진행 섬유화/간경변, 근육손상</td><td>음주량, MCV/GGT, platelet, CK, FIB-4 확인.</td></tr>
+      <tr><td>Albumin 낮음/platelet 낮음/INR 상승</td><td>간합성기능 저하, 진행 만성간질환</td><td>간전문 의뢰. 단순 지방간으로 설명하지 않는다.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. KCD와 의무기록</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>R74.x</strong></td><td>간효소 상승 자체. 원인 확정 전 평가 단계에서 사용.</td></tr>
+      <tr><td><strong>K76.0</strong></td><td>지방간. 영상/위험인자, 음주량, 대사질환 동반 여부를 함께 기록.</td></tr>
+      <tr><td><strong>K70.x</strong></td><td>알코올성 간질환. 음주량, 기간, 상담 내용 기록.</td></tr>
+      <tr><td><strong>B18.x</strong></td><td>만성 B/C형 간염. 혈청검사로 확인된 경우.</td></tr>
+      <tr><td><strong>K71.x/K80.x/K83.x</strong></td><td>약물성 간손상, 담석, 담도질환 의심/확진 시 임상상에 맞게 사용.</td></tr>
+    </tbody>
+  </table>
+
+  <section class="page-break">
+    <h2>4. 기본 검사 세트</h2>
+    <table>
+      <thead><tr><th>상황</th><th>검사</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td>초기 공통</td><td>AST/ALT, ALP, GGT, bilirubin, albumin, CBC/platelet, PT/INR, Cr</td><td>손상 패턴, 합성기능, portal HTN 단서.</td></tr>
+        <tr><td>바이러스</td><td>HBsAg, anti-HBs, anti-HBc 필요 시, anti-HCV</td><td>만성간염 선별과 예방접종 상담.</td></tr>
+        <tr><td>대사</td><td>HbA1c/FBS, lipid, BP, BMI/허리둘레</td><td>MASLD 위험도와 치료 목표.</td></tr>
+        <tr><td>음주/약물</td><td>MCV, GGT, medication/supplement review</td><td>음주/약물성 간손상 가능성.</td></tr>
+        <tr><td>담도 의심</td><td>복부초음파, bilirubin, ALP/GGT, 필요 시 의뢰</td><td>담석, 담도확장, 종괴, 담낭염/담관염.</td></tr>
+        <tr><td>지속/비전형</td><td>ANA, SMA, IgG, ferritin/TSAT, ceruloplasmin 등</td><td>자가면역/철과다/희귀질환은 의뢰와 병행.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>5. FIB-4 기반 MASLD 위험층화</h2>
+    <p>
+      FIB-4는 나이, AST, ALT, platelet로 계산하는 간단한 섬유화 위험 점수다. 수치 하나로 진단을 끝내는 검사는 아니지만,
+      1차의원에서 "누구를 안심시키고, 누구를 elastography/간전문 진료로 보낼지" 정하는 데 유용하다.
+    </p>
+
+    <table>
+      <thead><tr><th>FIB-4</th><th>해석</th><th>행동</th></tr></thead>
+      <tbody>
+        <tr><td>낮음</td><td>진행 섬유화 가능성 낮음</td><td>체중, 당뇨, 지질, 혈압 관리. 1~2년 또는 위험도별 재평가.</td></tr>
+        <tr><td>중간</td><td>추가 평가 필요</td><td>transient elastography, 간초음파, 간전문 의뢰/공유진료 고려.</td></tr>
+        <tr><td>높음</td><td>진행 섬유화/간경변 가능성</td><td>간전문 의뢰. HCC surveillance, varix 평가 필요 여부 확인.</td></tr>
+        <tr><td>65세 이상</td><td>위양성 증가 가능</td><td>고령 cutoff를 고려하되 platelet 저하/albumin 저하는 놓치지 않는다.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box warn">
+      <strong>실전 문장</strong>: "간수치는 오늘의 염증 숫자이고, 예후는 딱딱해진 정도가 더 중요합니다.
+      그래서 혈소판과 나이를 같이 넣어 섬유화 위험을 보겠습니다."
+    </div>
+
+    <h2>6. 치료방법</h2>
+    <table>
+      <thead><tr><th>원인</th><th>1차의원 치료/상담</th><th>재평가</th></tr></thead>
+      <tbody>
+        <tr><td>MASLD</td><td>체중 7~10% 감량 목표, 운동, 당뇨/지질/혈압 치료, 음주 최소화</td><td>3개월 LFT/체중, FIB-4 주기 평가.</td></tr>
+        <tr><td>음주</td><td>음주량 수치화, 절주/금주 계약, AUDIT-C, 필요 시 약물/정신건강 연계</td><td>2~4주 금주 후 LFT, 재음주 예방.</td></tr>
+        <tr><td>약물/보충제</td><td>의심 약/한약/헬스보충제 중단, acetaminophen/항생제/항경련제 확인</td><td>2~4주 재검, 악화 시 의뢰.</td></tr>
+        <tr><td>바이러스</td><td>HBV/HCV 확인, 가족검사/예방접종, 간전문 의뢰</td><td>항바이러스 적응증과 HCC surveillance 결정.</td></tr>
+        <tr><td>담도</td><td>RUQ pain/fever/jaundice 확인, 초음파</td><td>담관염/폐쇄 의심 시 응급 의뢰.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>7. 가정의학과 바운더리와 Red Flag</h2>
+    <table>
+      <thead><tr><th>1차의원에서 관리 가능</th><th>의뢰/상급진료</th></tr></thead>
+      <tbody>
+        <tr><td>무증상 경도 AST/ALT 상승, MASLD 저위험군</td><td>AST/ALT 5배 이상, bilirubin/INR 상승, albumin 저하, platelet 감소</td></tr>
+        <tr><td>대사질환 동반 지방간의 체중/혈당/지질/혈압 관리</td><td>FIB-4 중간/고위험, elastography 이상, 간경변 의심</td></tr>
+        <tr><td>음주/약물/건기식 중단 후 단기 재검</td><td>중단해도 악화, 급성 약물성 간손상 의심, 임신 중 간수치 상승</td></tr>
+        <tr><td>HBV/HCV 선별과 예방접종 상담</td><td>HBsAg 양성, anti-HCV 양성, 가족력/HCC 위험이 높음</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box danger">
+      <strong>응급/빠른 의뢰</strong>: 황달, 의식 변화, PT/INR 상승, 토혈/흑변, 복수, 발열+우상복부 통증,
+      AST/ALT 급격한 고도 상승, bilirubin 동반 상승, 임신, 체중감소/종괴 의심, 간성뇌증.
+    </div>
+
+    <h2>8. 예후와 추적</h2>
+    <ul>
+      <li>경도 MASLD는 체중 5% 감량으로 지방증이 줄고, 7~10% 감량에서 염증/섬유화 개선 가능성이 커진다.</li>
+      <li>ALT가 정상이어도 진행 섬유화가 있을 수 있으므로 당뇨/비만/고령/혈소판 감소 환자는 FIB-4를 반복한다.</li>
+      <li>음주성 간손상은 2~4주 금주만으로도 수치가 좋아질 수 있어 재검 예약이 치료 동기가 된다.</li>
+      <li>바이러스 간염은 증상이 없어도 간경변/HCC 위험이 있어 확진되면 항바이러스 평가와 감시 체계가 필요하다.</li>
+    </ul>
+
+    <h2>9. 개원의 경영: 매출과 재진 구조</h2>
+    <p>
+      간수치 상승은 검진 시즌에 매우 흔하지만, 단순히 "간장약 드세요"로 끝내면 재진이 끊긴다. 실전에서는
+      검진 결과 리뷰, 원인감별 검사, 2~4주 또는 3개월 재검, 지방간 대사관리, 음주 상담, 예방접종을 묶어
+      환자가 결과 변화를 확인하도록 만드는 것이 핵심이다. 수익은 불필요한 검사보다 "위험도에 맞는 패키지"와
+      장기 대사질환 관리에서 나온다.
+    </p>
+
+    <table>
+      <thead><tr><th>운영 포인트</th><th>실행</th><th>재진 유도</th></tr></thead>
+      <tbody>
+        <tr><td>검진 리뷰 방문</td><td>간수치 pattern, 음주/약물, 대사위험, FIB-4 계산</td><td>오늘은 원인을 나누고 위험도를 정하는 방문입니다.</td></tr>
+        <tr><td>원인감별 세트</td><td>간기능 패널, CBC/platelet, 바이러스, 대사검사, 초음파 선택</td><td>모든 검사가 아니라 위험도에 맞춰 단계적으로 합니다.</td></tr>
+        <tr><td>2~4주 재검</td><td>금주/약물중단 후 LFT 확인</td><td>수치가 떨어지는지 봐야 약물성/음주성 가능성을 판단합니다.</td></tr>
+        <tr><td>3개월 대사관리</td><td>체중, 허리둘레, HbA1c, 지질, LFT 동시 추적</td><td>간수치를 낮추는 치료는 체중과 혈당을 같이 보는 것입니다.</td></tr>
+        <tr><td>예방접종</td><td>A/B형 간염 면역 확인과 접종</td><td>간질환 위험이 있으면 예방 가능한 간염부터 막겠습니다.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>10. 비슷한 개원가 의사들의 실제 접근</h2>
+    <ul>
+      <li>검진표를 보며 AST/ALT만 설명하지 않고 GGT, platelet, albumin, bilirubin을 같이 보며 위험도를 설명한다.</li>
+      <li>지방간 환자를 비만/당뇨/지질/혈압 클리닉으로 연결해 재진 흐름을 만든다.</li>
+      <li>음주 상담은 "줄이세요"보다 주당 표준잔, binge drinking, 금주 재검 날짜를 차트에 남긴다.</li>
+      <li>건기식/한약/헬스보충제를 실제 제품명으로 기록하고 사진을 찍어오게 해 약물성 간손상을 줄인다.</li>
+      <li>간초음파는 모두에게 반복하지 않고, 담도 패턴/위험도/지속 상승/FIB-4에 맞춰 사용한다.</li>
+    </ul>
+
+    <h2>11. 최신지견 요약</h2>
+    <table>
+      <thead><tr><th>트렌드</th><th>개원가 적용</th></tr></thead>
+      <tbody>
+        <tr><td>NAFLD에서 MASLD/MASH 용어로 전환</td><td>지방간을 대사질환의 간 표현형으로 설명하고 혈당/지질/혈압을 같이 관리한다.</td></tr>
+        <tr><td>ALT 수치보다 fibrosis risk가 예후를 좌우</td><td>FIB-4를 정기적으로 계산하고 중간/고위험군을 elastography/간전문으로 보낸다.</td></tr>
+        <tr><td>GLP-1/GIP 계열, SGLT2, pioglitazone 등 대사치료 관심 증가</td><td>당뇨/비만 동반 환자에서 체중과 혈당 치료가 간에도 도움이 될 수 있음을 설명한다.</td></tr>
+        <tr><td>HCV 치료 접근성 향상, HBV 장기감시 중요</td><td>검진 양성자를 놓치지 않고 확진/의뢰/가족검사/예방접종으로 연결한다.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>12. 환자 설명 스크립트</h2>
+    <div class="script">간수치가 높다는 말은 원인이 여러 가지라는 뜻입니다. 오늘은 간염, 음주, 약물, 지방간, 담도 문제를 나눠 보겠습니다.</div>
+    <div class="script">지방간에서 중요한 것은 수치 하나보다 간이 딱딱해졌는지입니다. 혈소판과 나이를 같이 넣어 위험도를 보겠습니다.</div>
+    <div class="script">2~4주 금주와 의심 약 중단 후 재검을 잡겠습니다. 좋아지는 속도가 원인을 찾는 데 큰 단서가 됩니다.</div>
+
+    <h2>13. 근거와 업데이트 링크</h2>
+    <ul class="small">
+      <li>AASLD 2023 NAFLD practice guidance: <a href="https://www.aasld.org/practice-guidelines/nonalcoholic-fatty-liver-disease">AASLD guidance page</a></li>
+      <li>EASL-EASD-EASO 2024 MASLD guideline: <a href="https://easl.eu/publication/easl-easd-easo-clinical-practice-guidelines-on-the-management-of-masld/">MASLD clinical practice guideline</a></li>
+      <li>ACG abnormal liver chemistries guideline: <a href="https://journals.lww.com/ajg/fulltext/2017/01000/acg_clinical_guideline__evaluation_of_abnormal.13.aspx">Evaluation of abnormal liver chemistries</a></li>
+      <li>AACE NAFLD/MASLD resources: <a href="https://pro.aace.com/clinical-guidance/2022-nafld">AACE clinical guidance</a></li>
+    </ul>
+  </section>
 </body>
 </html>
-

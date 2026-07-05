@@ -378,7 +378,7 @@ export const adultDailyContent = [
     day: 7,
     date: '2026-07-05',
     slug: 'obesity-injection-basics',
-    topic: '비만주사 기본: 위고비/삭센다/마운자로 상담, 금기, 중단 기준',
+    topic: '비만주사 실전 보강판: GLP-1/GIP 상담, 금기, 유지 전략',
     printPath: '/adult-daily/print/day-07-obesity-injection-basics.html',
     pdfPath: '/adult-daily/pdf/day-07-obesity-injection-basics.pdf',
     masterPath: '/adult-daily/master/day-07-obesity-injection-basics.md',
@@ -392,6 +392,12 @@ export const adultDailyContent = [
           <div style="font-weight:900;color:#115e59;margin-bottom:6px">3분 상담</div>
           <div>BMI/동반질환, 임신·수유, MTC/MEN2, 췌장염/담낭질환, severe GI disease, insulin/SU 병용과 비용·장기치료 이해도를 확인.</div>
         </div>
+      </div>
+
+      <div style="border:1px solid #99f6e4;background:#f0fdfa;border-radius:10px;padding:12px;margin-bottom:14px">
+        <b>실전 보강 포인트</b><br>
+        비만은 만성 대사질환으로 설명하고, 초진 평가-4주 증량-12주 효과판정-유지기 재진을 표준 흐름으로 잡는다.
+        최신 근거는 체중감량뿐 아니라 심혈관 위험 감소와 중단 후 재증가 문제를 함께 보여주므로, 시작 전부터 장기 비용과 유지 전략을 설명한다.
       </div>
 
       <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
@@ -448,14 +454,14 @@ export const adultDailyContent = [
       </div>
     `,
     revisions: [
-      '2026-07-05: 최초 작성. 대한비만학회 2024 진료지침, FDA Wegovy/Saxenda/Zepbound/Mounjaro label 반영.',
+      '2026-07-05: 실전 보강판. 병태생리, KCD, red flag, 개원 운영, SELECT/STEP/SURMOUNT 근거와 유지 전략 반영.',
     ],
   },
   {
     day: 8,
     date: '2026-07-05',
     slug: 'gout-hyperuricemia',
-    topic: '고요산혈증/통풍: 급성기 처방, ULT 시작 기준',
+    topic: '통풍 실전 보강판: 급성기 처방, treat-to-target ULT',
     printPath: '/adult-daily/print/day-08-gout-hyperuricemia.html',
     pdfPath: '/adult-daily/pdf/day-08-gout-hyperuricemia.pdf',
     masterPath: '/adult-daily/master/day-08-gout-hyperuricemia.md',
@@ -469,6 +475,12 @@ export const adultDailyContent = [
           <div style="font-weight:900;color:#92400e;margin-bottom:6px">급성기와 장기약 분리</div>
           <div>오늘은 염증을 끄고, 재발성 통풍·tophi·CKD·결석·요산 9 이상이면 ULT를 treat-to-target으로 설계.</div>
         </div>
+      </div>
+
+      <div style="border:1px solid #fde68a;background:#fffbeb;border-radius:10px;padding:12px;margin-bottom:14px">
+        <b>실전 보강 포인트</b><br>
+        급성 발작은 감염성 관절염 배제가 먼저이고, 장기 관리는 요산 목표 &lt;6 mg/dL까지 증량하는 treat-to-target 구조로 잡는다.
+        발작 1주 재진, 안정기 요산 재평가, ULT 증량 재진을 분리하면 통증 해결과 만성질환 관리를 모두 놓치지 않는다.
       </div>
 
       <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
@@ -526,14 +538,14 @@ export const adultDailyContent = [
       </div>
     `,
     revisions: [
-      '2026-07-05: 최초 작성. 2020 ACR gout guideline, colchicine/allopurinol label 반영.',
+      '2026-07-05: 실전 보강판. septic joint 감별, HLA-B*58:01, ULT titration, 재진 운영, ACR/EULAR 근거 반영.',
     ],
   },
   {
     day: 9,
     date: '2026-07-05',
     slug: 'elevated-liver-enzymes',
-    topic: '간수치 상승: 지방간 vs 간염 vs 약물성, 검사 루틴',
+    topic: '간수치 상승 실전 보강판: MASLD, FIB-4, 의뢰 기준',
     printPath: '/adult-daily/print/day-09-elevated-liver-enzymes.html',
     pdfPath: '/adult-daily/pdf/day-09-elevated-liver-enzymes.pdf',
     masterPath: '/adult-daily/master/day-09-elevated-liver-enzymes.md',
@@ -547,6 +559,12 @@ export const adultDailyContent = [
           <div style="font-weight:900;color:#166534;margin-bottom:6px">패턴 먼저</div>
           <div>AST/ALT 중심인지 ALP/GGT/bilirubin 중심인지 나누고, 음주·약물·대사위험·viral hepatitis·담도 증상을 확인.</div>
         </div>
+      </div>
+
+      <div style="border:1px solid #bbf7d0;background:#f0fdf4;border-radius:10px;padding:12px;margin-bottom:14px">
+        <b>실전 보강 포인트</b><br>
+        간수치 상승은 AST/ALT 숫자보다 패턴, 합성기능, bilirubin, platelet, FIB-4로 위험을 나누는 것이 핵심이다.
+        검진 리뷰-원인감별-2~4주 재검-3개월 대사관리 흐름으로 잡으면 지방간, 음주, 약물, 바이러스 간염을 동시에 관리할 수 있다.
       </div>
 
       <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
@@ -600,14 +618,14 @@ export const adultDailyContent = [
       </div>
     `,
     revisions: [
-      '2026-07-05: 최초 작성. AASLD 2023 NAFLD/MASLD guidance, ACG abnormal liver chemistries guideline 반영.',
+      '2026-07-05: 실전 보강판. MASLD 용어, FIB-4 위험층화, red flag, 재검 예약 구조, AASLD/EASL/ACG 근거 반영.',
     ],
   },
   {
     day: 10,
     date: '2026-07-05',
     slug: 'thyroid-function-patterns',
-    topic: '갑상선 기능 이상: TSH 패턴, 추적/치료/의뢰 기준',
+    topic: '갑상선 기능 이상 실전 보강판: TSH 패턴, 치료/의뢰 기준',
     printPath: '/adult-daily/print/day-10-thyroid-function-patterns.html',
     pdfPath: '/adult-daily/pdf/day-10-thyroid-function-patterns.pdf',
     masterPath: '/adult-daily/master/day-10-thyroid-function-patterns.md',
@@ -621,6 +639,12 @@ export const adultDailyContent = [
           <div style="font-weight:900;color:#6d28d9;margin-bottom:6px">TSH + FT4 패턴</div>
           <div>TSH high/low와 FT4/T3를 같이 보고 hypo, subclinical hypo, hyper, subclinical hyper, central pattern을 나눈다.</div>
         </div>
+      </div>
+
+      <div style="border:1px solid #ddd6fe;background:#f5f3ff;border-radius:10px;padding:12px;margin-bottom:14px">
+        <b>실전 보강 포인트</b><br>
+        TSH 단독 이상은 biotin, 약물, 임신, 최근 illness를 먼저 확인하고 TSH/FT4/T3 패턴으로 재검 또는 치료를 결정한다.
+        6~8주 재검 예약, levothyroxine 복용법 교육, 항진증 red flag, 초음파 과잉사용 방지가 개원가 운영의 핵심이다.
       </div>
 
       <h3 style="margin:14px 0 7px;font-size:15px">핵심 문진/PE</h3>
@@ -681,7 +705,7 @@ export const adultDailyContent = [
       </div>
     `,
     revisions: [
-      '2026-07-05: 최초 작성. ATA hyperthyroidism guideline, subclinical hypothyroidism 자료 반영.',
+      '2026-07-05: 실전 보강판. biotin 간섭, subclinical 질환 개별화, 임신/AF/thyroid storm 의뢰 기준, ATA/NICE 근거 반영.',
     ],
   },
 ]

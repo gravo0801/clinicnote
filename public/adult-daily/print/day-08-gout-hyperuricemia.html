@@ -2,32 +2,36 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>Day 08 고요산혈증/통풍</title>
+  <title>Day 08 고요산혈증/통풍 실전 보강판</title>
   <style>
-    @page { size: A4; margin: 14mm; }
+    @page { size: A4; margin: 12mm; }
     * { box-sizing: border-box; }
     html { background: #f5f3ef; }
-    body { max-width: 186mm; margin: 0 auto; padding: 16px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.62; font-size: 12.4px; }
-    h1 { font-size: 24px; margin: 0 0 8px; letter-spacing: 0; }
-    h2 { font-size: 16px; margin: 21px 0 8px; padding-bottom: 5px; border-bottom: 2px solid #b45309; color: #92400e; }
-    h3 { font-size: 13px; margin: 14px 0 6px; color: #1c1917; }
-    ul, ol { margin: 6px 0 10px 20px; padding: 0; }
-    li { margin: 2px 0; }
-    table { width: 100%; border-collapse: collapse; margin: 9px 0 14px; font-size: 11.4px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
-    th, td { border: 1px solid #fde68a; padding: 6px 7px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
+    body { max-width: 186mm; margin: 0 auto; padding: 14px; background: #fff; overflow-x: hidden; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #1c1917; line-height: 1.46; font-size: 11.2px; }
+    h1 { font-size: 21px; margin: 0 0 7px; letter-spacing: 0; }
+    h2 { font-size: 14px; margin: 16px 0 7px; padding-bottom: 4px; border-bottom: 2px solid #b45309; color: #92400e; }
+    h3 { font-size: 12px; margin: 11px 0 5px; color: #1c1917; }
+    p { margin: 5px 0 8px; }
+    ul, ol { margin: 5px 0 8px 18px; padding: 0; }
+    li { margin: 1px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 7px 0 10px; font-size: 10.3px; table-layout: fixed; page-break-inside: auto; break-inside: auto; }
+    th, td { border: 1px solid #fde68a; padding: 5px 6px; vertical-align: top; overflow-wrap: anywhere; word-break: keep-all; }
     th { background: #fffbeb; color: #92400e; text-align: left; }
     tr { page-break-inside: avoid; break-inside: avoid; }
-    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-    .pill { display: inline-block; border: 1px solid #fde68a; background: #fffbeb; color: #92400e; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; }
-    .box { border: 1px solid #fde68a; background: #fffbeb; border-radius: 8px; padding: 10px 12px; margin: 8px 0 13px; }
+    a { color: #92400e; }
+    .meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .pill { display: inline-block; border: 1px solid #fde68a; background: #fffbeb; color: #92400e; border-radius: 999px; padding: 2px 8px; font-size: 10px; font-weight: 800; }
+    .box { border: 1px solid #fde68a; background: #fffbeb; border-radius: 8px; padding: 8px 10px; margin: 6px 0 9px; }
     .danger { border-color: #fecaca; background: #fef2f2; color: #7f1d1d; }
     .warn { border-color: #bfdbfe; background: #eff6ff; color: #1e3a8a; }
-    .script { border-left: 4px solid #b45309; background: #fffbeb; padding: 9px 12px; margin: 8px 0; }
-    .small { color: #57534e; font-size: 11px; }
-    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 12px; padding: 8px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
-    .print-toolbar button { border: none; border-radius: 8px; background: #047857; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
-    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } table { font-size: 10.4px; } th, td { padding: 4px 5px; } }
-    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } }
+    .neutral { border-color: #e7e5e4; background: #fafaf9; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .script { border-left: 4px solid #b45309; background: #fffbeb; padding: 7px 9px; margin: 6px 0; }
+    .small { color: #57534e; font-size: 10px; }
+    .print-toolbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: flex-end; gap: 8px; margin: -4px -4px 10px; padding: 7px 4px; background: rgba(255,255,255,0.92); backdrop-filter: blur(6px); border-bottom: 1px solid #eee7db; }
+    .print-toolbar button { border: none; border-radius: 8px; background: #b45309; color: #fff; padding: 8px 13px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    @media screen and (max-width: 720px) { body { max-width: none; padding: 12px; } .grid { grid-template-columns: 1fr; } table { font-size: 10px; } th, td { padding: 4px 5px; } }
+    @media print { html, body { background: #fff !important; } body { max-width: none; margin: 0; padding: 0; overflow: visible; } .print-toolbar { display: none !important; } a { color: inherit; text-decoration: none; } .page-break { break-before: page; page-break-before: always; } .no-break { break-inside: avoid; page-break-inside: avoid; } }
   </style>
 </head>
 <body>
@@ -35,104 +39,209 @@
     <button type="button" onclick="window.print()">A4 인쇄</button>
   </div>
 
-  <h1>성인 Daily Day 08 - 고요산혈증/통풍</h1>
+  <h1>성인 Daily Day 08 - 고요산혈증/통풍 실전 보강판</h1>
   <div class="meta">
-    <span class="pill">급성 관절염</span>
-    <span class="pill">ULT</span>
+    <span class="pill">급성 단관절염</span>
+    <span class="pill">Treat-to-target ULT</span>
     <span class="pill">KCD M10.x</span>
-    <span class="pill">작성일 2026-07-05</span>
+    <span class="pill">A4 4~5장 압축</span>
+    <span class="pill">업데이트 2026-07-05</span>
   </div>
 
   <div class="box">
     <strong>오늘의 목표</strong><br>
-    급성 통풍 발작에서 감염성 관절염을 놓치지 않고 NSAID, colchicine, steroid 중 안전한 약을 고른다.
-    재발성 통풍에서는 allopurinol을 낮게 시작해 요산 목표까지 증량한다.
+    급성 통풍 발작에서 감염성 관절염을 놓치지 않고, NSAID/colchicine/steroid 중 안전한 약을 고른다.
+    재발성 통풍은 allopurinol을 낮게 시작해 혈청 요산 목표까지 증량하는 장기질환으로 관리한다.
   </div>
 
-  <h2>1. 첫 3분 Triage</h2>
-  <div class="box danger">
-    <strong>당일 의뢰</strong>: 발열/오한, 면역저하, prosthetic joint, 최근 관절주사/수술, 외상/골절 의심,
-    통풍 병력이 불확실한 심한 단관절염, 다관절+고열.
-  </div>
-  <ol>
-    <li>이전 통풍과 같은 양상인지, 감염/외상 단서가 있는지 먼저 확인한다.</li>
-    <li>신기능, GI bleeding, 심부전, 항응고제, 당뇨를 확인해 약을 고른다.</li>
-    <li>ULT 적응증이 있으면 발작 조절과 장기 요산 관리 계획을 분리해 설명한다.</li>
-  </ol>
-
-  <h2>2. 핵심 문진/PE</h2>
-  <table>
-    <thead><tr><th>문진 5개</th><th>Physical exam</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>반복 발작, 발열/외상/상처, CKD/GI/심부전/항응고제, 음주/탈수/과식, ULT 복용과 발진 병력</td>
-        <td>관절 열감/발적/종창, 상처/봉와직염, tophi, 체온/맥박, 다관절 침범</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <h2>3. 검사</h2>
-  <table>
-    <thead><tr><th>상황</th><th>검사</th><th>해석/행동</th></tr></thead>
-    <tbody>
-      <tr><td>급성 발작</td><td>CBC/CRP 선택, Cr/eGFR, AST/ALT, uric acid</td><td>요산은 급성기에 정상일 수 있다.</td></tr>
-      <tr><td>감염 의심</td><td>관절천자/배양 의뢰</td><td>septic arthritis 가능하면 의뢰.</td></tr>
-      <tr><td>ULT 시작 전</td><td>uric acid, Cr/eGFR, AST/ALT, CBC</td><td>시작 용량과 추적 기준값.</td></tr>
-      <tr><td>증량 중</td><td>uric acid q2-5주, CBC/LFT/Cr</td><td>목표 <6 mg/dL까지 증량.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>4. 급성기 처방</h2>
-  <table>
-    <thead><tr><th>선택</th><th>예시</th><th>피해야 할 상황</th></tr></thead>
-    <tbody>
-      <tr><td>NSAID</td><td>Naproxen 250-500 mg bid 등</td><td>eGFR 저하, GI bleeding, 항응고제, 심부전.</td></tr>
-      <tr><td>Colchicine</td><td>1.2 mg 후 1시간 뒤 0.6 mg</td><td>eGFR 저하, CYP3A4/P-gp inhibitor, 설사, 고령.</td></tr>
-      <tr><td>Steroid</td><td>Prednisolone 20-30 mg qd 3-5일</td><td>감염 배제 안 됨, 혈당 조절 매우 불량.</td></tr>
-      <tr><td>관절강내 steroid</td><td>1-2개 큰 관절</td><td>감염 가능성 있으면 금지.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>5. ULT 시작 기준</h2>
-  <div class="box warn">
-    <strong>시작 고려</strong>: 1년 2회 이상 발작, tophi, 영상상 손상, CKD stage 3 이상,
-    요로결석, uric acid >9 mg/dL. 증상 없는 고요산혈증만으로는 보통 시작하지 않는다.
-  </div>
-  <table>
-    <thead><tr><th>약제</th><th>시작/목표</th><th>주의</th></tr></thead>
-    <tbody>
-      <tr><td>Allopurinol</td><td>100 mg qd 이하 시작, CKD면 더 낮게. 목표 uric acid <6.</td><td>발진 즉시 중단, 한국인 HLA-B*58:01 고려.</td></tr>
-      <tr><td>Febuxostat</td><td>40 mg qd 시작</td><td>심혈관질환 병력 신중.</td></tr>
-      <tr><td>Prophylaxis</td><td>colchicine 0.6 mg qd-bid 또는 NSAID 저용량</td><td>최소 3-6개월, 신기능/상호작용 조정.</td></tr>
-    </tbody>
-  </table>
-
-  <h2>6. Follow-up / Refer</h2>
-  <ul>
-    <li>급성기 3-7일 내 반응 확인. 발열/악화/다관절이면 재평가.</li>
-    <li>ULT 시작 후 2-5주마다 요산 확인, 목표 도달까지 증량.</li>
-    <li>감염 감별, CKD 진행, 결석 반복, 약제 과민반응, tophi 기능장애는 의뢰.</li>
-  </ul>
-
-  <h2>7. 환자 설명 스크립트</h2>
-  <div class="script">통풍약은 급성기 염증을 끄는 약과 요산을 낮추는 장기약이 다릅니다.</div>
-  <div class="script">요산수치는 발작 중 정상처럼 나올 수도 있어 오늘 수치 하나로 배제하지 않습니다.</div>
-  <div class="script">Allopurinol 시작 뒤 발진, 입안 헐음, 열이 나면 바로 중단하고 연락해야 합니다.</div>
-
-  <h2>8. 자가체크</h2>
-  <ol>
-    <li>급성 단관절염에서 먼저 배제해야 할 질환은?</li>
-    <li>NSAID를 피해야 할 상황은?</li>
-    <li>ULT 시작 적응증은?</li>
-    <li>Allopurinol 시작 용량과 목표 요산은?</li>
-    <li>flare prophylaxis를 쓰는 이유는?</li>
-  </ol>
-
-  <h2>참고 출처</h2>
-  <p class="small">
-    ACR 2020 Gout Guideline: https://rheumatology.org/gout-guideline<br>
-    FDA Colcrys label; FDA allopurinol label, HLA-B*58:01 warning.
+  <h2>1. 교과서적 개요와 병태생리</h2>
+  <p>
+    통풍은 urate가 과포화되어 monosodium urate crystal이 관절과 연부조직에 침착하고, NLRP3 inflammasome을 통해
+    IL-1 beta 중심의 급성 염증을 일으키는 질환이다. 혈청 요산은 생산 증가보다 배설 저하가 흔하며,
+    CKD, 이뇨제, 음주, fructose, 비만, 대사증후군, 고혈압, 탈수가 위험을 높인다.
   </p>
+  <p>
+    전형적 발작은 밤이나 새벽에 갑자기 시작하는 극심한 단관절 통증, 발적, 열감, 종창이다. 1st MTP가 유명하지만
+    발목, 무릎, 손목, 손가락도 가능하다. 핵심은 "통풍 같아 보이는 감염성 관절염"을 놓치지 않는 것이다.
+    급성기 요산은 정상일 수 있으므로 요산 수치만으로 배제하지 않는다.
+  </p>
+
+  <div class="grid">
+    <div class="box no-break">
+      <strong>통풍을 시사하는 단서</strong>
+      <ul>
+        <li>반복되는 유사 발작, 24시간 이내 최고 통증</li>
+        <li>1st MTP, 발목, 무릎, tophi, 과음/회식/탈수 뒤 발생</li>
+        <li>고요산혈증, CKD, 이뇨제, 대사증후군 동반</li>
+      </ul>
+    </div>
+    <div class="box danger no-break">
+      <strong>감염을 먼저 생각할 단서</strong>
+      <ul>
+        <li>발열/오한, 전신 쇠약, 면역저하, 당뇨 조절 불량</li>
+        <li>인공관절, 최근 관절주사/수술, 상처/봉와직염</li>
+        <li>통풍 병력이 불확실한 첫 심한 단관절염</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>2. 진단과 첫 방문 알고리즘</h2>
+  <ol>
+    <li>활력징후, 발열, 감염 위험, 외상/골절 가능성을 먼저 확인한다.</li>
+    <li>이전 발작 양상, 침범 관절, 음주/탈수/과식, 약물(이뇨제, aspirin), CKD/GI bleeding/항응고제를 묻는다.</li>
+    <li>관절 열감, 발적, 종창, 압통, 운동범위, 상처/봉와직염, tophi를 본다.</li>
+    <li>감염이 가능하면 관절천자와 배양이 원칙이므로 응급실/정형외과/류마티스 의뢰를 우선한다.</li>
+  </ol>
+
+  <table>
+    <thead><tr><th>검사</th><th>언제</th><th>해석</th></tr></thead>
+    <tbody>
+      <tr><td>Uric acid</td><td>초진, ULT 조절, 발작 후 안정기</td><td>급성기에는 정상 가능. 목표치는 보통 &lt;6 mg/dL, tophi 있으면 더 낮게 고려.</td></tr>
+      <tr><td>CBC/CRP/ESR</td><td>감염 감별, 심한 염증</td><td>염증 정도 참고용. septic arthritis 배제에는 부족.</td></tr>
+      <tr><td>Cr/eGFR, AST/ALT, CBC</td><td>급성 약제 선택, ULT 시작 전</td><td>NSAID/colchicine/allopurinol/febuxostat 용량과 안전성 판단.</td></tr>
+      <tr><td>관절천자</td><td>감염 의심, 첫 비전형 단관절염</td><td>crystal 확인과 Gram stain/culture. 가능하면 가장 확실한 검사.</td></tr>
+      <tr><td>초음파/DECT</td><td>진단 애매, 반복 발작</td><td>double contour sign, urate deposit 확인. 1차의원에서는 의뢰 검사로 활용.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>3. KCD와 의무기록</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>M10.x</strong></td><td>통풍. 관절 위치, 급성 발작/만성 통풍, 요산 수치, ULT 여부 기록.</td></tr>
+      <tr><td><strong>E79.0</strong></td><td>무증상 고요산혈증. 발작이 없으면 통풍으로 과잉진단하지 않는다.</td></tr>
+      <tr><td><strong>N18.x/I10/E11.x/E78.x</strong></td><td>CKD, 고혈압, 당뇨, 이상지질혈증 동반 시 장기 위험 관리.</td></tr>
+      <tr><td><strong>L03.x/M00.x</strong></td><td>봉와직염/감염성 관절염 의심이면 감별진단으로 기록하고 의뢰.</td></tr>
+    </tbody>
+  </table>
+
+  <section class="page-break">
+    <h2>4. 급성 발작 치료</h2>
+    <p>
+      급성 발작은 가능한 빨리 염증을 끊는 것이 중요하다. NSAID, colchicine, steroid 중 하나를 고르되,
+      신기능, 위장관 출혈, 심부전, 항응고제, 당뇨, 감염 가능성에 따라 선택한다. 이미 ULT를 복용 중이면
+      급성 발작 때 임의로 중단하지 않는 것이 보통 원칙이다.
+    </p>
+
+    <table>
+      <thead><tr><th>옵션</th><th>쓸 만한 상황</th><th>피하거나 조심할 상황</th><th>실전 포인트</th></tr></thead>
+      <tbody>
+        <tr><td>NSAID</td><td>젊고 신기능/위장관 위험 낮음</td><td>CKD, 위궤양/출혈, 항응고제, 심부전, 조절 안 되는 고혈압</td><td>PPI, 최단기간, Cr/BP 확인.</td></tr>
+        <tr><td>Colchicine</td><td>발작 초기, NSAID 위험이 애매할 때</td><td>중증 CKD, 강한 CYP3A4/P-gp 억제제, 고령/근병증 위험</td><td>저용량 전략, 설사/구토/근육통 교육.</td></tr>
+        <tr><td>Oral steroid</td><td>NSAID/colchicine 어려움, 다관절</td><td>감염 의심, 혈당 조절 불량, 정신증/위험 높은 환자</td><td>짧게 사용, 당뇨 환자 혈당 경고.</td></tr>
+        <tr><td>관절강 steroid</td><td>한 관절, 감염 배제 가능</td><td>감염 가능, 천자 불가능</td><td>1차의원에서 숙련도/무균 술기 필요.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box danger">
+      <strong>급성 단관절염에서 red flag</strong>: 발열/오한, prosthetic joint, 최근 주사/수술, 면역저하,
+      상처/봉와직염, 외상/골절 의심, 첫 발작인데 통증이 극심하고 진단 불확실. 이 경우 통풍약보다 의뢰가 우선이다.
+    </div>
+
+    <h2>5. ULT 시작 기준과 treat-to-target</h2>
+    <table>
+      <thead><tr><th>ULT를 적극 고려</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>연 2회 이상 발작</td><td>반복 염증과 관절 손상 예방. 혈청 요산 목표 기반으로 증량.</td></tr>
+        <tr><td>Tophi, 방사선 손상</td><td>더 강한 장기 치료 필요. 목표 요산을 더 낮게 잡을 수 있다.</td></tr>
+        <tr><td>CKD stage 3 이상, 요로결석, 매우 높은 요산</td><td>초기부터 ULT 논의. 신기능에 맞춰 낮은 용량에서 시작.</td></tr>
+        <tr><td>무증상 고요산혈증만 있음</td><td>대부분 생활요법/위험인자 관리. 약물은 개별 판단.</td></tr>
+      </tbody>
+    </table>
+
+    <p>
+      최신 지침의 핵심은 "고정 저용량으로 방치하지 말고 목표 요산까지 titration"이다. Allopurinol은 보통 낮은 용량으로
+      시작해 2~5주 간격으로 요산과 부작용을 보며 증량한다. 초기 3~6개월은 발작 예방 목적으로 저용량 colchicine,
+      NSAID, 또는 steroid 예방요법을 고려한다. 시작 직후 발작이 생길 수 있음을 미리 설명하지 않으면 환자가 약을 끊는다.
+    </p>
+  </section>
+
+  <section class="page-break">
+    <h2>6. Allopurinol, Febuxostat, HLA-B*58:01</h2>
+    <table>
+      <thead><tr><th>약제</th><th>장점</th><th>주의</th><th>재진 포인트</th></tr></thead>
+      <tbody>
+        <tr><td>Allopurinol</td><td>1차 선택, 비용/경험 많음, 목표까지 증량 가능</td><td>발진, DRESS/SJS/TEN, CKD에서 낮게 시작, HLA-B*58:01 고려</td><td>피부발진/발열/구강병변 즉시 중단 교육.</td></tr>
+        <tr><td>Febuxostat</td><td>신기능 이슈에서 선택지, 강한 요산 저하</td><td>심혈관질환 병력에서 이득/위험 논의, 간수치 추적</td><td>CV 병력, LFT, 비용/순응도 확인.</td></tr>
+        <tr><td>Uricosuric</td><td>요산 배설 촉진</td><td>요로결석, CKD에서는 제한</td><td>국내 사용 가능성, 결석 병력 확인.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box warn">
+      <strong>HLA-B*58:01</strong>: 한국인을 포함한 일부 아시아 인구에서 allopurinol severe cutaneous adverse reaction 위험과 관련된다.
+      CKD, 고령, thiazide 병용, 과거 발진 병력이 있으면 검사와 대체약을 적극 고려하고, 발진/발열/점막 병변 교육을 반드시 남긴다.
+    </div>
+
+    <h2>7. 가정의학과 바운더리와 의뢰 기준</h2>
+    <table>
+      <thead><tr><th>1차의원에서 관리 가능</th><th>의뢰/상급진료</th></tr></thead>
+      <tbody>
+        <tr><td>전형적 통풍 발작의 단기 치료와 재발 예방 상담</td><td>감염성 관절염 의심, 관절천자 필요, 진단 불확실한 첫 발작</td></tr>
+        <tr><td>반복 발작 환자의 ULT 시작, 요산 목표 추적, 생활요법</td><td>Tophi가 크거나 다관절 변형, 치료 불응, 잦은 발작 지속</td></tr>
+        <tr><td>CKD 초기, 고혈압/지질/당뇨 동반 위험 관리</td><td>중증 CKD, 이식, 복잡한 약물상호작용, 중증 간질환</td></tr>
+        <tr><td>무증상 고요산혈증 교육과 대사위험 관리</td><td>SJS/TEN/DRESS 의심 발진, 전신증상, eosinophilia, 간/신장 손상</td></tr>
+      </tbody>
+    </table>
+
+    <h2>8. 예후와 환자 교육</h2>
+    <ul>
+      <li>요산 목표에 도달하고 유지하면 발작 빈도와 tophi가 줄지만, 초기 수개월은 발작이 늘 수 있다.</li>
+      <li>발작이 없어졌다고 ULT를 중단하면 재발 가능성이 높다. "평생 약"이라는 말보다 "목표 요산 유지 치료"라고 설명한다.</li>
+      <li>맥주만이 문제가 아니다. 폭음, 탈수, 과당음료, 내장류/고퓨린 식사, 급격한 다이어트가 발작을 유발할 수 있다.</li>
+      <li>식이만으로 요산을 크게 낮추기 어렵다. 반복 발작이 있으면 약물치료가 중심이고 식이는 보조다.</li>
+    </ul>
+  </section>
+
+  <section class="page-break">
+    <h2>9. 개원의 경영: 매출과 재진 설계</h2>
+    <p>
+      통풍은 "한 번 진통제 주고 끝나는 질환"으로 운영하면 재발 때만 오는 환자가 된다. 반대로 급성 발작을 입구로 삼아
+      요산 목표, 신기능, 대사증후군, 혈압/지질/당뇨를 묶어 관리하면 안정적인 재진 질환이 된다. 핵심은 급성 통증 해결과
+      장기 요산 관리가 다른 목표라는 점을 환자가 이해하게 하는 것이다.
+    </p>
+
+    <table>
+      <thead><tr><th>운영 포인트</th><th>실행</th><th>재진을 만드는 문장</th></tr></thead>
+      <tbody>
+        <tr><td>발작 1주 재진</td><td>통증 반응, 부작용, 감염 단서 재확인</td><td>통증만 줄었는지, 감염 신호가 늦게 드러나지 않는지 보겠습니다.</td></tr>
+        <tr><td>2~4주 안정기 평가</td><td>요산 재측정, Cr/eGFR, ULT 적응증 상담</td><td>오늘 진통제는 불을 끄는 약이고, 요산약은 불이 나지 않게 하는 약입니다.</td></tr>
+        <tr><td>ULT titration</td><td>2~5주 간격 요산/부작용 확인, 목표까지 증량</td><td>요산 수치를 목표까지 낮춰야 발작 횟수가 줄어듭니다.</td></tr>
+        <tr><td>동반질환 관리</td><td>고혈압, 당뇨, 지질, 체중, CKD, 음주 상담</td><td>통풍은 관절만의 문제가 아니라 대사위험 신호입니다.</td></tr>
+        <tr><td>교육자료</td><td>발작 시 대처, 금주/수분, 약 중단 금지, 발진 경고</td><td>발작 때 약을 끊지 않고 연락하는 것이 장기 예후를 바꿉니다.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>10. 비슷한 개원가 의사들의 실제 접근</h2>
+    <ul>
+      <li>발작 초진에서 "통풍 확정"보다 septic arthritis red flag를 먼저 걸러 민원/의료사고 위험을 낮춘다.</li>
+      <li>NSAID 처방 전 Cr/eGFR, 위장관 출혈, 항응고제, 심부전을 확인하는 체크리스트를 사용한다.</li>
+      <li>ULT를 시작하면 1~3개월 뒤가 아니라 짧은 간격으로 요산을 보며 증량해 목표 도달률을 높인다.</li>
+      <li>발작 유발 식품 리스트만 주지 않고 음주, 체중, 혈압, 지질, 당뇨를 같이 관리해 장기 재진으로 연결한다.</li>
+      <li>무증상 고요산혈증 환자에게는 약보다 위험인자 조절과 추적을 제안해 과잉치료 이미지를 피한다.</li>
+    </ul>
+
+    <h2>11. 최신지견 요약</h2>
+    <table>
+      <thead><tr><th>근거/트렌드</th><th>개원가 적용</th></tr></thead>
+      <tbody>
+        <tr><td>ACR 지침은 treat-to-target ULT와 낮은 용량 시작을 강조</td><td>요산 &lt;6 mg/dL 목표를 차트와 환자 설명에 명시한다.</td></tr>
+        <tr><td>급성기에도 ULT 시작을 고려할 수 있다는 방향</td><td>항염 예방요법과 충분한 설명이 가능할 때 개별 적용한다.</td></tr>
+        <tr><td>Allopurinol hypersensitivity와 HLA-B*58:01 주의 지속</td><td>한국인, CKD, 고령, thiazide 병용 환자에서 검사/대체약을 고려한다.</td></tr>
+        <tr><td>통풍은 심혈관/신장/대사질환과 강하게 연결</td><td>통풍 재진을 만성질환 관리 방문으로 확장한다.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>12. 환자 설명 스크립트</h2>
+    <div class="script">오늘 약은 불난 관절을 끄는 약입니다. 반복 발작을 막으려면 요산을 목표까지 낮추는 약이 따로 필요할 수 있습니다.</div>
+    <div class="script">요산약을 시작한 뒤 초기에 발작이 올 수 있지만 실패가 아닙니다. 이때 임의로 끊지 말고 연락해 주세요.</div>
+    <div class="script">발진, 입안 헐음, 열, 눈 충혈이 생기면 allopurinol을 바로 중단하고 병원에 연락해야 합니다.</div>
+
+    <h2>13. 근거와 업데이트 링크</h2>
+    <ul class="small">
+      <li>2020 ACR gout guideline: <a href="https://rheumatology.org/gout-guideline">American College of Rheumatology guideline</a></li>
+      <li>EULAR gout management recommendations: <a href="https://ard.bmj.com/content/76/1/29">Annals of the Rheumatic Diseases 2016 recommendations</a></li>
+      <li>CPIC allopurinol and HLA-B: <a href="https://cpicpgx.org/guidelines/guideline-for-allopurinol-and-hla-b/">HLA-B genotype and allopurinol dosing</a></li>
+      <li>ACR patient/clinician gout resources: <a href="https://rheumatology.org/patients/gout">Gout overview and patient guidance</a></li>
+    </ul>
+  </section>
 </body>
 </html>
-

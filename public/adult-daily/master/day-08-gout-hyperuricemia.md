@@ -1,159 +1,198 @@
 # 성인 Daily Day 08 - 고요산혈증/통풍: 급성기 처방, ULT 시작 기준
 
-- 주제: 고요산혈증/통풍: 급성기 처방, ULT 시작 기준
-- 대상: 가정의학과/동네 의원 1차진료
+- 대상: 개원 가정의학과에서 발가락/발목/무릎 급성 관절통, 검진 요산 상승, 반복 통풍 환자를 보는 상황
 - 작성일: 2026-07-05
-- 목표: 급성 통풍 발작을 안전하게 가라앉히고, 요산저하치료를 언제 시작하고 어떻게 증량할지 결정한다.
+- 업데이트: 2026-07-05 실전 보강판
+- 목표: 급성 발작을 안전하게 가라앉히고, 재발성 통풍은 treat-to-target으로 장기관리한다.
 
-## 1. 배경지식
+## 1. 개요와 병태생리
 
-통풍은 "아픈 관절염"이면서 동시에 장기 요산 관리가 필요한 만성질환이다. 급성기에는 염증을 빠르게 줄이고, 재발성 통풍·결절·요산신장병 위험이 있으면 treat-to-target으로 혈청 요산을 낮춘다. 단순 고요산혈증만으로 무조건 약을 시작하지 않는다.
+통풍은 monosodium urate crystal이 관절과 조직에 침착되어 생기는 염증성 관절염이다. 고요산혈증은 요산 생성 증가보다 배설 저하가 흔하다. 요산이 높다고 모두 통풍이 되는 것은 아니지만, 결정이 생기면 NLRP3 inflammasome과 IL-1 경로가 활성화되어 갑자기 붓고 뜨거운 관절염이 온다.
 
-1차진료에서 핵심 질문은 세 가지다.
+개원가에서 가장 중요한 구분은 "아픈 통풍"과 "숫자만 높은 고요산혈증"이다. 숫자만 보고 평생약을 시작하면 과잉진료가 되고, 반복 발작 환자에게 진통제만 반복하면 만성 결절성 통풍과 신장/관절 손상을 놓친다.
 
-1. 진짜 통풍인가, 감염성 관절염이나 외상인가?
-2. 오늘 NSAID, colchicine, steroid 중 무엇이 가장 안전한가?
-3. ULT 적응증이 있는가, 시작한다면 allopurinol을 낮게 시작해 목표 요산까지 올릴 수 있는가?
+## 2. 증상과 진단
 
-## 2. 첫 3분 triage
+전형적인 통풍은 밤이나 새벽에 갑자기 시작하는 1st MTP, 발목, 발등, 무릎의 심한 통증, 발적, 열감, 종창이다. 닿기만 해도 아프고 24시간 이내 최고조에 도달한다. 술, 과식, 탈수, 수술/입원, 감염, 이뇨제, 급격한 체중감량 뒤에 흔하다.
 
-### 즉시/당일 의뢰
+확진은 관절액에서 바늘 모양의 negatively birefringent MSU crystal을 보는 것이다. 하지만 개원가에서 매번 관절천자를 하기는 어렵다. 이전에 확진된 통풍, 전형적 양상, 고요산혈증, 빠른 치료 반응이 있으면 임상진단으로 치료할 수 있다. 반대로 첫 발작, 발열, 외상, 면역저하, prosthetic joint, 최근 관절주사/수술, 당뇨발/상처가 있으면 감염성 관절염을 먼저 배제해야 한다.
 
-- 발열, 오한, 전신쇠약, 면역저하, prosthetic joint, 최근 관절주사/수술
-- 한 관절이 매우 뜨겁고 통증이 심한데 통풍 병력이 불확실함: septic arthritis 배제 필요
-- 외상 후 변형, 체중부하 불가, 골절 의심
-- Cr 급상승, 심부전 악화, GI bleeding, 항응고제 복용으로 외래 약 선택이 어려움
-- 다관절 통증, 고열, 의식 변화
+중요: 급성 발작 중 serum uric acid는 정상일 수 있다. "요산 정상이라 통풍 아님"이라고 말하지 않는다.
 
-### 의원에서 치료 가능한 상황
+## 3. 첫 3분 triage
 
-- 이전 통풍과 같은 양상, 1st MTP/발목/무릎 등 전형 부위, 발작 24-48시간 이내
-- 감염/외상 단서가 낮고 NSAID/colchicine/steroid 중 안전한 선택지가 있음
-- 신기능, 위장관, 심혈관, 항응고제, 당뇨 상태를 확인할 수 있음
+### 당일 refer/ER
 
-## 3. 핵심 문진 5문항
+- fever/chills, toxic appearance
+- immunosuppression, uncontrolled diabetes, prosthetic joint
+- recent joint injection/surgery
+- trauma, deformity, weight-bearing impossible
+- cellulitis/ulcer/wound near joint
+- severe polyarthritis, sepsis concern
+- NSAID/colchicine/steroid 모두 위험한 CKD, GI bleeding, heart failure, anticoagulation 복잡 사례
 
-1. "이전에도 같은 부위가 붓고 아팠나요? 얼마나 자주 반복되나요?"
-2. "열, 오한, 상처, 최근 주사/수술, 외상이 있었나요?"
-3. "신장기능 저하, 위궤양/출혈, 심부전, 항응고제, 당뇨가 있나요?"
-4. "맥주/소주, 육류/내장, 해산물, 단 음료, 탈수, 과식이 최근 있었나요?"
-5. "allopurinol/febuxostat을 먹고 있나요? 발진이나 과민반응 병력이 있나요?"
+### 의원에서 볼 수 있는 범위
 
-## 4. Physical exam
+- 이전과 같은 전형적 통풍 발작
+- 1-2개 관절, 전신증상 없음
+- 감염/외상 단서 낮음
+- 신기능, 위장관, 심혈관, 항응고제, 당뇨를 확인하고 약 선택 가능
+- 3-7일 내 재평가 가능
 
-- 부위, 열감, 발적, 종창, 압통, 관절가동범위
-- 상처, 봉와직염, 궤양, 감염 입구 확인
+## 4. 핵심 문진/진찰
+
+문진 5개:
+
+1. 이전에도 같은 부위가 붓고 아팠는가? 1년에 몇 번인가?
+2. 열, 오한, 상처, 외상, 최근 관절주사/수술이 있었나?
+3. CKD, 위궤양/출혈, 심부전, 항응고제, 당뇨가 있나?
+4. 술, 내장/육류/해산물, 단 음료, 탈수, 급격한 다이어트가 있었나?
+5. allopurinol/febuxostat을 먹는가? 발진/입안 헐음/열 병력이 있었나?
+
+진찰:
+
+- 체온, 맥박, 혈압
+- 관절 열감/발적/종창, ROM 제한
+- cellulitis/상처/궤양
 - tophi: 귓바퀴, 팔꿈치, 손가락, 발가락
-- 체온, 혈압, 맥박, 탈수 여부
-- 다관절 침범, 하지부종, 심부전 단서
+- 다관절 침범 여부
+- 말초혈관/당뇨발 상태
 
-## 5. 검사
+## 5. 검사 루틴
 
-| 상황 | 검사 | 해석/행동 |
+| 상황 | 검사 | 실전 포인트 |
 |---|---|---|
-| 급성 발작 | CBC, CRP/ESR 선택, Cr/eGFR, AST/ALT, uric acid | 요산은 급성기에 정상일 수 있어 단독 배제 금지 |
-| 감염 의심 | 관절천자/배양 의뢰 | septic arthritis 가능하면 항생제 전 의뢰 |
-| ULT 시작 전 | uric acid, Cr/eGFR, AST/ALT, CBC | 시작 용량과 추적 기준값 |
-| 재발/신장결석 | UA, urine pH, renal imaging 선택 | 요로결석/신장질환 확인 |
-| ULT 증량 중 | uric acid q2-5주, CBC/LFT/Cr | 목표 <6 mg/dL까지 증량 |
+| 급성 발작 | CBC, CRP/ESR 선택, Cr/eGFR, AST/ALT, uric acid | 요산 정상이어도 배제 금지 |
+| 감염 의심 | 관절천자/그람염색/배양 의뢰 | 항생제 전 의뢰가 원칙 |
+| ULT 시작 전 | uric acid, Cr/eGFR, AST/ALT, CBC | 시작 용량/추적 기준값 |
+| 결석/CKD | UA, urine pH, renal US 선택 | 재발/혈뇨/옆구리통증 |
+| ULT 증량 | uric acid 2-5주 간격 | 목표 <6 mg/dL, tophi면 <5 고려 |
 
-## 6. KCD 코드
+## 6. 상병코드 잡는 법
 
-- M10.x: 통풍. 부위와 원인에 따라 세부 코드 조정.
-- E79.0: 증상 없는 고요산혈증 또는 고요산혈증 평가.
-- N20.x: 요로결석 동반 시 근거가 있을 때.
-- N18.x/I10/E11.x/E78.x: CKD, 고혈압, 당뇨, 이상지질혈증 동반 부상병 후보.
-- L03.x/M00.x: 봉와직염 또는 감염성 관절염 의심 시 감별 코드.
+- M10.x: 통풍 주상병. 부위/원인 세부 코드는 EMR에 맞춰 조정.
+- E79.0: 무증상 고요산혈증 또는 통풍 확진 전 요산 상승.
+- M00.x: 감염성 관절염 의심이면 의뢰/감별 근거가 있을 때.
+- L03.x: 봉와직염 감별/동반.
+- N20.x: 요로결석.
+- N18.x/I10/E11.x/E78.x: CKD, 고혈압, 당뇨, 이상지질혈증 동반 부상병.
 
-## 7. 급성기 처방 regimen
+차팅에는 "급성 단관절염, 이전 통풍 병력, 감염 red flag 없음, 신기능 확인 후 NSAID/colchicine/steroid 선택"처럼 의사결정 근거를 남긴다.
 
-### 1차 선택지
+## 7. 급성기 치료
 
-| 선택 | 예시 | 피해야 할 상황 |
+### 약제 선택 알고리즘
+
+| 환자 상황 | 우선 고려 | 피할 것 |
 |---|---|---|
-| NSAID | Naproxen 250-500 mg bid, ibuprofen 400 mg tid, celecoxib 선택 | eGFR 저하, GI bleeding/ulcer, 항응고제, 심부전, 조절 안 되는 HTN |
-| Colchicine | 1.2 mg 시작 후 1시간 뒤 0.6 mg, 이후 0.6 mg qd-bid | eGFR 저하, 강한 CYP3A4/P-gp inhibitor, 고령 frailty, 설사 |
-| Steroid | Prednisolone 20-30 mg qd 3-5일 후 감량/중단 | 감염 배제 안 됨, 혈당 조절 매우 불량, 정신증 위험 |
-| 관절강내 steroid | 무릎 등 1-2개 큰 관절 | 감염 가능성 있으면 금지 |
+| 젊고 신기능 정상, 위장관 위험 낮음 | NSAID | 위궤양/출혈, 항응고제 |
+| 24-36시간 이내 초기 발작 | low-dose colchicine | CKD, CYP3A4/P-gp inhibitor |
+| CKD/GI bleeding/항응고제 등 NSAID 어려움 | oral steroid 또는 관절강내 steroid | 감염 배제 안 된 경우 |
+| 1-2개 큰 관절 | 관절강내 steroid 가능 | septic arthritis 가능성 |
 
-### 실무 포인트
+Colchicine은 고용량보다 저용량이 안전하다. FDA label의 classic regimen은 1.2 mg 후 1시간 뒤 0.6 mg이다. 국내 제형과 용량은 병원/약국 상황에 맞춰 조정한다. NSAID와 steroid를 동시에 세게 쓰는 조합은 피한다.
 
-- 이미 ULT를 먹는 환자는 발작 중이라고 임의 중단하지 않는다.
-- 발작 초기에 시작할수록 효과가 좋다.
-- NSAID와 steroid를 무리하게 병용하지 않는다.
-- colchicine은 고용량보다 저용량이 안전하다. 국내 제형 용량은 병원/제품별로 확인한다.
+이미 ULT를 복용 중인 환자는 급성 발작이 왔다고 중단하지 않는다. 단, 새로 시작하는 ULT는 환자 이해도와 flare prophylaxis 준비가 되어 있을 때 시작한다.
 
-## 8. ULT 시작 기준
+## 8. ULT 시작 기준과 treat-to-target
 
-### 시작을 강하게 고려
+ACR 2020의 실전 메시지는 allopurinol first-line, low start, slow titration, treat-to-target이다.
 
-- 1년에 2회 이상 발작
+### ULT 강하게 고려
+
+- 1년에 2회 이상 flare
 - tophi
-- 영상에서 통풍성 관절 손상
-- CKD stage 3 이상, 요로결석 병력, 혈청 요산 >9 mg/dL
-- 발작이 드물어도 직업/기능 손상이 크고 환자가 장기 치료를 이해함
+- 영상상 관절 손상
+- CKD stage 3 이상
+- 요로결석 병력
+- serum urate >9 mg/dL
+- 첫 발작이라도 신장위험/요산 매우 높음/결석이면 논의
 
-### 시작하지 않는 경우가 많은 상황
+### 보통 시작하지 않음
 
 - 증상 없는 고요산혈증만 있음
-- 첫 발작이고 요산이 아주 높지 않으며 CKD/결석/tophi가 없음
-- 진단이 불확실하고 감염성 관절염 가능성이 남아 있음
+- 첫 발작이고 요산이 아주 높지 않으며 CKD/결석/tophi 없음
+- 진단 불확실, 감염 가능성 남음
 
-## 9. ULT regimen
+## 9. ULT 처방
 
 | 약제 | 시작 | 증량/목표 | 주의 |
 |---|---|---|---|
-| Allopurinol | 100 mg qd 이하, CKD면 더 낮게 | 2-5주마다 증량, uric acid <6 mg/dL | 발진 즉시 중단, HLA-B*58:01 고려 |
-| Febuxostat | 40 mg qd | 목표 미달 시 증량 | 심혈관질환 병력은 신중 |
-| Prophylaxis | colchicine 0.6 mg qd-bid 또는 NSAID 저용량 | 최소 3-6개월 | CKD/상호작용/위장관 위험 조정 |
+| Allopurinol | 100 mg qd 이하, CKD면 50 mg 고려 | 2-5주마다 증량, urate <6 | 발진/열/구내염 즉시 중단 |
+| Febuxostat | 40 mg qd | 목표 미달 시 증량 | CV disease 병력 신중, CARES/FAST 맥락 설명 |
+| Flare prophylaxis | colchicine 0.6 mg qd-bid 또는 NSAID 저용량 | 최소 3-6개월 | CKD/상호작용/위장관 위험 조정 |
 
-한국인에서는 allopurinol severe cutaneous adverse reaction 위험과 관련된 HLA-B*58:01 빈도가 의미 있게 보고되어, CKD, 고령, thiazide 병용, 고위험 병력이 있으면 시작 전 검사와 대체약을 적극 고려한다.
+한국인에서는 HLA-B*58:01이 allopurinol severe cutaneous adverse reaction과 관련된다. ACR은 Korean 등 일부 Asian ancestry에서 검사 고려를 권고한다. 국내 자료에서도 renal insufficiency가 있는 한국인 통풍 환자에서 HLA-B*58:01 검사를 권장하는 흐름이다. 현실적으로 CKD, 고령, thiazide 병용, 과거 약진/SCAR 병력이 있으면 검사와 대체약을 적극 고려한다.
 
-## 10. Follow-up
+## 10. 예후와 재발 방지
 
-- 급성기: 3-7일 내 통증 반응 확인. 악화/발열/다관절이면 재평가.
-- ULT 시작 후: 2-5주마다 uric acid와 부작용 확인, 목표 도달까지 증량.
-- 목표 도달 후: 3-6개월 간격, 안정 후 6-12개월 간격.
-- 생활요법: 금주/절주, 단 음료 줄이기, 체중감량, 탈수 피하기. 식이만으로 해결된다고 과장하지 않는다.
+요산 목표에 도달하면 flare 빈도와 tophi가 줄고 관절 손상 진행을 줄일 수 있다. 하지만 초기 ULT 시작/증량기에는 flare가 오히려 늘 수 있다. 그래서 "약이 안 맞아서 더 아픈 것"이 아니라 "결정이 흔들리며 flare가 생길 수 있어 예방약을 같이 쓴다"고 설명한다.
 
-## 11. Refer 기준
+생활요법은 보조다. 술, 특히 맥주/증류주, 과당음료, 과식, 탈수, 급격한 다이어트를 줄인다. 체중감량은 도움이 되지만, 비만주사/초저열량으로 급격히 감량하면 flare가 생길 수 있어 통풍 환자에서는 수분/요산 추적이 필요하다.
 
-- septic arthritis 감별 필요, 관절천자 필요.
-- 반복 발작인데 진단 불확실, 다관절/비전형 통증.
-- CKD 진행, 요로결석 반복, 요산 조절 불량.
-- allopurinol/febuxostat 과민반응 또는 여러 약제 금기.
-- tophi 크고 기능장애가 있거나 수술적 평가 필요.
+## 11. 개원의 경영 포인트
 
-## 12. 환자 설명 스크립트
+통풍은 재진 구조를 만들기 좋은 질환이다. 급성기 처방만 하면 일회성이고, ULT titration을 하면 2-5주 간격 재진과 검사, 교육이 자연스럽다.
 
-"오늘은 불이 난 관절의 염증을 빨리 꺼야 합니다. 통풍약은 급성기 약과 요산을 낮추는 장기약이 다릅니다."
+### 재진 프로토콜
 
-"요산수치는 발작 중에 정상처럼 나올 수도 있어서, 오늘 수치 하나로 통풍을 배제하지는 않습니다."
+1. D0 급성기: 감염 배제, 약 선택, 3-7일 재평가 예약.
+2. D3-7: 통증 반응 확인, 약 부작용, 신기능/위장관 안전.
+3. 2-4주: ULT 적응증 설명, uric acid/Cr/LFT/CBC 확인.
+4. ULT 시작 후 q2-5주: uric acid 목표까지 증량.
+5. 목표 도달 후 3개월: flare prophylaxis 중단 검토.
+6. 안정 후 3-6개월: 요산, 신기능, 동반질환 추적.
 
-"요산을 낮추는 약은 처음 먹을 때 오히려 발작이 흔들릴 수 있어 예방약을 같이 쓰고 천천히 증량합니다."
+### 매출과 진료 품질
 
-"Allopurinol을 시작한 뒤 발진, 입안 헐음, 열이 나면 바로 중단하고 연락해야 합니다."
+- 급성 통풍은 짧은 재진 예약을 반드시 잡는다. "아프면 오세요"가 아니라 "3-7일 후 약 반응 보겠습니다."
+- 요산저하치료는 검사 기반 titration이므로 혈액검사와 상담이 정당하다.
+- 고혈압, 당뇨, CKD, 지질, 비만과 연결하면 만성질환 관리로 확장된다.
+- 환자 교육자료를 주면 약 중단/임의복용이 줄어든다.
+- HLA-B*58:01 검사는 모든 환자에게 무조건이 아니라 위험군 중심으로 설명한다.
 
-## 13. 자가체크 5문항
+## 12. 비슷한 개원가 의사들의 접근 패턴
 
-1. 급성 단관절염에서 통풍보다 먼저 배제해야 할 질환은?
-2. NSAID를 피해야 할 대표 상황 4가지는?
-3. ULT 시작을 강하게 고려하는 적응증은?
-4. Allopurinol 시작 용량과 목표 요산은?
-5. ULT 시작 후 flare prophylaxis를 쓰는 이유는?
+공개 의원/정형외과/류마티스/가정의학과 자료를 보면 개원가는 대개 세 그룹이다.
 
-## 14. 업데이트 이력
+1. 급성 통증 해결형: NSAID/colchicine/steroid로 통증을 빠르게 낮추고 끝. 환자 만족은 빠르지만 재발 관리가 약하다.
+2. 요산 수치 관리형: 검진 요산 상승 환자에게 요산, 신기능, 식이 상담을 하고 필요 시 ULT. 과잉치료 위험이 있다.
+3. 재발 방지 프로그램형: flare diary, urate target, 약 증량, 생활요법, 동반질환까지 관리. 가정의학과에 가장 적합하다.
 
-- 2026-07-05: 최초 작성. 2020 ACR gout guideline, colchicine FDA label, allopurinol label의 HLA-B*58:01 경고를 1차진료용으로 정리.
+가정의학과 개원의는 3번으로 가는 것이 좋다. 통풍은 대사질환 클러스터의 표지자라 고혈압, 비만, CKD, 음주, 지방간 상담으로 자연스럽게 이어진다.
 
-## 15. 참고 출처
+## 13. 최신지견 요약
 
-- American College of Rheumatology. 2020 Guideline for the Management of Gout.
-  https://rheumatology.org/gout-guideline
-- ACR press summary: treat-to-target urate-lowering therapy.
-  https://rheumatology.org/press-releases/acr-releases-gout-management-guideline-with-emphasis-on-treat-to-target-strategy-for-urate-lowering-therapy
-- FDA. Colcrys prescribing information.
-  https://www.accessdata.fda.gov/drugsatfda_docs/label/2009/022351lbl.pdf
-- FDA. Allopurinol prescribing information, HLA-B*58:01 warning.
-  https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/018832s056s058s061,018877s063s065s068lbl.pdf
+- ACR 2020: allopurinol first-line, low-dose start, treat-to-target, flare prophylaxis.
+- Febuxostat CV safety는 CARES에서 mortality signal, FAST에서 non-inferiority가 나와 환자별 해석이 필요하다. 기존 major CVD 환자에서는 신중.
+- HLA-B*58:01는 Korean/Han Chinese/Thai 등에서 allopurinol SCAR risk와 관련, CKD 환자에서 더 중요.
+- Imaging은 ultrasound double contour sign, DECT 등이 있으나 개원가에서는 감염 배제와 장기 요산관리 판단이 먼저다.
+
+## 14. 환자 설명 스크립트
+
+"오늘은 불이 난 관절의 염증을 빨리 끄는 약을 쓰겠습니다. 다만 통풍은 통증이 사라져도 요산 결정이 남아 있으면 반복됩니다."
+
+"요산을 낮추는 약은 처음부터 많이 쓰면 부작용과 발작이 늘 수 있어 낮게 시작해서 피검사 보며 올립니다."
+
+"Allopurinol을 시작한 뒤 발진, 입안 헐음, 열이 나면 바로 약을 중단하고 연락해야 합니다."
+
+"요산 목표는 보통 6 미만입니다. 아프지 않은 기간에도 목표까지 내려야 재발이 줄어듭니다."
+
+## 15. 자가체크 5문항
+
+1. 급성 단관절염에서 통풍보다 먼저 배제해야 하는 질환은?
+2. ULT 시작을 강하게 고려하는 5가지 상황은?
+3. Allopurinol 시작 전 한국인에서 고려할 유전자 검사는?
+4. 급성 통풍에서 NSAID 대신 steroid를 고르는 상황은?
+5. 통풍 재진율을 높이는 진료 구조는?
+
+## 참고 출처
+
+- 2020 American College of Rheumatology Guideline for the Management of Gout. https://pmc.ncbi.nlm.nih.gov/articles/PMC10563586/
+- ACR guideline summary press release. https://rheumatology.org/press-releases/acr-releases-gout-management-guideline-with-emphasis-on-treat-to-target-strategy-for-urate-lowering-therapy
+- EULAR recommendations for gout management. https://pubmed.ncbi.nlm.nih.gov/27457514/
+- FDA. Colcrys label. https://www.accessdata.fda.gov/drugsatfda_docs/label/2009/022351lbl.pdf
+- FDA. Allopurinol label, HLA-B*58:01 warning. https://www.accessdata.fda.gov/drugsatfda_docs/label/2024/018832s056s058s061,018877s063s065s068lbl.pdf
+- NCBI Medical Genetics Summaries: Allopurinol Therapy and HLA-B*58:01. https://www.ncbi.nlm.nih.gov/books/NBK127547/
+- Current state and prospects of gout treatment in Korea. Korean J Intern Med 2022. https://www.kjim.org/upload/kjim-2022-036.pdf
 
