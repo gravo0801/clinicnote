@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const SEVERITY_CONFIG = {
   critical: { label: '절대 금기', color: '#fff', bg: '#dc2626', border: '#dc2626' },
@@ -9,10 +9,10 @@ const SEVERITY_CONFIG = {
 }
 
 const RISK_CONFIG = {
-  safe:    { label: '안전', color: '#065f46', bg: '#f0faf5', icon: '[OK]' },
-  caution: { label: '주의', color: '#92400e', bg: '#fffbeb', icon: '[!]' },
-  warning: { label: '경고', color: '#991b1b', bg: '#fee2e2', icon: '[!!]' },
-  danger:  { label: '위험 - 즉시 확인 필요', color: '#7f1d1d', bg: '#fee2e2', icon: '[!!!]' },
+  safe:    { label: '주요 신호 없음', color: '#065f46', bg: '#f0faf5', icon: '✅' },
+  caution: { label: '주의', color: '#92400e', bg: '#fffbeb', icon: '⚠️' },
+  warning: { label: '경고', color: '#991b1b', bg: '#fee2e2', icon: '🚨' },
+  danger:  { label: '위험 - 즉시 확인 필요', color: '#7f1d1d', bg: '#fee2e2', icon: '⛔' },
 }
 
 export default function DrugInteractionChecker({ drugs }) {
@@ -22,6 +22,13 @@ export default function DrugInteractionChecker({ drugs }) {
   const [open, setOpen] = useState(false)
 
   const validDrugs = drugs.filter(d => d.name && d.name.trim())
+  const drugSignature = validDrugs.map(d => [d.name, d.dosage, d.freq, d.route, d.usage].join('|')).join('||')
+
+  useEffect(() => {
+    setResult(null)
+    setError(null)
+    setOpen(false)
+  }, [drugSignature])
 
   const check = async () => {
     if (validDrugs.length < 2) return
@@ -32,7 +39,12 @@ export default function DrugInteractionChecker({ drugs }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'drug_interaction',
-          caseData: { drugs: validDrugs.map(d => d.name.replace(/^\[INJ-\w+\] /, '')) }
+          caseData: { drugs: validDrugs.map(d => [
+            d.name.replace(/^\[INJ-\w+\] /, ''),
+            d.dosage,
+            d.freq && `${d.freq}회/일`,
+            d.route || d.usage,
+          ].filter(Boolean).join(' · ')) }
         })
       })
       if (!res.ok) throw new Error('서버 오류 ' + res.status)
@@ -48,15 +60,18 @@ export default function DrugInteractionChecker({ drugs }) {
 
   return (
     <div style={{ marginTop: 8 }}>
-      <button onClick={check} disabled={loading}
+      <button type="button" onClick={check} disabled={loading}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, border: '1px solid #fde68a', background: loading ? '#f9fafb' : '#fffbeb', color: loading ? '#9ca3af' : '#92400e', fontSize: 12, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
-        {loading ? '분석 중...' : '[DI] 약물 상호작용 체크 (' + validDrugs.length + '종)'}
+        {loading ? '분석 중...' : '🤖 AI 상호작용 참고 점검 (' + validDrugs.length + '종)'}
       </button>
+      <div style={{ marginTop:6, fontSize:10, color:'#9ca3af', lineHeight:1.5 }}>
+        참고용 AI 결과이며 공식 DUR을 대체하지 않습니다. 환자 상태와 최신 허가사항을 함께 확인하세요.
+      </div>
       {open && (
-        <div style={{ marginTop: 10, border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
+        <div aria-live="polite" style={{ marginTop: 10, border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
             <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>약물 상호작용 분석 결과</span>
-            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>x</button>
+            <button type="button" aria-label="상호작용 분석 결과 닫기" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>✕</button>
           </div>
           <div style={{ padding: '12px 14px' }}>
             {loading && <div style={{ textAlign: 'center', padding: '20px 0', color: '#9ca3af', fontSize: 13 }}>AI 분석 중... (10-20초 소요)</div>}
