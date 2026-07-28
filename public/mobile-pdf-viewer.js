@@ -1,23 +1,17 @@
 (function () {
   'use strict'
 
-  const VERSION = '3.11.174'
-  const WORKER = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSION}/build/pdf.worker.min.js`
+  const VERSION = '6.1.200'
+  const MODULE = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSION}/build/pdf.min.mjs`
+  const WORKER = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${VERSION}/build/pdf.worker.min.mjs`
   const TOUCH = 44
   let readyPromise
 
   function pdfjs() {
     if (readyPromise) return readyPromise
-    readyPromise = new Promise((resolve, reject) => {
-      let count = 0
-      const poll = () => {
-        if (window.pdfjsLib) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER
-          resolve(window.pdfjsLib)
-        } else if (++count > 80) reject(new Error('PDF.js 로드 실패'))
-        else setTimeout(poll, 100)
-      }
-      poll()
+    readyPromise = import(MODULE).then((library) => {
+      library.GlobalWorkerOptions.workerSrc = WORKER
+      return library
     })
     return readyPromise
   }
