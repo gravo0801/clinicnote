@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Login from './components/Login'
-import AdultDailyTab from './components/AdultDailyTab'
+import AdultDailyTab from './components/AdultDailyTabWithSupplements'
 import FamilyTab from './components/FamilyTab'
 import RxTab from './components/RxTab'
 import DiseaseNoteTab from './components/DiseaseNoteTab'
