@@ -23,6 +23,8 @@ const PRIMARY = [
   { key: 'archive', label: 'Archive', ko: '보관', icon: '🗂️' },
 ]
 
+const FAMILY_NAV = { key: 'family', label: '가족검진', ko: '가족 건강', icon: '👨‍👩‍👧' }
+
 const SECONDARY = {
   clinic: [
     { key: 'clinic-home', label: 'Clinic 홈' },
@@ -44,8 +46,10 @@ const SECONDARY = {
     { key: 'ops', label: '운영 노하우' },
   ],
   archive: [
-    { key: 'family', label: '가족 건강' },
     { key: 'backup', label: '백업 / 복원' },
+  ],
+  family: [
+    { key: 'family', label: '가족검진' },
   ],
 }
 
@@ -158,7 +162,7 @@ export default function AppV2() {
       notes: ['study', 'notes'],
       rx: ['clinic', 'rx'],
       caution: ['clinic', 'caution'],
-      family: ['archive', 'family'],
+      family: ['family', 'family'],
       backup: ['archive', 'backup'],
     }
     const next = map[target] || ['search', 'search-home']
@@ -185,11 +189,13 @@ export default function AppV2() {
             <button onClick={logout} style={{ minHeight: 44, padding: '8px 10px', border: '1px solid var(--line)', background: '#fff', borderRadius: 9, color: 'var(--ink-3)', fontWeight: 700 }}>로그아웃</button>
           </div>
           <div style={{ overflowX: 'auto', display: 'flex', gap: 5, padding: '4px 10px 7px', scrollbarWidth: 'none' }}>
-            {PRIMARY.map(nav => <button key={nav.key} onClick={() => chooseSection(nav.key)} style={{ minHeight: 44, flex: '0 0 auto', padding: '8px 12px', borderRadius: 10, border: section === nav.key ? '1px solid var(--accent)' : '1px solid var(--line)', background: section === nav.key ? 'var(--accent-soft)' : '#fff', color: section === nav.key ? 'var(--accent-deep)' : 'var(--ink-2)', fontWeight: 900 }}>{nav.icon} {nav.label}</button>)}
+            {[...PRIMARY, FAMILY_NAV].map(nav => <button key={nav.key} onClick={() => chooseSection(nav.key)} style={{ minHeight: 44, flex: '0 0 auto', padding: '8px 12px', borderRadius: 10, border: section === nav.key ? '1px solid var(--accent)' : '1px solid var(--line)', background: section === nav.key ? 'var(--accent-soft)' : '#fff', color: section === nav.key ? 'var(--accent-deep)' : 'var(--ink-2)', fontWeight: 900 }}>{nav.icon} {nav.label}</button>)}
           </div>
-          <div style={{ overflowX: 'auto', display: 'flex', gap: 6, padding: '0 10px 8px', scrollbarWidth: 'none' }}>
-            {secondary.map(sub => <button key={sub.key} onClick={() => setItem(sub.key)} style={{ minHeight: 40, flex: '0 0 auto', padding: '7px 11px', borderRadius: 999, border: 'none', background: item === sub.key ? 'var(--ink)' : 'var(--cream-2)', color: item === sub.key ? '#fff' : 'var(--ink-3)', fontWeight: 800 }}>{sub.label}</button>)}
-          </div>
+          {section !== 'family' && (
+            <div style={{ overflowX: 'auto', display: 'flex', gap: 6, padding: '0 10px 8px', scrollbarWidth: 'none' }}>
+              {secondary.map(sub => <button key={sub.key} onClick={() => setItem(sub.key)} style={{ minHeight: 40, flex: '0 0 auto', padding: '7px 11px', borderRadius: 999, border: 'none', background: item === sub.key ? 'var(--ink)' : 'var(--cream-2)', color: item === sub.key ? '#fff' : 'var(--ink-3)', fontWeight: 800 }}>{sub.label}</button>)}
+            </div>
+          )}
         </header>
         <main><ActiveContent section={section} item={item} onNavigate={navigateLegacy} /></main>
       </div>
@@ -215,14 +221,20 @@ export default function AppV2() {
           ))}
         </nav>
 
-        <div style={{ margin: '4px 12px 0', borderTop: '1px solid var(--line)', paddingTop: 10 }}>
-          <div style={{ color: 'var(--ink-mute)', fontSize: 10, fontWeight: 900, letterSpacing: '.08em', padding: '4px 8px 7px' }}>CURRENT WORKSPACE</div>
-          {secondary.map(sub => (
-            <button key={sub.key} onClick={() => setItem(sub.key)} style={{ width: '100%', minHeight: 42, border: 'none', borderRadius: 8, background: item === sub.key ? '#fff' : 'transparent', color: item === sub.key ? 'var(--ink)' : 'var(--ink-3)', textAlign: 'left', padding: '8px 10px', fontSize: 12.5, fontWeight: item === sub.key ? 900 : 650, cursor: 'pointer', boxShadow: item === sub.key ? 'var(--shadow-sm)' : 'none' }}>{sub.label}</button>
-          ))}
-        </div>
+        {section !== 'family' && (
+          <div style={{ margin: '4px 12px 0', borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+            <div style={{ color: 'var(--ink-mute)', fontSize: 10, fontWeight: 900, letterSpacing: '.08em', padding: '4px 8px 7px' }}>CURRENT WORKSPACE</div>
+            {secondary.map(sub => (
+              <button key={sub.key} onClick={() => setItem(sub.key)} style={{ width: '100%', minHeight: 42, border: 'none', borderRadius: 8, background: item === sub.key ? '#fff' : 'transparent', color: item === sub.key ? 'var(--ink)' : 'var(--ink-3)', textAlign: 'left', padding: '8px 10px', fontSize: 12.5, fontWeight: item === sub.key ? 900 : 650, cursor: 'pointer', boxShadow: item === sub.key ? 'var(--shadow-sm)' : 'none' }}>{sub.label}</button>
+            ))}
+          </div>
+        )}
 
-        <div style={{ marginTop: 'auto', padding: 12, borderTop: '1px solid var(--line)' }}>
+        <div style={{ marginTop: 'auto', padding: '10px 10px 12px', borderTop: '1px solid var(--line)' }}>
+          <button onClick={() => chooseSection(FAMILY_NAV.key)} style={{ width: '100%', minHeight: 50, display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px', marginBottom: 8, border: 'none', borderRadius: 10, background: section === FAMILY_NAV.key ? 'var(--accent-soft)' : 'transparent', color: section === FAMILY_NAV.key ? 'var(--accent-deep)' : 'var(--ink-2)', cursor: 'pointer', textAlign: 'left' }}>
+            <span style={{ width: 24, textAlign: 'center', fontSize: 16 }}>{FAMILY_NAV.icon}</span>
+            <span style={{ flex: 1 }}><span style={{ display: 'block', fontSize: 13.5, fontWeight: 900 }}>{FAMILY_NAV.label}</span><span style={{ display: 'block', fontSize: 10.5, marginTop: 1, color: 'var(--ink-mute)' }}>{FAMILY_NAV.ko}</span></span>
+          </button>
           <button onClick={logout} style={{ width: '100%', minHeight: 44, border: '1px solid var(--line)', borderRadius: 9, background: '#fff', color: 'var(--ink-3)', fontWeight: 800, cursor: 'pointer' }}>로그아웃</button>
         </div>
       </aside>
