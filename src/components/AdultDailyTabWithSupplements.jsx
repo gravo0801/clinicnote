@@ -3,9 +3,11 @@ import { adultDailyContent } from '../data/adultDailyContent'
 import { adultDailyDay11 } from '../data/adultDailyDay11'
 import { adultDailyDay12to15 } from '../data/adultDailyDay12to15'
 
+const day12to15Cards = adultDailyDay12to15.map(({ pdfPath, ...card }) => card)
+
 const supplementalCards = [
   ...adultDailyDay11,
-  ...adultDailyDay12to15,
+  ...day12to15Cards,
 ]
 
 supplementalCards.forEach(card => {
