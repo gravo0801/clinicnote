@@ -28,7 +28,6 @@ const SECONDARY = {
     { key: 'clinic-home', label: 'Clinic 홈' },
     { key: 'rx', label: '처방 노하우' },
     { key: 'caution', label: '주의 처방' },
-    { key: 'checkup', label: '검진' },
   ],
   study: [
     { key: 'adult', label: '성인 Daily' },
@@ -120,7 +119,7 @@ function ActiveContent({ section, item, onNavigate }) {
   if (item === 'adult') return <AdultDailyTab />
   if (item === 'rx') return <RxTab />
   if (item === 'caution') return <CautionTab />
-  if (item === 'checkup') return <HealthCheckup />
+  if (item === 'checkup' || item === 'family-checkup') return <HealthCheckup />
   if (item === 'notes') return <DiseaseNoteTab />
   if (item === 'cases') return <CaseStudyTab />
   if (item === 'search-home') return <SearchPanel onNavigate={onNavigate} />
@@ -158,6 +157,7 @@ export default function AppV2() {
       notes: ['study', 'notes'],
       rx: ['clinic', 'rx'],
       caution: ['clinic', 'caution'],
+      checkup: ['clinic', 'family-checkup'],
       family: ['archive', 'family'],
       backup: ['archive', 'backup'],
     }
@@ -165,6 +165,8 @@ export default function AppV2() {
     setSection(next[0])
     setItem(next[1])
   }
+
+  const openFamilyCheckup = () => setItem('family-checkup')
 
   const logout = () => {
     sessionStorage.removeItem('cn_auth')
@@ -189,6 +191,7 @@ export default function AppV2() {
           </div>
           <div style={{ overflowX: 'auto', display: 'flex', gap: 6, padding: '0 10px 8px', scrollbarWidth: 'none' }}>
             {secondary.map(sub => <button key={sub.key} onClick={() => setItem(sub.key)} style={{ minHeight: 40, flex: '0 0 auto', padding: '7px 11px', borderRadius: 999, border: 'none', background: item === sub.key ? 'var(--ink)' : 'var(--cream-2)', color: item === sub.key ? '#fff' : 'var(--ink-3)', fontWeight: 800 }}>{sub.label}</button>)}
+            <button onClick={openFamilyCheckup} style={{ minHeight: 40, flex: '0 0 auto', padding: '7px 12px', borderRadius: 999, border: item === 'family-checkup' ? '1px solid #86EFAC' : '1px solid var(--line)', background: item === 'family-checkup' ? '#F0FDF4' : '#fff', color: item === 'family-checkup' ? '#166534' : 'var(--ink-3)', fontWeight: 900 }}>🧾 가족검진</button>
           </div>
         </header>
         <main><ActiveContent section={section} item={item} onNavigate={navigateLegacy} /></main>
@@ -223,6 +226,17 @@ export default function AppV2() {
         </div>
 
         <div style={{ marginTop: 'auto', padding: 12, borderTop: '1px solid var(--line)' }}>
+          <button onClick={openFamilyCheckup} style={{
+            width: '100%', minHeight: 48, marginBottom: 8, borderRadius: 10,
+            border: item === 'family-checkup' ? '1px solid #86EFAC' : '1px solid var(--line)',
+            background: item === 'family-checkup' ? '#F0FDF4' : '#fff',
+            color: item === 'family-checkup' ? '#166534' : 'var(--ink)',
+            fontWeight: 900, cursor: 'pointer', textAlign: 'left', padding: '9px 11px',
+            display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <span style={{ width: 24, textAlign: 'center', fontSize: 16 }}>🧾</span>
+            <span><span style={{ display: 'block', fontSize: 13.5 }}>가족검진</span><span style={{ display: 'block', fontSize: 10.5, color: 'var(--ink-mute)', marginTop: 1 }}>검진 기록 · 결과 관리</span></span>
+          </button>
           <button onClick={logout} style={{ width: '100%', minHeight: 44, border: '1px solid var(--line)', borderRadius: 9, background: '#fff', color: 'var(--ink-3)', fontWeight: 800, cursor: 'pointer' }}>로그아웃</button>
         </div>
       </aside>
