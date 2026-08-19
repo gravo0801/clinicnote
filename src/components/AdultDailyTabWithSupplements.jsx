@@ -1,9 +1,11 @@
 import AdultDailyTab from './AdultDailyTab'
 import { adultDailyContent } from '../data/adultDailyContent'
 import { adultDailyDay11 } from '../data/adultDailyDay11'
+import { adultDailyDay12to15 } from '../data/adultDailyDay12to15'
 
 const supplementalCards = [
   ...adultDailyDay11,
+  ...adultDailyDay12to15,
 ]
 
 supplementalCards.forEach(card => {
