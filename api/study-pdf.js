@@ -10,6 +10,8 @@ const DAYS = {
   16: { file: 'day-16-gerd-dyspepsia.md', name: 'ClinicNote_D16_GERD_Dyspepsia.pdf', compact: true },
   17: { file: 'day-17-acute-abdominal-pain.md', name: 'ClinicNote_D17_Acute_Abdominal_Pain.pdf', compact: true },
   18: { file: 'day-18-diarrhea.md', name: 'ClinicNote_D18_Diarrhea.pdf', compact: true },
+  19: { file: 'day-19-constipation.md', name: 'ClinicNote_D19_Constipation.pdf', compact: true },
+  20: { file: 'day-20-nausea-vomiting.md', name: 'ClinicNote_D20_Nausea_Vomiting.pdf', compact: true },
   21: { file: 'day-21-acute-cough-uri.md', name: 'ClinicNote_D21_Acute_Cough_URI.pdf', compact: true },
   22: { file: 'day-22-pneumonia-curb65.md', name: 'ClinicNote_D22_Pneumonia_CURB65.pdf', compact: true },
 }
