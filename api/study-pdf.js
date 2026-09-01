@@ -7,9 +7,9 @@ const DAYS = {
   13: { file: 'day-13-dizziness-bppv-orthostatic-central.md', name: 'ClinicNote_D13_Dizziness.pdf' },
   14: { file: 'day-14-syncope-presyncope-risk-referral.md', name: 'ClinicNote_D14_Syncope.pdf' },
   15: { file: 'day-15-leg-edema-dvt-hf-venous-medication.md', name: 'ClinicNote_D15_Leg_Edema.pdf' },
-  16: { file: 'day-16-gerd-dyspepsia.md', name: 'ClinicNote_D16_GERD_Dyspepsia.pdf' },
-  17: { file: 'day-17-acute-abdominal-pain.md', name: 'ClinicNote_D17_Acute_Abdominal_Pain.pdf' },
-  18: { file: 'day-18-diarrhea.md', name: 'ClinicNote_D18_Diarrhea.pdf' },
+  16: { file: 'day-16-gerd-dyspepsia.md', name: 'ClinicNote_D16_GERD_Dyspepsia.pdf', compact: true },
+  17: { file: 'day-17-acute-abdominal-pain.md', name: 'ClinicNote_D17_Acute_Abdominal_Pain.pdf', compact: true },
+  18: { file: 'day-18-diarrhea.md', name: 'ClinicNote_D18_Diarrhea.pdf', compact: true },
 }
 
 function textWidthUnits(text) {
@@ -69,7 +69,7 @@ function normalizeMarkdown(markdown) {
       }
       line = line.replace(/^>\s?/, '').replace(/^[-*]\s+/, '• ').replace(/\*\*/g, '').replace(/`/g, '')
     }
-    rows.push({ text: line, kind: /^\d+[.)]\s/.test(line) ? 'body' : 'body' })
+    rows.push({ text: line, kind: 'body' })
   }
   return rows
 }
@@ -84,16 +84,22 @@ function ucs2Hex(text) {
   return hex
 }
 
-function makePdf(markdown) {
+function makePdf(markdown, compact = false) {
   const rows = normalizeMarkdown(markdown)
   const pages = []
   let current = []
   let y = 790
 
   const add = (text, kind = 'body') => {
-    const size = kind === 'h1' ? 15 : kind === 'h2' ? 12 : 9.6
-    const leading = kind === 'h1' ? 23 : kind === 'h2' ? 19 : 15
-    const maxUnits = kind === 'h1' ? 58 : kind === 'h2' ? 70 : 88
+    const size = compact
+      ? (kind === 'h1' ? 14 : kind === 'h2' ? 11 : 9.1)
+      : (kind === 'h1' ? 15 : kind === 'h2' ? 12 : 9.6)
+    const leading = compact
+      ? (kind === 'h1' ? 20 : kind === 'h2' ? 16 : 12.5)
+      : (kind === 'h1' ? 23 : kind === 'h2' ? 19 : 15)
+    const maxUnits = compact
+      ? (kind === 'h1' ? 62 : kind === 'h2' ? 76 : 94)
+      : (kind === 'h1' ? 58 : kind === 'h2' ? 70 : 88)
     const wrapped = text ? wrapLine(text, maxUnits) : ['']
     for (const line of wrapped) {
       if (y < 56) {
@@ -102,9 +108,9 @@ function makePdf(markdown) {
         y = 790
       }
       current.push({ text: line, kind, size, y })
-      y -= line ? leading : 8
+      y -= line ? leading : (compact ? 6 : 8)
     }
-    if (kind === 'h1' || kind === 'h2') y -= 3
+    if (kind === 'h1' || kind === 'h2') y -= compact ? 2 : 3
   }
 
   rows.forEach(row => add(row.text, row.kind))
@@ -166,7 +172,7 @@ export default function handler(req, res) {
   try {
     const masterPath = path.join(process.cwd(), 'public', 'adult-daily', 'master', config.file)
     const markdown = fs.readFileSync(masterPath, 'utf8')
-    const pdf = makePdf(markdown)
+    const pdf = makePdf(markdown, Boolean(config.compact))
     res.setHeader('Content-Type', 'application/pdf')
     res.setHeader('Content-Disposition', `attachment; filename="${config.name}"`)
     res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=3600')
