@@ -2,6 +2,7 @@ import AdultDailyTab from './AdultDailyTab'
 import { adultDailyContent } from '../data/adultDailyContent'
 import { adultDailyDay11 } from '../data/adultDailyDay11'
 import { adultDailyDay12to15 } from '../data/adultDailyDay12to15'
+import { adultDailyDay16to17 } from '../data/adultDailyDay16to17'
 import { adultDailyDay18 } from '../data/adultDailyDay18'
 
 const reader = day => `/adult-daily/print/study.html?day=${day}`
@@ -33,14 +34,29 @@ const assetPaths = {
     pdfPath: pdf(15),
     masterPath: '/adult-daily/master/day-15-leg-edema-dvt-hf-venous-medication.md',
   },
+  16: {
+    printPath: reader(16),
+    pdfPath: pdf(16),
+    masterPath: '/adult-daily/master/day-16-gerd-dyspepsia.md',
+  },
+  17: {
+    printPath: reader(17),
+    pdfPath: pdf(17),
+    masterPath: '/adult-daily/master/day-17-acute-abdominal-pain.md',
+  },
   18: {
     printPath: reader(18),
-    pdfPath: '/adult-daily/pdf/Day18_Diarrhea_FM_v1.1_2026-09-01.pdf',
+    pdfPath: pdf(18),
     masterPath: '/adult-daily/master/day-18-diarrhea.md',
   },
 }
 
-const supplementalCards = [...adultDailyDay11, ...adultDailyDay12to15, ...adultDailyDay18].map(card => ({
+const supplementalCards = [
+  ...adultDailyDay11,
+  ...adultDailyDay12to15,
+  ...adultDailyDay16to17,
+  ...adultDailyDay18,
+].map(card => ({
   ...card,
   ...assetPaths[card.day],
 }))
