@@ -17,7 +17,8 @@ const MAP={
 12:{title:'D12 두근거림',master:'/adult-daily/master/day-12-palpitations-ecg-monitoring.md'},
 13:{title:'D13 어지럼',master:'/adult-daily/master/day-13-dizziness-bppv-orthostatic-central.md'},
 14:{title:'D14 실신/전실신',master:'/adult-daily/master/day-14-syncope-presyncope-risk-referral.md'},
-15:{title:'D15 하지부종',master:'/adult-daily/master/day-15-leg-edema-dvt-hf-venous-medication.md'}
+15:{title:'D15 하지부종',master:'/adult-daily/master/day-15-leg-edema-dvt-hf-venous-medication.md'},
+18:{title:'D18 설사',master:'/adult-daily/master/day-18-diarrhea.md'}
 };
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function render(md){const out=[];let list=false;let fence=false;const close=()=>{if(list){out.push('</ul>');list=false}};for(let raw of md.replace(/\r/g,'').split('\n')){let line=raw.trim();if(line.startsWith('```')){fence=!fence;continue}if(!line){close();continue}const h=line.match(/^(#{1,4})\s+(.+)$/);if(h){close();out.push(`<h${Math.min(3,h[1].length)}>${esc(h[2].replace(/\*\*/g,''))}</h${Math.min(3,h[1].length)}>`);continue}if(/^\d+[.)]\s+/.test(line)&&line.length<75){close();out.push(`<h2>${esc(line.replace(/\*\*/g,''))}</h2>`);continue}if(/^[-*]\s+/.test(line)){if(!list){out.push('<ul>');list=true}out.push(`<li>${esc(line.replace(/^[-*]\s+/, '').replace(/\*\*/g,''))}</li>`);continue}close();line=line.replace(/^>\s?/,'').replace(/\*\*/g,'').replace(/`/g,'');out.push(`<p${/^사용 범위|^즉시|^Red Flag/i.test(line)?' class="note"':''}>${esc(line)}</p>`)}close();return out.join('')}

@@ -5,8 +5,8 @@ import { adultDailyContent } from '../data/adultDailyContent'
 import { db } from '../firebase'
 import { useIsMobile } from './ui'
 
-const ADULT_DAILY_VERSION = 'v2026.07.28-upload-restored'
-const ADULT_DAILY_UPDATED_AT = '2026-07-28'
+const ADULT_DAILY_VERSION = 'v2026.09.01'
+const ADULT_DAILY_UPDATED_AT = '2026-09-01'
 const MATERIALS_COLLECTION = 'adultDailyMaterials'
 
 const planSummary = [
