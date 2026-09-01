@@ -7,6 +7,9 @@ const DAYS = {
   13: { file: 'day-13-dizziness-bppv-orthostatic-central.md', name: 'ClinicNote_D13_Dizziness.pdf' },
   14: { file: 'day-14-syncope-presyncope-risk-referral.md', name: 'ClinicNote_D14_Syncope.pdf' },
   15: { file: 'day-15-leg-edema-dvt-hf-venous-medication.md', name: 'ClinicNote_D15_Leg_Edema.pdf' },
+  16: { file: 'day-16-gerd-dyspepsia.md', name: 'ClinicNote_D16_GERD_Dyspepsia.pdf' },
+  17: { file: 'day-17-acute-abdominal-pain.md', name: 'ClinicNote_D17_Acute_Abdominal_Pain.pdf' },
+  18: { file: 'day-18-diarrhea.md', name: 'ClinicNote_D18_Diarrhea.pdf' },
 }
 
 function textWidthUnits(text) {
