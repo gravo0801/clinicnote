@@ -1,259 +1,218 @@
 # Day 18. 설사: 감염성/약물성/IBS, 항생제 적응증
 
 작성일: 2026-09-01  
-버전: v1.1
+버전: v1.2 실전 보강판
 
 ## 핵심 결론
 
-- 설사는 Bristol 6-7형의 묽은변이 평소보다 증가한 상태로, 횟수뿐 아니라 변 굳기와 변실금·급박변도 확인한다.
-- 급성 설사는 **기간 → 중증도 → 탈수 → 노출/약물** 순서로 평가한다.
-- 대부분의 급성 수양성 설사는 수분·전해질 보충이 1차 치료이며 경험적 항생제는 좁은 적응증에만 사용한다.
-- 혈변, 지속 고열, 독성/패혈증, 심한 국소 복통·반발통, 중증 탈수, 의식변화, 면역저하는 즉시 검사와 의뢰·전원을 판단한다.
-- 4주 이상이면 감염성 장염 프레임에서 벗어나 염증성·흡수장애·약물·기능성 원인으로 전환한다.
+- 급성 설사는 **기간 → 중증도 → 탈수 → 노출/약물 → ORS vs IV vs ER** 순서로 판단한다.
+- 수액은 “장염 주사”가 아니라 **volume depletion 치료**다. 500 mL 투여 후 반드시 재평가하고 다음 처분을 결정한다.
+- 대부분의 급성 수양성 설사는 항생제가 필요 없다. 혈성/염증성, sepsis, 고위험 숙주에서는 검사와 항생제·전원을 선별한다.
+- IV를 시행했다는 사실만으로 E86.0 탈수를 코딩하지 않는다. 탈수의 임상근거와 수액 전후 재평가를 차트에 남긴다.
+- 2주 이상이면 persistent pathway, 4주 이상이면 “반복 장염” 프레임을 버리고 약물성, IBS-D, microscopic colitis, bile acid diarrhea, IBD 등으로 전환한다.
 
-## v1.1에서 바로잡은 핵심
+## 1. 첫 3분 평가
 
-- 제2급 법정감염병은 24시간 이내, 제4급은 지정 표본감시기관이 7일 이내 신고한다.
-- 국내 허가된 성인 racecadotril 100 mg 캡슐은 급성 설사에 100 mg 1일 3회, 최대 7일 범위에서 사용 가능하다.
-- KCD-9에서 A09.0은 감염성 기원으로 임상 진단한 경우, A09.9는 기원 불명, K52.9는 비감염성으로 명시한 경우다.
-- 수액을 시행했다는 이유만으로 E86.0 탈수를 병기하지 않는다.
-- C. difficile은 최근 항생제력만으로 선별하지 않는다. 설명되지 않는 새 발병 묽은변 ≥3회/24시간에서 완하제 사용과 위험인자를 함께 본다.
-- 만성 수양성 설사에는 분변 calprotectin/lactoferrin, Giardia, 셀리악병, 담즙산 설사 평가를 추가한다.
-- 현미경적 대장염은 우측과 좌측 결장 조직검사를 명시한다.
-- 급성 감염성 설사에서 probiotics를 일률적으로 routine 처방할 근거는 약하다.
-- 2026 CDC 여행자 설사 기준은 배변 횟수보다 기능적 중증도를 중심으로 한다.
+1. 기간: 급성 <14일 / 지속성 14-29일 / 만성 ≥4주.
+2. Red flag: 혈변, 지속 고열, 독성/패혈증, rebound·심한 국소압통, 중증 탈수, 의식변화, 면역저하.
+3. 탈수: 기립성 어지럼, BP/PR, 점막, 최근 소변량/마지막 배뇨, oral intake, 반복구토.
+4. 노출: 공동식사/집단발생, 덜 익힌 육류, 생해산물·해수, 여행, 최근 입원/요양시설, 항생제.
+5. 약물: metformin, Mg, acarbose, colchicine, SSRI, PPI, GLP-1 RA, 항생제, 하제의 최근 신규/증량.
 
----
+### 즉시 ER
 
-## 1. 정의와 기간 분류
+저혈압/쇼크, altered mental status, severe AKI 의심, 심한 전해질 이상 의심, peritoneal sign/급성복증, sepsis/toxic appearance, 지속 혈변+고열 또는 원내 초기 수액에도 불안정하면 의원 observation으로 시간을 끌지 않는다.
 
-- **급성, <14일:** 대부분 감염성 또는 식이·약물성. 수분 보충과 red flag 선별이 핵심.
-- **지속성, 14-29일:** Giardia/기생충, 감염 후 장기능 변화, 약물, C. difficile 등을 재평가.
-- **만성, ≥4주:** 염증성, 흡수장애, 약물, 기능성 원인으로 접근을 전환.
+## 2. 설사 환자의 수액치료: “누구에게?”가 먼저
 
-### 병태생리 4형
+### A. ORS 우선
 
-- **삼투성:** 금식 시 감소. 유당불내증, Mg 제제, 솔비톨/자일리톨, 락툴로오스.
-- **분비성:** 금식해도 지속, 야간 설사, 대량 수양성. 담즙산 설사, 현미경적 대장염, 일부 독소성 감염.
-- **염증성:** 혈변/점액, 발열, 이급후중, 국소 압통. Shigella, Campylobacter, Salmonella, STEC, IBD, 허혈성 대장염.
-- **운동성/DGBI:** 복통-배변 연관, 배변 후 호전, 야간 증상 드묾. IBS-D, 갑상선기능항진, 당뇨 자율신경병증, 수술 후.
+활력 안정, 경구 섭취 가능, 구토 없거나 조절 가능, 소변 유지, 경증 갈증/어지럼 정도라면 ORS를 소량씩 자주 준다. 당이 매우 높은 음료를 대량 마시면 삼투성 설사를 악화시킬 수 있다. 금식시키지 말고 견딜 수 있는 범위에서 식사를 재개한다.
 
-## 2. 첫 3분 평가
+### B. 의원 IV 수액 고려
 
-1. 기간을 급성, 지속성, 만성으로 분류한다.
-2. 혈변, 지속 고열, 독성/패혈증, 반발통·심한 국소 압통, 중증 탈수, 의식변화, 면역저하를 확인한다.
-3. 기립성 어지럼/저혈압, 빈맥, 점막 건조, 소변 감소, 경구 섭취 가능 여부로 탈수를 평가한다.
-4. 공동식사/집단발생, 덜 익힌 육류, 생해산물·해수, 여행, 최근 입원·요양시설, 항생제, 유제품 노출을 묻는다.
-5. metformin, Mg, acarbose, colchicine, SSRI, PPI, GLP-1 RA, 항생제, 하제의 최근 3개월 신규·증량 여부를 확인한다.
+다음과 같은 **중등도 volume depletion**이 있으나 shock/acute abdomen은 아닌 경우가 현실적인 IV 후보다.
 
-노인, CKD, 심부전 환자는 수액 전후 활력, 증상, 소변, 폐수포를 재평가한다.
+- 기립성 어지럼/weakness가 뚜렷하다.
+- tachycardia, 점막 건조, 소변 감소가 있다.
+- 반복구토 또는 nausea로 충분한 ORS가 어렵다.
+- 장시간 수양성 설사 후 경구만으로 회복이 더디지만 혈압·의식은 안정적이다.
 
-## 3. 대변검사 적응증
+### C. 실무 투여 예시
 
-### 염증성 또는 중증 설사
+아래는 지침의 “모든 환자 고정용량”이 아니라 의원에서 재평가를 표준화하기 위한 예시다.
 
-혈변/점액 + 발열, 심한 복통·압통, 패혈증 징후가 있으면 Salmonella, Shigella, Campylobacter, Yersinia, STEC 등을 포함한 배양 또는 multiplex PCR을 고려한다. STEC 의심 시 Shiga toxin 확인을 우선한다.
+- LR 또는 NS **500 mL를 약 30-60분** 투여한다.
+- 이후 BP/PR, dizziness, oral intake, nausea, urine, lung crackle/dyspnea, 복통의 focality를 다시 평가한다.
+- 건강한 성인에서 여전히 임상적으로 volume depletion이 남으면 추가 500 mL를 고려할 수 있다.
+- 고령, HF, CKD는 **250-500 mL 단위**로 더 보수적으로 주고 폐수포/호흡곤란/산소포화도까지 반복 확인한다.
+- 목표는 “1 L를 다 맞추는 것”이 아니라 **discharge / additional fluid / ER** 중 하나를 결정하는 것이다.
 
-### 집단발생 또는 공중보건 필요
+### 수액 전후 체크리스트
 
-공동노출이나 집단발생이면 원인 병원체 범위를 넓히고 관할 보건소와 조기 협의한다.
+Before: BP/PR/BT, orthostatic symptom, last urine, vomiting 횟수, oral intake, focal tenderness/rebound, HF/CKD, 복용약.  
+After first bolus: 증상 호전, BP/PR 안정, urine recovery, nausea, crackle/dyspnea, 복통 악화 여부.  
+귀가 전: 물/ORS oral challenge 가능, 보행 가능, 활력 안정, 연락/보호자 가능, 24-72시간 follow-up과 ER 기준 이해.
 
-### C. difficile
+수액을 했다는 이유만으로 탈수가 입증되는 것은 아니다. 차트에는 “왜 IV가 필요했는지”와 “투여 후 무엇이 바뀌었는지”를 남긴다.
 
-설명되지 않는 새 발병 묽은변 ≥3회/24시간에서 평가한다. 완하제 사용, 항생제/의료기관 노출, 고령, 면역저하를 함께 고려하며 가능하면 toxin을 포함한 다단계 알고리즘을 사용한다.
+## 3. 필요한 검사
 
-### 지속성/만성
+### 대변검사
 
-여행 후 ≥2주 지속 시 Giardia 등 원충을 고려한다. ≥4주 수양성 설사는 만성 경로로 전환한다.
+- 혈변/점액 + 발열, 심한 복통/압통, sepsis: Salmonella, Shigella, Campylobacter, Yersinia, STEC 등을 포함한 culture 또는 multiplex PCR을 고려. STEC 의심 시 Shiga toxin 우선.
+- 공동노출/집단발생: 검사 범위를 넓히고 관할 보건소와 조기 협의.
+- C. difficile: 설명되지 않는 새 발병 묽은변 ≥3회/24시간. 완하제 사용, 항생제/의료기관 노출, 고령, 면역저하를 함께 고려.
+- 여행 후 ≥2주: Giardia 등 원충 고려.
 
----
+### 혈액검사
 
-## 4. 치료
+“장염 패널”로 일괄하지 않는다. 중등도 이상 탈수, 고령/CKD, 반복구토, 심한 전신증상이면 Na/K, BUN/Cr, glucose를 우선 고려하고 CBC/CRP는 감염 중증도·다른 진단의 보조로 선택한다. 검사 결과를 기다리느라 불안정 환자 전원을 지연하지 않는다.
 
-### 수분·전해질
+## 4. 실제 진료세트 예시
 
-- **경증, 경구 가능:** ORS 또는 선호하는 수분을 소량씩 자주. 당이 매우 높은 음료의 대량 섭취는 삼투성 설사를 악화시킬 수 있다. 금식시키지 않고 소량씩 식사를 재개한다.
-- **중등도 탈수/반복 구토:** LR 또는 NS 500-1,000 mL 후 활력, 증상, 소변, 폐수포를 재평가한다. 고령·심부전·CKD는 더 작은 용량으로 반복 평가한다.
-- **중증 탈수/AKI/의식변화:** 의원에서 수액이나 검사를 오래 끌지 말고 응급실로 전원한다.
+### 단순 수양성 설사
 
-### 대증약
+ORS + 조기 식사. 발열/혈변이 없고 증상 조절이 필요하면 loperamide 또는 racecadotril을 선택적으로 사용한다. Routine IV, antibiotic, probiotic은 필요하지 않다.
 
-- **Loperamide:** 초회 4 mg, 이후 묽은변마다 2 mg. 최대 16 mg/일, 보통 1-2일 단기. 혈변 또는 발열 동반 설사, 독성거대결장/중증 대장염 가능성, 치료 전 CDI 의심에서는 피한다.
-- **Racecadotril 100 mg:** 100 mg 1일 3회, 식전 권장. 정상변 2회까지, 최대 7일. ORS 대체가 아닌 보조 증상치료이며 간·신장애와 중증 피부반응에 주의한다.
-- **Diosmectite:** 선택적 증상 완화. 다른 경구약과 시간 간격을 둔다. 성인 근거는 일관되지 않아 필수약으로 보지 않는다.
-- **Probiotics:** 급성 감염성 설사에서 routine 처방을 권하지 않는다. 면역저하 또는 중심정맥관 환자는 특히 신중하다.
+### 구토 + 중등도 탈수
 
-## 5. 경험적 항생제
+필요 시 electrolytes/Cr/glucose ± CBC → LR/NS 500 mL → 재평가 → oral challenge. 항구토제는 QT prolongation, 병용약, 연령과 동반질환을 고려해 선택한다.
 
-대부분의 수양성 설사에는 경험적 항생제를 사용하지 않는다.
+### 혈변/고열/염증성 설사
 
-### 고려할 상황
+Routine antimotility agent를 피하고 stool test ± Shiga toxin을 시행한다. 심한 국소통, toxic appearance, sepsis, 고위험 숙주는 병원평가 문턱을 낮춘다.
 
-- 혈변/점액변 + 발열 또는 전형적 이질증상
-- 고열/패혈증을 동반한 여행자 설사
-- 면역저하자의 혈성 설사
+### 최근 항생제/입원 후 설사
 
-### STEC 의심
+CDI 기준에 맞으면 검사한다. 무증상 보균 검사, 동일 episode의 반복검사, test-of-cure를 하지 않는다. 중증/재발/고위험은 감염내과·소화기내과 의뢰.
 
-혈성 설사인데 발열이 없거나 낮고 덜 익힌 육류/집단노출이 있으면 Shiga toxin 검사를 우선하고 항생제를 피한다. 항생제가 HUS 위험을 높일 수 있다.
+## 5. 대증약
 
-### 비장티푸스성 Salmonella
+- **Loperamide:** 초회 4 mg, 이후 묽은변마다 2 mg, 최대 16 mg/day, 보통 1-2일. 혈변 또는 발열, 중증 대장염/독성거대결장, 치료 전 CDI 의심이면 피한다.
+- **Racecadotril 100 mg:** 100 mg tid, 식전 권장. 정상변 2회까지, 최대 7일. ORS를 대체하지 않는 보조치료.
+- **Diosmectite:** 선택적 증상 완화. 다른 경구약과 간격을 둔다. 필수약으로 보지 않는다.
+- **Probiotics:** 급성 감염성 설사에 routine 처방할 근거가 약하다. 면역저하/중심정맥관 환자는 특히 신중.
 
-건강한 성인의 단순 장염은 보통 항생제가 필요하지 않다. 고위험 숙주 또는 침습성 감염은 별도 판단한다.
+## 6. 경험적 항생제
 
-### 여행자 설사: 2026 CDC 기능적 중증도
+대부분의 수양성 설사에는 사용하지 않는다.
 
-- **경증, 활동에 지장 없음:** 항생제 권장하지 않음. 수분, 필요 시 loperamide.
-- **중등도, 불편하고 활동 방해:** 항생제 사용 가능. 혈변/발열이 없으면 loperamide 단독 또는 병용 가능.
-- **중증, 활동 불가 또는 모든 이질:** 항생제 권장, azithromycin 선호. Loperamide는 보조로만 사용하며 혈변/발열이면 단독 사용하지 않는다.
+### 고려
 
-Azithromycin 예시는 1 g 1회 또는 500 mg 1일 1회 3일이다. 동남아, 이질, 발열성 설사에서 선호한다. Rifaximin은 비침습성 설사에만 사용한다.
+- 혈변/점액 + 발열 또는 전형적 dysentery.
+- 고열/sepsis를 동반한 여행자 설사.
+- 면역저하자의 혈성 설사.
 
-## 6. C. difficile
+### STEC를 놓치지 않는다
 
-- 새로 발생한 설명되지 않는 묽은변 ≥3회/24시간에서 검사한다.
-- 무증상 보균 검사·치료, 동일 episode의 7일 이내 반복검사, test-of-cure는 피한다.
-- 초기 CDI는 fidaxomicin 선호, 경구 vancomycin은 허용 가능한 대안이다.
-- Metronidazole은 더 이상 일반적 1차 선택이 아니다.
-- 저혈압/쇼크, ileus/megacolon, AKI, 현저한 WBC 상승, 고령·면역저하·재발은 응급실 또는 감염내과·소화기내과에 의뢰한다.
+혈성 설사 + 발열이 낮거나 없음 + 덜 익힌 육류/집단노출이면 Shiga toxin을 우선 확인하고 항생제를 피한다. HUS 위험 때문이다.
 
-## 7. KCD-9
+### 여행자 설사: CDC Yellow Book 2026
 
-- **A09.0:** 감염성 기원의 기타 및 상세불명의 위장염 및 결장염. 임상적으로 감염성 위장염이라고 판단·기록한 경우.
-- **A09.9:** 상세불명 기원의 위장염 및 결장염. 감염성/비감염성 기원을 정하지 못한 경우.
-- **K52.9:** 상세불명의 비감염성 위장염 및 결장염. 비감염성이라고 명시한 경우.
-- **K58.0 / K59.1:** 설사형 IBS / 기능성 설사. 만성·재발성이고 경고증상을 배제한 뒤 사용.
-- **E73.9:** 상세불명의 유당불내증. 식이 연관이 명확할 때.
-- **E86.0:** 탈수. 탈수가 임상 진단으로 기록된 경우. IV 수액 시행만으로 자동 병기하지 않는다.
+- Mild, 활동 방해 없음: 항생제 권장하지 않음.
+- Moderate, 활동 방해: 항생제 사용 가능.
+- Severe 또는 모든 dysentery: 항생제 권장, azithromycin 선호.
 
-KCD-9는 2026-01-01 시행됐다. 원내 EMR 상병 마스터와 심사기준은 최신 상태를 확인한다.
+Azithromycin 예시는 1 g 1회 또는 500 mg qd 3일이다. 발열/혈변이 있으면 loperamide 단독요법은 피한다.
 
----
+## 7. C. difficile
 
-## 8. 만성·지속성 설사
+- 설명되지 않는 새 묽은변 ≥3회/24시간에서 평가.
+- 무증상 검사·치료, 동일 episode의 7일 이내 반복검사, test-of-cure는 피한다.
+- 초기 CDI는 fidaxomicin 선호, oral vancomycin은 적절한 대안. Metronidazole은 routine 1차가 아니다.
+- hypotension/shock, ileus/megacolon, AKI, 현저한 WBC 상승, 재발 또는 고위험 숙주는 병원/전문과.
 
-### 고정 질문 4개
+## 8. KCD-9
 
-1. 우유·아이스크림 후 30분-수시간 안에 복부팽만/설사가 반복되는지 확인한다.
-2. Metformin, Mg, acarbose, colchicine, SSRI, PPI, GLP-1 RA, 항생제, 하제의 신규·증량을 확인한다.
-3. 중년·고령의 비혈성 수양성/야간 설사에서는 현미경적 대장염을 생각한다. 내시경 육안이 정상이어도 배제되지 않는다.
-4. 담낭절제/회장질환, 식후 급박변이 있으면 담즙산 설사를 생각한다.
-
-### 4주 이상 수양성 설사 최소 평가
-
-- CBC, 전해질/Cr, 간기능, albumin, 필요 시 ferritin/iron, TSH
-- 분변 calprotectin 또는 lactoferrin
-- Giardia 검사
-- 임상 맥락에 따른 tTG-IgA + total IgA
-- 담즙산 설사 평가 또는 전문의 협의 하 치료반응 활용
-- 혈변, 빈혈/저albumin, 체중감소, 야간 증상, 고령에서 새로 발생, CRC screening 미완료 시 대장내시경
-- 현미경적 대장염 의심 시 의뢰서에 `microscopic colitis r/o, right & left colon biopsy`를 명시
-
-### 압축 감별
-
-- 유제품 후 팽만·가스: 유당불내증 → 유당 제한 후 재평가/재노출.
-- 최근 신규약/증량: 약물유발 → 가능한 경우 중단·감량 후 1-2주 재평가.
-- 복통-배변 연관, 야간 증상과 alarm 없음: IBS-D.
-- 복통 없이 만성 묽은변: 기능성 설사.
-- 야간/대량 수양성, 내시경 정상: 현미경적 대장염 → 우·좌측 결장 조직검사.
-- 담낭절제 후 식후 급박변: 담즙산 설사.
-- 혈변/체중감소/빈혈/저albumin: IBD, 암, 허혈 등 기질적 원인 평가.
-
-## 9. 직접 관리와 의뢰 경계
-
-### 가정의학과 직접 관리
-
-- 경증-중등도 급성 수양성 설사
-- 경구 또는 단기 IV로 교정되는 탈수
-- 혈변·독성 소견이 없는 환자
-- 대부분의 자가한정성 장염
-- alarm이 없는 유당/약물/기능성 가능성의 초기 평가와 생활·약물 조정
-
-### 의뢰/전원
-
-- 중증 탈수, 패혈증, 복막자극, 심한 국소통증, AKI/전해질 이상
-- 고위험 면역저하
-- Enteric fever, 이질, 콜레라, EHEC 등 신고대상 의심·확진
-- 중증/fulminant 또는 재발 CDI
-- 혈변, 체중감소, 빈혈/저albumin, 야간 설사, 고령의 새 증상
-- 초기 평가 후에도 지속되는 만성 설사 또는 현미경적 대장염 의심
-
-## 10. 법정감염병과 집단발생
-
-- **제2급:** 콜레라, 장티푸스, 파라티푸스, 세균성이질, 장출혈성대장균감염증, A형간염 등은 환자/의사환자/병원체보유자 범위에 따라 24시간 이내 신고한다.
-- **제4급 장관감염증:** 노로바이러스, 살모넬라, 캄필로박터 등은 표본감시 체계로 지정 표본감시기관이 7일 이내 보고한다.
-- 같은 음식/장소 노출 후 여러 명이 유사 증상을 보이면 검사 결과 전이라도 관할 보건소와 조기 상의한다.
-- 검사 의뢰 환자는 결과 회신과 신고 여부를 추적하는 원내 리스트를 둔다.
-
-## 11. 외래 운영과 재진
-
-- 수액은 실제 경구 섭취 곤란, 반복 구토, 기립성 증상, 소변 감소 등 탈수 위험이 있을 때 시행하고 전후 상태를 기록한다.
-- 대변검사는 중증도와 역학에 맞춰 시행하며 적응증을 차트에 남긴다.
-- Actionable result가 있으면 결과 설명 일정을 처음부터 정한다.
-- 경증이면 red flag 발생 또는 호전 없음 시 재내원하도록 안내한다.
-- 고령, 중등도 탈수, 기저질환, 검사 시행 환자는 24-72시간 내 추적을 구체화한다.
-- 2주 이상이면 Giardia/여행/약물/CDI를 재평가하고 4주 이상이면 만성 pathway로 전환한다.
-
-## 12. EMR 복사용 템플릿
-
-```text
-CC Diarrhea onset ( ), frequency ( /day), Bristol ( )
-Blood/mucus ( - / + ) Fever ( - / +, Tmax ) Vomiting ( - / + ) Abd pain ( - / +, site )
-Nocturnal diarrhea ( - / + ) Weight loss ( - / + ) Tenesmus ( - / + )
-
-Exposure 공동식사( ) 여행( ) 생해산물( ) 덜 익힌 육류( ) 유제품( ) sick contact( )
-Drug 신규/증량약 3개월( ) 항생제/입원·요양시설( ) 완하제 48h( ) Metformin/PPI/Mg/GLP-1( )
-
-PE BP ( ) PR ( ) BT ( ) orthostatic symptom ( ) mucosa dry( ) urine last ( )h ago
-Abd soft/rigid, tenderness ( ), rebound ( ), bowel sound ( )
-
-A
-# Acute gastroenteritis/diarrhea - origin unspecified A09.9 OR infectious origin documented A09.0
-# Dehydration E86.0 only if clinically diagnosed
-# r/o lactose intolerance E73.9
-Red flags: none / ( )
-
-P
-1) ORS/수분 보충, 식사 소량 재개
-2) 대증약 적응증/금기 설명
-3) Empiric antibiotics: not indicated / indicated because ( )
-4) Stool test because ( )
-5) Safety net: 혈변, 지속 고열, 소변감소, 심한 어지럼/복통 악화 시 즉시 재평가
-6) F/U: PRN / 24-72h / result review on ( )
-7) ≥2주 지속 시 persistent pathway, ≥4주 시 chronic pathway
-```
-
-## 13. 환자 설명
-
-- “급성 설사는 대부분 며칠 안에 좋아지고, 항생제가 필요한 경우는 일부입니다. 지금은 탈수를 막는 것이 가장 중요합니다.”
-- “한 번에 많이 마시지 말고 조금씩 자주 드세요. 설사가 많다면 ORS가 가장 균형이 좋고, 너무 단 음료를 많이 마시면 오히려 설사가 늘 수 있습니다.”
-- “피가 섞이거나 열이 나는 설사는 지사제를 혼자 드시면 안 됩니다.”
-- “피가 섞인 변, 계속되는 고열, 소변이 현저히 줄거나 일어설 때 쓰러질 듯한 어지럼, 복통이 점점 심해지면 바로 다시 평가받으세요.”
-- “한 달 이상이면 단순 장염과는 접근이 달라집니다. 내시경이 정상처럼 보여도 조직검사로만 진단되는 질환이 있습니다.”
-
-## 14. 셀프 체크
-
-1. 급성 설사의 1차 치료는? **수분·전해질 보충.**
-2. STEC 의심 시 항생제는? **회피하고 Shiga toxin 검사 우선.**
-3. Loperamide 단독을 피할 상황은? **혈변 또는 발열, 중증 대장염/독성거대결장 가능성.**
-4. CDI 검사 대상은? **설명되지 않는 새 발병 묽은변 ≥3회/24시간이며 완하제 등 대체원인을 확인.**
-5. 초기 CDI 치료 흐름은? **Fidaxomicin 선호, oral vancomycin 대안, metronidazole은 routine 1차가 아님.**
-6. 내시경이 정상인 만성 수양성 설사에서 생각할 질환은? **현미경적 대장염, 우·좌측 결장 biopsy.**
-7. 제2급 장관감염병 신고 시점은? **24시간 이내.**
-8. 여행자 설사 경증에 항생제는? **권장하지 않음.**
-
-## 주요 참고문헌
+- **A09.0:** 감염성 기원의 기타/상세불명 위장염·결장염. 임상적으로 감염성이라고 판단·기록.
+- **A09.9:** 상세불명 기원. 감염/비감염을 아직 정하지 못함.
+- **K52.9:** 비감염성 위장염·결장염이라고 판단.
+- **K58.0 / K59.1:** IBS-D / functional diarrhea. 만성·재발성이고 alarm feature를 배제한 뒤.
+- **E73.9:** lactose intolerance가 임상적으로 뒷받침될 때.
+- **E86.0:** 탈수가 실제 임상 진단된 경우. **IV 시행만으로 자동 병기하지 않는다.**
+
+## 9. 2주/4주를 넘으면 진료 프레임을 바꾼다
+
+### 2주 이상
+
+Giardia/기생충, post-infectious change, 약물, CDI, 여행관련 감염을 재검토한다.
+
+### 4주 이상 수양성 설사
+
+- CBC, electrolytes/Cr, LFT, albumin, 필요 시 ferritin/iron, TSH.
+- 접근 가능하면 fecal calprotectin/lactoferrin, Giardia, tTG-IgA + total IgA.
+- 담낭절제/회장질환 + postprandial urgency: bile acid diarrhea.
+- 중년·고령 비혈성 수양성/야간 설사: microscopic colitis. Colonoscopy가 육안 정상이어도 **right + left colon biopsy**를 의뢰서에 명시.
+- 혈변, 체중감소, anemia/hypoalbuminemia, nocturnal symptom, 고령의 새 증상, CRC screening 미완료는 colonoscopy/referral.
+
+## 10. FM boundary / Refer
+
+### 의원 관리 가능
+
+활력 안정, oral intake 가능 또는 짧은 IV 후 회복, 복막자극 없음, 중증 면역저하 없음, 24-72시간 내 추적 가능.
+
+### 당일 병원/ER
+
+shock/저혈압, altered mental status, severe AKI/전해질 이상, sepsis/toxic appearance, 지속 심한 focal pain/peritoneal sign, significant GI bleeding, oral/IV rehydration 실패, 고위험 면역저하자의 중증 설사.
+
+## 11. 개원 운영·매출: 수액매출이 아니라 hydration pathway
+
+### 임상적으로 정당한 수익 구조
+
+1. **탈수 평가:** BP/PR, orthostatic symptom, urine, oral intake를 정형화.
+2. **선택적 표적검사:** electrolytes/Cr/glucose 등 결과가 진료결정을 바꿀 때 시행.
+3. **IV treatment:** 적응증 있는 중등도 탈수에서 LR/NS. 수액 전후 수치와 증상 변화를 기록.
+4. **Reassessment:** 500 mL 후 실제 의사가/진료팀이 상태를 다시 확인하고 discharge/additional fluid/ER를 결정.
+5. **24-72 h revisit:** 중등도 탈수, 검사 시행, 고령/동반질환, 증상 지속 환자는 결과/상태 재평가.
+6. **Persistent/chronic conversion:** 2주/4주를 넘는 환자는 수액 반복 대신 원인 진단형 진료로 전환.
+
+### 운영 checklist
+
+간호 체크시트에 수액 전 BP/PR, last urine, vomiting, oral intake, IV 시작량, 첫 500 mL 후 BP/PR와 증상, oral challenge, 귀가/추가수액/전원 선택을 넣는다. 이것이 “한 팩 맞고 끝”보다 환자 안전과 진료 품질을 높인다.
+
+### 하지 말아야 할 매출 전략
+
+- 설사 환자 전원에 영양수액/비타민수액을 묶어 권유.
+- 탈수근거 없이 E86 코딩.
+- 반응평가 없이 1-2 L 자동 투여.
+- 동일 환자가 반복 방문할 때 원인평가 없이 수액만 반복.
+
+수액·비급여 처치는 적응증, 대안, 예상 비용을 설명하고 실제 진료기록과 일치해야 한다.
+
+## 12. 국내 유사 개원가 패턴: 관찰 기반 참고
+
+공식 설문통계가 아니라 국내 1차진료 운영 특성을 바탕으로 한 추론이다.
+
+- 급성 장염 환자의 “수액 기대”가 큰 편이지만, 안전한 의원은 요구 자체가 아니라 dehydration checklist로 IV를 결정한다.
+- 500 mL 단위 재평가, oral challenge, 귀가 기준을 프로토콜화하면 불필요한 추가 수액과 volume overload를 줄일 수 있다.
+- 수액 후 증상이 좋아졌더라도 focal abdominal pain이 새로 뚜렷해지면 appendicitis/other acute abdomen을 다시 본다.
+- 2-4주 반복 설사를 계속 “장염”으로 보지 않고 medication, IBS-D, microscopic colitis, bile acid diarrhea 경로로 전환하는 것이 중요하다.
+
+## 13. EMR 복사용 템플릿
+
+CC: diarrhea onset( ) frequency( /day) Bristol( ) blood/mucus( ) fever Tmax( ) vomiting( ) focal pain( )  
+Exposure: 공동식사( ) 여행( ) raw seafood( ) undercooked meat( ) recent antibiotics/admission( )  
+Drug change: metformin/Mg/GLP-1RA/PPI/SSRI/laxative( )  
+PE: BP( ) PR( ) BT( ) SpO2( ) orthostatic symptom( ) mucosa( ) last urine( ) abdomen tenderness/rebound( )  
+Assessment: A09.0 / A09.9 / K52.9 / E86.0 only if clinically dehydrated. Red flag: none/( ).  
+Plan: ORS / IV LR-NS ( )mL. Pre-IV BP/PR( ). After first bolus BP/PR( ), dizziness( ), oral challenge( ), crackle( ). Stool/lab because( ). Antibiotic indicated/not indicated because( ). Follow-up( ). ER precautions explained.
+
+## 14. 환자 설명
+
+“수액은 설사를 멈추는 약이 아니라 부족한 수분을 보충하는 치료입니다. 지금 탈수가 어느 정도인지 보고 수액이 필요한지 결정하겠습니다. 한 팩을 맞은 뒤 혈압·맥박과 어지럼, 물을 마실 수 있는지를 다시 확인해서 더 필요한지, 집에 가도 되는지 판단하겠습니다.”
+
+## 15. 참고문헌
 
 1. 질병관리청·대한감염학회·대한항균요법학회. 급성 위장관계 감염 항생제 사용지침. Infect Chemother. 2019;51:217-243.
 2. Shane AL, et al. IDSA Clinical Practice Guidelines for Infectious Diarrhea. Clin Infect Dis. 2017;65:e45-e80.
-3. Johnson S, et al. SHEA/IDSA 2021 Focused Update for Clostridioides difficile Infection in Adults. Clin Infect Dis. 2021.
-4. Lacy BE, et al. ACG Clinical Guideline: Management of Irritable Bowel Syndrome. Am J Gastroenterol. 2021;116:17-44.
-5. Miehlke S, et al. European guidelines on microscopic colitis. United European Gastroenterol J. 2021;9:13-37.
-6. Collinson S, et al. Probiotics for treating acute infectious diarrhoea. Cochrane Database Syst Rev. 2020;CD003048.
-7. CDC Yellow Book 2026. Travelers' Diarrhea / Post-Travel Diarrhea.
-8. Porcari S, et al. Prevalence of IBS and functional dyspepsia after acute gastroenteritis: systematic review and meta-analysis. Gut. 2024;73:1431-1440.
-9. AGA. Laboratory evaluation of functional diarrhea and IBS-D in adults. Gastroenterology. 2019.
-10. 질병관리청 감염병포털. 법정감염병 신고시기.
-11. 통계청. 제9차 한국표준질병·사인분류(KCD-9), 2026-01-01 시행.
+3. Johnson S, et al. SHEA/IDSA 2021 Focused Update for C. difficile Infection.
+4. Lacy BE, et al. ACG Clinical Guideline: Management of IBS. Am J Gastroenterol. 2021.
+5. Miehlke S, et al. European guidelines on microscopic colitis. UEGJ. 2021.
+6. CDC Yellow Book 2026. Travelers’ Diarrhea / Post-Travel Diarrhea.
+7. Porcari S, et al. Post-infectious IBS/functional dyspepsia meta-analysis. Gut. 2024.
+8. AGA. Laboratory evaluation of functional diarrhea and IBS-D.
+9. 질병관리청 감염병포털. 법정감염병 신고시기.
+10. 통계청. KCD-9, 2026-01-01 시행.
 
-본 자료는 교육용 1차진료 학습자료다. 실제 처방, 급여, 신고, 검사 가용성은 환자 상태와 최신 식약처 허가사항, KDCA/HIRA 고시, 지역 검사실 기준을 우선한다.
+※ 실제 처방·검사·청구·신고는 환자 상태와 최신 국내 허가사항, KDCA/HIRA 기준을 우선한다.
